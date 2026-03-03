@@ -100,9 +100,11 @@ git remote -v
 
 ### After PR Review
 
-Once your PR is approved:
-- The reviewer will merge it, OR
-- You can merge it yourself if the branch is up to date with main
+Once your PR is ready to merge (all conversations resolved and checks pass):
+- If a reviewer has approved it, they may merge it, OR
+- You can merge it yourself once the branch is up to date with main
+
+> **Note:** Reviewer approval is recommended but not enforced. Ensure all conversations are resolved before merging.
 
 ## Syncing Your Fork
 
@@ -128,14 +130,14 @@ git rebase main
 
 - **Never push directly to the organization's main branch** - it is protected
 - **Always create a PR** for any changes you want to merge
-- **Get at least 1 approval** before merging
+- **We recommend getting at least 1 approval** before merging
 - **Keep your fork updated** by regularly syncing with upstream
 - **Resolve all conversations** in the PR before it can be merged
 
 ## Branch Protection Rules
 
 The organization's `main` branch has these protection rules:
-- Require at least 1 approving review
+- Approving review: recommended (not enforced by branch protection)
 - Protection applies to administrators (no bypass)
 - Dismiss stale reviews when new commits are pushed
 - Require conversation resolution before merging
