@@ -25,7 +25,7 @@ The application uses **local data files** (JSON/CSV) instead of live APIs. This 
 |-------|------|-------------|
 | `stationId` | String | Unique identifier (e.g., MRT station code) |
 | `name` | String | Display name |
-| `lines` | Set&lt;String&gt; | MRT lines (e.g., "NS", "EW") |
+| `lines` | List&lt;String&gt; | MRT lines (e.g., "NS", "EW"); values should be unique |
 
 **Example (JSON):**
 
@@ -117,7 +117,7 @@ The application uses **local data files** (JSON/CSV) instead of live APIs. This 
 
 Since the app uses local data only:
 
-> *"Accurate as of X date"* — display whenever data is updated
+> Display a label such as *"Accurate as of 2025-01-15"*, where the date is derived from the dataset metadata and formatted as ISO 8601 (YYYY-MM-DD).
 
 ---
 
