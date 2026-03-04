@@ -13,7 +13,7 @@ This document specifies the operations exposed by the Logic layer for the UI. Al
 | Operation | Parameters | Description |
 |-----------|------------|-------------|
 | `setDestination(stationId)` | `stationId: String` | Sets the primary destination MRT station in `UserPreferences` |
-| `setPreferences(maxRent, maxCommuteMins, requireAircon, transportMode)` | `maxRent: int`, `maxCommuteMins: int`, `requireAircon: boolean`, `transportMode: enum` | Updates search constraints; transport mode defaults to MRT for MVP |
+| `setPreferences(maxRent, maxCommuteMinutes, requireAircon, transportMode)` | `maxRent: int`, `maxCommuteMinutes: int`, `requireAircon: boolean`, `transportMode: TransportMode` | Updates search constraints; transport mode defaults to MRT for MVP |
 
 ### Search
 
@@ -26,7 +26,7 @@ This document specifies the operations exposed by the Logic layer for the UI. Al
 | Operation | Parameters | Returns | Description |
 |-----------|------------|---------|-------------|
 | `getListingDetails(listingId)` | `listingId: String` | `ListingDetails` | Returns full listing info for a given listing |
-| `getCommuteDetails(listingId)` | `listingId: String` | `CommuteEstimate` | Returns commute estimate + route summary (V1.4) |
+| `getCommuteDetails(listingId)` | `listingId: String` | `CommuteEstimate` | Returns commute estimate for the listing (see RouteAnalyzer for summaries) |
 
 ---
 

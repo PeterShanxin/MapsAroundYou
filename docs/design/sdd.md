@@ -22,7 +22,7 @@ A desktop GUI application that helps newcomers to Singapore find rental listings
 
 > *Prof suggested against this by strongly recommending using local data*
 
-Since we use local data, our app will be *"Accurate as of X date"* whenever we update it.
+Since we use local data, our app will be accurate only up to the last dataset update date, and the UI should display a notice like "Data accurate as of <last-updated date>" based on dataset metadata.
 
 ---
 
@@ -137,7 +137,7 @@ Immutable-ish entities; lightweight DTOs between layers.
 2. UI calls `Logic.generateShortlist()`.
 3. Logic loads listings (Storage).
 4. ListingFilter applies rent + aircon filters.
-5. For each remaining listing: `CommuteEstimator.estimate(listing.nearestStationId, destinationStationId)` — discard if `totalMinutes > maxCommuteMinutes`.
+5. For each remaining listing: `CommuteEstimator.estimate(listing.nearestStationId, destinationStationId, 'MRT')` — discard if `totalMinutes > maxCommuteMinutes`.
 6. ListingRanker computes score and sorts results.
 7. UI displays ranked results.
 
