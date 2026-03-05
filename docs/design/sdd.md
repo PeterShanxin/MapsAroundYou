@@ -141,12 +141,51 @@ Immutable-ish entities; lightweight DTOs between layers.
 6. ListingRanker computes score and sorts results.
 7. UI displays ranked results.
 
+```mermaid
+flowchart TD
+    A([User sets filters & clicks Search]) --> B[UI calls Logic.generateShortlist]
+    B --> C[Storage: load listings dataset]
+    C --> D{Schema valid?}
+    D -- No --> E[/DataLoadException → UI error message/]
+    D -- Yes --> F[ListingFilter.filterByRent]
+    F --> G[ListingFilter.filterByAircon]
+    G --> H{Any listings remaining?}
+    H -- None --> I[/NoResultsException → UI empty-state message/]
+    H -- Yes --> J[For each listing: CommuteEstimator.estimate]
+    J --> K{totalMinutes > maxCommuteMinutes?}
+    K -- Yes --> L[Discard listing]
+    K -- No --> M[Keep listing]
+    L --> N{More listings?}
+    M --> N
+    N -- Yes --> J
+    N -- No --> O{Results non-empty?}
+    O -- None --> I
+    O -- Yes --> P[ListingRanker: sort by commute → rent → listingId]
+    P --> Q[Return SearchResultViewModel list]
+    Q --> R([UI renders ranked results panel])
+```
+
 ### Workflow C — Commute Breakdown + Anti-Walk Filter (V1.4)
 
 1. User opens listing details (click result).
 2. Logic returns CommuteEstimate + route summary.
 3. `RouteAnalyzer.isWalkDominant()` rejects results if walking dominates (per threshold).
 4. UI displays breakdown: transit vs walking, transfers, total time.
+
+```mermaid
+flowchart TD
+    A([User clicks a listing result]) --> B[UI calls Logic.getCommuteDetails listingId]
+    B --> C[Storage: retrieve listing + CommuteEstimate]
+    C --> D{listingId valid?}
+    D -- No --> E[/ListingNotFoundException → UI error message/]
+    D -- Yes --> F[RouteAnalyzer.isWalkDominant commuteEstimate]
+    F --> G{walkMinutes / totalMinutes > threshold?}
+    G -- Yes --> H[Flag result: walk-dominant warning shown in UI]
+    G -- No --> I[RouteAnalyzer.summarize commuteEstimate]
+    H --> I
+    I --> J[Return CommuteSummary: transitMinutes, walkMinutes, transfers, total]
+    J --> K([UI renders commute breakdown panel])
+```
 
 ---
 
