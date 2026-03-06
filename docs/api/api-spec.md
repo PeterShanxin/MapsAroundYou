@@ -19,7 +19,7 @@ This document specifies the operations exposed by the Logic layer for the UI. Al
 
 | Operation | Returns | Description |
 |-----------|---------|-------------|
-| `generateShortlist()` | `List<SearchResult>` | Executes full pipeline: load listings → filter by rent/aircon → estimate commute → filter by max commute → rank and sort. Returns ranked results. |
+| `generateShortlist()` | `List<SearchResult>` | Executes full pipeline: load listings → filter by rent/aircon → estimate commute → reject over-max-commute and walk-dominant routes (V1.4) → rank and sort. Returns ranked results. |
 
 ### Details
 
@@ -56,7 +56,7 @@ These are used by Logic; not directly called by UI.
 
 | Operation | Parameters | Returns | Description |
 |-----------|------------|---------|-------------|
-| `isWalkDominant(commuteEstimate)` | `commuteEstimate: CommuteEstimate` | `boolean` | True if walking dominates (per config threshold) |
+| `isWalkDominant(commuteEstimate)` | `commuteEstimate: CommuteEstimate` | `boolean` | True if `walkMinutes / totalMinutes` is greater than or equal to the configured walk-dominant threshold |
 | `summarize(commuteEstimate)` | `commuteEstimate: CommuteEstimate` | `CommuteSummary` | Returns transit vs walking breakdown, transfers, total time |
 
 ---
@@ -74,9 +74,38 @@ These are used by Logic; not directly called by UI.
 
 ## Error Handling
 
-- Logic centralizes error handling with user-friendly messages
-- Invalid inputs (e.g., unknown stationId) should return clear feedback
-- Load errors (missing/invalid data files) should be surfaced to UI
+Logic centralizes all error handling. All exceptions are caught and converted to user-friendly messages before reaching the UI. The UI never receives raw exceptions.
+
+### Exception Types
+
+| Exception | Thrown By | Condition |
+|-----------|-----------|----------|
+| `InvalidInputException` | Logic | Input fails validation (null, out-of-range, or empty string) |
+| `StationNotFoundException` | Logic, CommuteEstimator | `stationId` not found in loaded station dataset |
+| `ListingNotFoundException` | Logic | `listingId` not found in listings dataset |
+| `DataLoadException` | Storage | Data file missing, unreadable, or fails schema validation |
+| `NoResultsException` | Logic | All listings filtered out; shortlist is empty |
+
+### Invalid Input Rules
+
+| Operation | Validation Rule |
+|-----------|----------------|
+| `setDestination(stationId)` | `stationId` must be non-null, non-empty, and present in the station dataset |
+| `setPreferences(maxRent, ...)` | `maxRent` ≥ 0; `maxCommuteMinutes` ≥ 1; `transportMode` non-null |
+| `generateShortlist()` | Destination must be set; preferences must pass all rules above |
+| `getListingDetails(listingId)` | `listingId` must be non-null and present in the listings dataset |
+| `getCommuteDetails(listingId)` | `listingId` must be non-null; destination must be set |
+| `estimate(fromStationId, toStationId, mode)` | Both station IDs must exist in transit graph; `mode` non-null |
+
+### UI Feedback Convention
+
+| Exception | User-facing Message |
+|-----------|-------------------|
+| `InvalidInputException` | Inline validation message next to the offending input field |
+| `StationNotFoundException` | "Unknown station. Please select a valid MRT station." |
+| `ListingNotFoundException` | "Listing not found. It may have been removed from the dataset." |
+| `DataLoadException` | "Failed to load data. Please check the application files and restart." |
+| `NoResultsException` | "No listings match your filters. Try relaxing your rent or commute limits." |
 
 ---
 
