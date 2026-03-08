@@ -1,6 +1,10 @@
 # Compiled class file
 *.class
 
+# Gradle
+.gradle/
+build/
+
 # Log file
 *.log
 
@@ -24,7 +28,7 @@ hs_err_pid*
 replay_pid*
 
 # Intellij
-*.idea
+.idea/
 
 # Python virtual environments
 .venv/
