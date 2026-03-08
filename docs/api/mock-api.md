@@ -2,7 +2,7 @@
 
 **Smart Rental Search Algorithm**
 
-The application uses **local data files** (JSON/CSV) instead of live APIs. This document describes the data schemas and structures for mock/demo datasets.
+The application uses local CSV datasets instead of live APIs at runtime. This document describes the offline data model and the development-time workflow that regenerates the commute matrix.
 
 ---
 
@@ -127,6 +127,66 @@ The application uses **local data files** (JSON/CSV) instead of live APIs. This 
 
 ---
 
+## Offline Commute Dataset
+
+The repository-tracked commute dataset is stored as CSV files under `src/main/resources/commute_data/`.
+
+### [`Rental_List.csv`](../../src/main/resources/commute_data/Rental_List.csv) (Input)
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `Flat_ID` | String | Unique identifier for the rental unit, for example `R01` |
+| `Postal_Code` | String | Six-digit Singapore postal code used for geocoding |
+| `Region` | String | Broad Singapore region |
+| `Area_Name` | String | Human-readable neighborhood label |
+
+### [`Dst_List.csv`](../../src/main/resources/commute_data/Dst_List.csv) (Input)
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `ID` | String | Unique destination identifier, for example `D01` |
+| `Category` | String | Destination type such as university, office, or healthcare |
+| `Location Name` | String | Display label for the destination |
+| `Postal Code` | String | Six-digit Singapore postal code used for geocoding |
+
+### [`transit_matrix.csv`](../../src/main/resources/commute_data/transit_matrix.csv) (Generated Output)
+
+| Column Name | Description |
+|-------------|-------------|
+| `flat_id` | Foreign key matching `Flat_ID` in `Rental_List.csv` |
+| `destination_id` | Foreign key matching `ID` in `Dst_List.csv` |
+| `pt_total` | Total public-transport journey time in minutes |
+| `pt_walk` | Walking time within the public-transport journey |
+| `pt_bus` | Minutes spent on bus legs |
+| `pt_rail` | Minutes spent on MRT or LRT legs |
+| `pt_transit` | Minutes spent inside moving transit vehicles |
+| `pt_fare` | Estimated public-transport fare in SGD |
+| `drive_total` | Total driving time in minutes |
+| `cycle_total` | Total cycling time in minutes |
+| `walk_total` | Total walking time in minutes |
+
+The matrix format replaces the earlier station-edge graph assumption. Runtime lookup is keyed by rental origin and destination identifier instead of station adjacency.
+
+---
+
+## Data Generation Workflow
+
+The generator is development-only tooling at [`scripts/generate_travel_data.py`](../../scripts/generate_travel_data.py). It is intentionally kept out of `src/main/resources` so it is not shipped as packaged application data.
+
+1. Install Python 3 and `requests`.
+2. Obtain a fresh OneMap token and export it as `ONEMAP_TOKEN`.
+3. Run the generator from the repository root:
+
+```bash
+python scripts/generate_travel_data.py
+```
+
+The script reads the input CSVs, resolves postal codes through OneMap, and rewrites `transit_matrix.csv` with fresh commute data.
+
+Detailed token setup steps are documented in the [Build and Run Guide](../ops/build-and-run.md).
+
+---
+
 ## Data Freshness
 
 Since the app uses local data only:
@@ -135,8 +195,18 @@ Since the app uses local data only:
 
 ---
 
+## Troubleshooting
+
+- If the generator reports `ONEMAP_TOKEN environment variable is not set`, export a fresh token before running it.
+- If OneMap returns `Unauthorized`, the token likely expired and should be regenerated.
+- If the output contains `-1` timings, confirm the input postal codes are valid and rerun.
+- If OneMap rate-limits the script, increase the configured delay and rerun.
+
+---
+
 ## Related Documents
 
 - [Software Design Document](../design/sdd.md)
 - [Architecture Overview](../design/architecture.md)
 - [API Spec](./api-spec.md)
+- [Build and Run Guide](../ops/build-and-run.md)
