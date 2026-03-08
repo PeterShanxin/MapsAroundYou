@@ -7,8 +7,8 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -24,6 +24,9 @@ public class CsvTravelTimeRepository implements TravelTimeRepository {
     };
 
     private final Map<String, Map<String, CommuteEstimate>> commuteByOriginThenDestination;
+    private final Set<String> knownOrigins;
+    private final Set<String> knownDestinations;
+    private final Map<String, Set<String>> knownDestinationsByOrigin;
 
     public CsvTravelTimeRepository(String resourcePath) {
         this(CsvSupport.classpathReader(resourcePath), resourcePath);
@@ -35,6 +38,11 @@ public class CsvTravelTimeRepository implements TravelTimeRepository {
 
     private CsvTravelTimeRepository(ReaderSupplier readerSupplier, String sourceName) {
         this.commuteByOriginThenDestination = load(readerSupplier, sourceName);
+        this.knownOrigins = Set.copyOf(commuteByOriginThenDestination.keySet());
+        this.knownDestinations = commuteByOriginThenDestination.values().stream()
+                .flatMap(destinationMap -> destinationMap.keySet().stream())
+                .collect(java.util.stream.Collectors.toUnmodifiableSet());
+        this.knownDestinationsByOrigin = buildKnownDestinationsByOrigin(commuteByOriginThenDestination);
     }
 
     @Override
@@ -46,14 +54,17 @@ public class CsvTravelTimeRepository implements TravelTimeRepository {
 
     @Override
     public Set<String> findKnownOrigins() {
-        return Set.copyOf(commuteByOriginThenDestination.keySet());
+        return knownOrigins;
     }
 
     @Override
     public Set<String> findKnownDestinations() {
-        return commuteByOriginThenDestination.values().stream()
-                .flatMap(destinationMap -> destinationMap.keySet().stream())
-                .collect(java.util.stream.Collectors.toUnmodifiableSet());
+        return knownDestinations;
+    }
+
+    @Override
+    public Map<String, Set<String>> findKnownDestinationsByOrigin() {
+        return knownDestinationsByOrigin;
     }
 
     private static Map<String, Map<String, CommuteEstimate>> load(ReaderSupplier readerSupplier, String sourceName) {
@@ -88,5 +99,15 @@ public class CsvTravelTimeRepository implements TravelTimeRepository {
             throw new DataLoadException("No travel-time records found in " + sourceName);
         }
         return commutes;
+    }
+
+    private static Map<String, Set<String>> buildKnownDestinationsByOrigin(
+            Map<String, Map<String, CommuteEstimate>> commuteByOriginThenDestination
+    ) {
+        Map<String, Set<String>> destinationsByOrigin = new LinkedHashMap<>();
+        for (Map.Entry<String, Map<String, CommuteEstimate>> entry : commuteByOriginThenDestination.entrySet()) {
+            destinationsByOrigin.put(entry.getKey(), Set.copyOf(entry.getValue().keySet()));
+        }
+        return Collections.unmodifiableMap(destinationsByOrigin);
     }
 }

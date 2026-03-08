@@ -2,6 +2,7 @@ package mapsaroundyou.storage;
 
 import mapsaroundyou.model.CommuteEstimate;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -11,4 +12,6 @@ public interface TravelTimeRepository {
     Set<String> findKnownOrigins();
 
     Set<String> findKnownDestinations();
+
+    Map<String, Set<String>> findKnownDestinationsByOrigin();
 }

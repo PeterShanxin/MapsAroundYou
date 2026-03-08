@@ -12,6 +12,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CsvListingRepositoryTest {
     @TempDir
@@ -47,6 +48,6 @@ class CsvListingRepositoryTest {
                 () -> new CsvListingRepository(csvPath)
         );
 
-        assertEquals(true, exception.getMessage().contains("hasAircon"));
+        assertTrue(exception.getMessage().contains("hasAircon"));
     }
 }

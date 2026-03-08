@@ -55,6 +55,19 @@ class CliApplicationTest {
     }
 
     @Test
+    void run_unknownFlag_returnsErrorCode() {
+        FakeSearchLogic searchLogic = new FakeSearchLogic();
+        CliApplication cliApplication = new CliApplication(searchLogic, new CliCommandParser(), new CliPrinter());
+
+        OutputCapture outputCapture = new OutputCapture();
+        int exitCode = outputCapture.run(() -> cliApplication.run(
+                new String[]{"search", "--destination", "D01", "--max-rentt", "1800", "--max-commute", "35"}));
+
+        assertEquals(1, exitCode);
+        assertTrue(outputCapture.stderr().contains("Unknown flag: --max-rentt"));
+    }
+
+    @Test
     void run_interactiveMode_allowsSearchThenExit() {
         CountingSearchLogic searchLogic = new CountingSearchLogic();
         CliApplication cliApplication = new CliApplication(searchLogic, new CliCommandParser(), new CliPrinter());

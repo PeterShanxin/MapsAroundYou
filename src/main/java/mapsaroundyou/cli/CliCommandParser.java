@@ -9,6 +9,12 @@ import java.util.Map;
  * Small parser for the scaffold CLI surface.
  */
 public class CliCommandParser {
+    private static final java.util.Set<String> VALUE_FLAGS = java.util.Set.of(
+            "--destination",
+            "--max-rent",
+            "--max-commute"
+    );
+
     public ParsedCommand parse(String[] args) {
         if (args.length == 0) {
             return new ParsedCommand(ParsedCommand.CommandType.INTERACTIVE, null);
@@ -42,6 +48,9 @@ public class CliCommandParser {
             }
             if (!token.startsWith("--")) {
                 throw new InvalidInputException("Expected a named flag but got: " + token);
+            }
+            if (!VALUE_FLAGS.contains(token)) {
+                throw new InvalidInputException("Unknown flag: " + token);
             }
             if (index + 1 >= args.length) {
                 throw new InvalidInputException("Missing value for flag: " + token);

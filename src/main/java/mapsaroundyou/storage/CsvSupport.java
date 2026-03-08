@@ -36,8 +36,9 @@ final class CsvSupport {
     }
 
     static CSVParser openParser(ReaderSupplier readerSupplier, String sourceName, String... requiredHeaders) {
+        Reader reader = null;
         try {
-            Reader reader = readerSupplier.open();
+            reader = readerSupplier.open();
             CSVFormat format = CSVFormat.DEFAULT.builder()
                     .setHeader()
                     .setSkipHeaderRecord(true)
@@ -47,6 +48,7 @@ final class CsvSupport {
             validateHeaders(parser.getHeaderMap(), sourceName, requiredHeaders);
             return parser;
         } catch (IOException exception) {
+            closeQuietly(reader);
             throw new DataLoadException("Failed to read dataset: " + sourceName, exception);
         }
     }
@@ -98,6 +100,17 @@ final class CsvSupport {
                 throw new DataLoadException("Missing required column '" + header + "' in " + sourceName
                         + ". Present columns: " + Arrays.toString(headerMap.keySet().toArray()));
             }
+        }
+    }
+
+    private static void closeQuietly(Reader reader) {
+        if (reader == null) {
+            return;
+        }
+        try {
+            reader.close();
+        } catch (IOException ignored) {
+            // Best-effort cleanup after parser construction fails.
         }
     }
 }

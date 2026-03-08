@@ -131,5 +131,21 @@ class DefaultSearchLogicTest {
                     .map(CommuteEstimate::destinationId)
                     .collect(java.util.stream.Collectors.toUnmodifiableSet());
         }
+
+        @Override
+        public Map<String, Set<String>> findKnownDestinationsByOrigin() {
+            Map<String, Set<String>> destinationsByOrigin = new LinkedHashMap<>();
+            for (CommuteEstimate commuteEstimate : commuteByPair.values()) {
+                destinationsByOrigin.computeIfAbsent(
+                                commuteEstimate.originNodeId(),
+                                ignored -> new java.util.LinkedHashSet<>())
+                        .add(commuteEstimate.destinationId());
+            }
+            return destinationsByOrigin.entrySet().stream()
+                    .collect(java.util.stream.Collectors.toUnmodifiableMap(
+                            Map.Entry::getKey,
+                            entry -> Set.copyOf(entry.getValue())
+                    ));
+        }
     }
 }
