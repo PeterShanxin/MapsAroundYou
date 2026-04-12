@@ -35,6 +35,7 @@ import mapsaroundyou.model.ListingDetails;
 import mapsaroundyou.model.PersonaPreset;
 import mapsaroundyou.model.PersonaPresetAppliedValues;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -318,12 +319,6 @@ public final class MapsAroundYouGuiApp extends Application {
             applyPersonaPreset(selected);
         });
 
-        darkModeToggle.setOnAction(event -> {
-            boolean enabled = darkModeToggle.isSelected();
-            uiSettingsStore.setDarkModeEnabled(enabled);
-            applyDarkMode(enabled);
-        });
-
         Button closeButton = new Button("Close");
         closeButton.setOnAction(event -> settingsStage.close());
 
@@ -341,8 +336,16 @@ public final class MapsAroundYouGuiApp extends Application {
         VBox content = new VBox(10, form);
         content.setPadding(new Insets(12));
 
-        settingsStage.setScene(new Scene(content, 320, 210));
+        Scene settingsScene = new Scene(content, 320, 210);
+        darkModeToggle.setOnAction(event -> {
+            boolean enabled = darkModeToggle.isSelected();
+            uiSettingsStore.setDarkModeEnabled(enabled);
+            applyDarkMode(enabled, settingsScene);
+        });
+
+        settingsStage.setScene(settingsScene);
         settingsStage.setResizable(false);
+        applyDarkMode(uiSettingsStore.isDarkModeEnabled(), settingsScene);
         settingsStage.showAndWait();
     }
 
@@ -494,11 +497,7 @@ public final class MapsAroundYouGuiApp extends Application {
         setStatus(message);
     }
 
-    private void applyDarkMode(boolean enabled) {
-        if (mainScene == null) {
-            return;
-        }
-
+    private void applyDarkMode(boolean enabled, Scene... additionalScenes) {
         String cssUrl = getClass().getResource(DARK_THEME_CSS_RESOURCE) == null
                 ? null
                 : getClass().getResource(DARK_THEME_CSS_RESOURCE).toExternalForm();
@@ -506,12 +505,27 @@ public final class MapsAroundYouGuiApp extends Application {
             return;
         }
 
-        if (enabled) {
-            if (!mainScene.getStylesheets().contains(cssUrl)) {
-                mainScene.getStylesheets().add(cssUrl);
+        List<Scene> scenes = new ArrayList<>();
+        if (mainScene != null) {
+            scenes.add(mainScene);
+        }
+        for (Scene scene : additionalScenes) {
+            if (scene != null) {
+                scenes.add(scene);
             }
-        } else {
-            mainScene.getStylesheets().remove(cssUrl);
+        }
+        if (scenes.isEmpty()) {
+            return;
+        }
+
+        for (Scene scene : scenes) {
+            if (enabled) {
+                if (!scene.getStylesheets().contains(cssUrl)) {
+                    scene.getStylesheets().add(cssUrl);
+                }
+            } else {
+                scene.getStylesheets().remove(cssUrl);
+            }
         }
     }
 
