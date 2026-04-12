@@ -9,7 +9,10 @@ import java.util.prefs.Preferences;
  * Persists a small amount of UI state (persona preset + dark mode) for onboarding/UX.
  *
  * <p>All values are treated as best-effort; missing/invalid values fall back to
- * deterministic defaults.</p>
+ * deterministic defaults. If the backing {@link Preferences} implementation
+ * throws at runtime (for example {@link SecurityException} or
+ * {@link IllegalStateException}), reads fall back to those defaults and writes
+ * are skipped so the GUI is not disrupted.</p>
  */
 public final class UiSettingsStore {
     private static final String KEY_PERSONA_PRESET = "personaPreset";
@@ -26,7 +29,12 @@ public final class UiSettingsStore {
     }
 
     public PersonaPreset loadPersonaPreset() {
-        String stored = preferences.get(KEY_PERSONA_PRESET, null);
+        String stored;
+        try {
+            stored = preferences.get(KEY_PERSONA_PRESET, null);
+        } catch (RuntimeException unused) {
+            return PersonaPreset.NEW_USER;
+        }
         if (stored == null) {
             return PersonaPreset.NEW_USER;
         }
@@ -40,15 +48,27 @@ public final class UiSettingsStore {
 
     public void savePersonaPreset(PersonaPreset preset) {
         Objects.requireNonNull(preset, "preset");
-        preferences.put(KEY_PERSONA_PRESET, preset.name());
+        try {
+            preferences.put(KEY_PERSONA_PRESET, preset.name());
+        } catch (RuntimeException unused) {
+            // Best-effort persistence only.
+        }
     }
 
     public boolean isDarkModeEnabled() {
-        return preferences.getBoolean(KEY_DARK_MODE_ENABLED, false);
+        try {
+            return preferences.getBoolean(KEY_DARK_MODE_ENABLED, false);
+        } catch (RuntimeException unused) {
+            return false;
+        }
     }
 
     public void setDarkModeEnabled(boolean enabled) {
-        preferences.putBoolean(KEY_DARK_MODE_ENABLED, enabled);
+        try {
+            preferences.putBoolean(KEY_DARK_MODE_ENABLED, enabled);
+        } catch (RuntimeException unused) {
+            // Best-effort persistence only.
+        }
     }
 }
 
