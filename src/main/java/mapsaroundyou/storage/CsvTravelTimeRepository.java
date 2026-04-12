@@ -1,7 +1,8 @@
 package mapsaroundyou.storage;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import mapsaroundyou.common.DataLoadException;
+import mapsaroundyou.common.DatasetIntegrityException;
+import mapsaroundyou.common.DatasetIOException;
 import mapsaroundyou.model.CommuteEstimate;
 
 import org.apache.commons.csv.CSVParser;
@@ -86,7 +87,7 @@ public final class CsvTravelTimeRepository implements TravelTimeRepository {
                 Map<String, CommuteEstimate> byDestination =
                         commutes.computeIfAbsent(originNodeId, ignored -> new LinkedHashMap<>());
                 if (byDestination.containsKey(destinationId)) {
-                    throw new DataLoadException("Duplicate travel-time pair in " + sourceName + ": "
+                    throw new DatasetIntegrityException("Duplicate travel-time pair in " + sourceName + ": "
                             + originNodeId + " -> " + destinationId);
                 }
 
@@ -102,10 +103,10 @@ public final class CsvTravelTimeRepository implements TravelTimeRepository {
                 byDestination.put(destinationId, commuteEstimate);
             }
         } catch (java.io.IOException exception) {
-            throw new DataLoadException("Failed to close dataset: " + sourceName, exception);
+            throw new DatasetIOException("Failed to close dataset: " + sourceName, exception);
         }
         if (commutes.isEmpty()) {
-            throw new DataLoadException("No travel-time records found in " + sourceName);
+            throw new DatasetIntegrityException("No travel-time records found in " + sourceName);
         }
         return commutes;
     }

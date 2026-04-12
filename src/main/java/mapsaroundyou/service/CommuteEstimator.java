@@ -1,6 +1,7 @@
 package mapsaroundyou.service;
 
-import mapsaroundyou.common.DataLoadException;
+import mapsaroundyou.common.DatasetIntegrityException;
+import mapsaroundyou.common.InvalidInputException;
 import mapsaroundyou.model.CommuteEstimate;
 import mapsaroundyou.model.TransportMode;
 import mapsaroundyou.storage.TravelTimeRepository;
@@ -17,10 +18,10 @@ public class CommuteEstimator {
 
     public CommuteEstimate estimate(String originNodeId, String destinationId, TransportMode transportMode) {
         if (transportMode != TransportMode.PUBLIC_TRANSPORT) {
-            throw new DataLoadException("Unsupported transport mode: " + transportMode);
+            throw new InvalidInputException("Unsupported transport mode: " + transportMode);
         }
         return travelTimeRepository.findByOriginAndDestination(originNodeId, destinationId)
-                .orElseThrow(() -> new DataLoadException(
+                .orElseThrow(() -> new DatasetIntegrityException(
                         "No commute record for origin " + originNodeId + " and destination " + destinationId));
     }
 }

@@ -1,16 +1,17 @@
 package mapsaroundyou.common;
 
 /**
- * Raised when bundled datasets cannot be loaded or validated.
+ * Raised when bundled datasets cannot be loaded or validated. Concrete failures use
+ * {@link DatasetIOException} or {@link DatasetIntegrityException}.
  */
-public class DataLoadException extends RuntimeException {
+public abstract class DataLoadException extends MapsAroundYouException {
     private static final long serialVersionUID = 1L;
 
-    public DataLoadException(String message) {
+    protected DataLoadException(String message) {
         super(message);
     }
 
-    public DataLoadException(String message, Throwable cause) {
+    protected DataLoadException(String message, Throwable cause) {
         super(message, cause);
     }
 }

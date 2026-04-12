@@ -1,10 +1,12 @@
 package mapsaroundyou.storage;
 
-import mapsaroundyou.common.DataLoadException;
+import mapsaroundyou.common.DatasetIntegrityException;
+import mapsaroundyou.common.DatasetIOException;
 import mapsaroundyou.model.DatasetMetadata;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.util.Properties;
 
@@ -25,23 +27,24 @@ public final class PropertiesDatasetMetadataRepository implements DatasetMetadat
         try (InputStream inputStream = PropertiesDatasetMetadataRepository.class.getClassLoader()
                 .getResourceAsStream(resourcePath)) {
             if (inputStream == null) {
-                throw new DataLoadException("Missing resource: " + resourcePath);
+                throw new DatasetIntegrityException("Missing resource: " + resourcePath);
             }
             properties.load(inputStream);
         } catch (IOException exception) {
-            throw new DataLoadException("Failed to read dataset metadata: " + resourcePath, exception);
+            throw new DatasetIOException("Failed to read dataset metadata: " + resourcePath, exception);
         }
 
         String lastUpdated = properties.getProperty("lastUpdated");
         String sourceDescription = properties.getProperty("sourceDescription", "");
         if (lastUpdated == null || lastUpdated.isBlank()) {
-            throw new DataLoadException("Missing lastUpdated in dataset metadata: " + resourcePath);
+            throw new DatasetIntegrityException("Missing lastUpdated in dataset metadata: " + resourcePath);
         }
 
         try {
             return new DatasetMetadata(LocalDate.parse(lastUpdated.trim()), sourceDescription.trim());
-        } catch (RuntimeException exception) {
-            throw new DataLoadException("Invalid lastUpdated value in dataset metadata: " + lastUpdated, exception);
+        } catch (DateTimeException exception) {
+            throw new DatasetIntegrityException("Invalid lastUpdated value in dataset metadata: " + lastUpdated,
+                    exception);
         }
     }
 }

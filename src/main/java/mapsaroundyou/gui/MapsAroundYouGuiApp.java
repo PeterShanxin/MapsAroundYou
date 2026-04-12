@@ -27,10 +27,8 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import mapsaroundyou.app.ApplicationFactory;
 import mapsaroundyou.common.DataLoadException;
-import mapsaroundyou.common.DestinationNotFoundException;
 import mapsaroundyou.common.InvalidInputException;
-import mapsaroundyou.common.ListingNotFoundException;
-import mapsaroundyou.common.NoResultsException;
+import mapsaroundyou.common.MapsAroundYouException;
 import mapsaroundyou.logic.SearchLogic;
 import mapsaroundyou.model.CommuteEstimate;
 import mapsaroundyou.model.DatasetMetadata;
@@ -41,8 +39,12 @@ import mapsaroundyou.model.TransportMode;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public final class MapsAroundYouGuiApp extends Application {
+    private static final Logger LOGGER = Logger.getLogger(MapsAroundYouGuiApp.class.getName());
+
     private static final int MIN_WIDTH = 1100;
     private static final int MIN_HEIGHT = 650;
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ISO_LOCAL_DATE;
@@ -167,7 +169,8 @@ public final class MapsAroundYouGuiApp extends Application {
         airconCol.setMaxWidth(100);
 
         TableColumn<SearchRow, String> scoreCol = new TableColumn<>("Score");
-        scoreCol.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(String.format("%.3f", cell.getValue().getScore())));
+        scoreCol.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(
+                String.format("%.3f", cell.getValue().getScore())));
         scoreCol.setMaxWidth(120);
 
         resultsTable.getColumns().add(titleCol);
@@ -359,10 +362,11 @@ public final class MapsAroundYouGuiApp extends Application {
         ListingDetails details;
         try {
             details = searchService.getListingDetails(row.getListingId());
-        } catch (ListingNotFoundException | InvalidInputException exception) {
+        } catch (MapsAroundYouException exception) {
             setStatus("Failed to load details: " + userMessage(exception));
             return;
         } catch (RuntimeException exception) {
+            LOGGER.log(Level.SEVERE, "Unexpected failure loading listing details", exception);
             setStatus("Failed to load details: " + userMessage(exception));
             return;
         }
@@ -438,7 +442,7 @@ public final class MapsAroundYouGuiApp extends Application {
         try {
             return Integer.parseInt(raw.trim());
         } catch (NumberFormatException exception) {
-            throw new InvalidInputException(label + " must be a valid integer.");
+            throw new InvalidInputException(label + " must be a valid integer.", exception);
         }
     }
 
@@ -446,11 +450,7 @@ public final class MapsAroundYouGuiApp extends Application {
         if (throwable == null) {
             return "Unknown error.";
         }
-        if (throwable instanceof NoResultsException
-                || throwable instanceof InvalidInputException
-                || throwable instanceof DestinationNotFoundException
-                || throwable instanceof ListingNotFoundException
-                || throwable instanceof DataLoadException) {
+        if (throwable instanceof MapsAroundYouException) {
             return throwable.getMessage();
         }
         String message = throwable.getMessage();

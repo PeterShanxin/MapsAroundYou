@@ -92,7 +92,7 @@ public class CliCommandParser {
         try {
             return Integer.parseInt(rawValue);
         } catch (NumberFormatException exception) {
-            throw new InvalidInputException(optionName + " must be a valid integer.");
+            throw new InvalidInputException(optionName + " must be a valid integer.", exception);
         }
     }
 

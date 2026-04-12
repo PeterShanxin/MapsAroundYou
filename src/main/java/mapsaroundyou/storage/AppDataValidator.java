@@ -1,6 +1,6 @@
 package mapsaroundyou.storage;
 
-import mapsaroundyou.common.DataLoadException;
+import mapsaroundyou.common.DatasetIntegrityException;
 import mapsaroundyou.model.Destination;
 import mapsaroundyou.model.RentalListing;
 
@@ -34,31 +34,32 @@ public final class AppDataValidator {
 
         for (RentalListing listing : listings) {
             if (!knownOriginIds.contains(listing.originNodeId())) {
-                throw new DataLoadException("Listing " + listing.listingId()
+                throw new DatasetIntegrityException("Listing " + listing.listingId()
                         + " references unknown origin node " + listing.originNodeId());
             }
             if (!knownTravelTimeOrigins.contains(listing.originNodeId())) {
-                throw new DataLoadException("Listing " + listing.listingId()
+                throw new DatasetIntegrityException("Listing " + listing.listingId()
                         + " has no travel-time records for origin " + listing.originNodeId());
             }
         }
 
         for (String originId : knownTravelTimeOrigins) {
             if (!knownOriginIds.contains(originId)) {
-                throw new DataLoadException("Travel-time dataset references unknown origin node " + originId);
+                throw new DatasetIntegrityException("Travel-time dataset references unknown origin node " + originId);
             }
         }
 
         for (String destinationId : knownTravelTimeDestinations) {
             if (!knownDestinationIds.contains(destinationId)) {
-                throw new DataLoadException("Travel-time dataset references unknown destination " + destinationId);
+                throw new DatasetIntegrityException(
+                        "Travel-time dataset references unknown destination " + destinationId);
             }
         }
 
         for (RentalListing listing : listings) {
             Set<String> destinationsForOrigin = knownDestinationsByOrigin.get(listing.originNodeId());
             if (destinationsForOrigin == null || !destinationsForOrigin.containsAll(knownDestinationIds)) {
-                throw new DataLoadException("Missing travel-time coverage for listing origin "
+                throw new DatasetIntegrityException("Missing travel-time coverage for listing origin "
                         + listing.originNodeId());
             }
         }

@@ -1,6 +1,7 @@
 package mapsaroundyou.storage;
 
-import mapsaroundyou.common.DataLoadException;
+import mapsaroundyou.common.DatasetIntegrityException;
+import mapsaroundyou.common.DatasetIOException;
 import mapsaroundyou.model.RentalListing;
 
 import org.apache.commons.csv.CSVParser;
@@ -55,7 +56,7 @@ public final class CsvListingRepository implements ListingRepository {
             for (CSVRecord record : parser) {
                 String listingId = CsvSupport.requireValue(record, "listingId", sourceName);
                 if (listings.containsKey(listingId)) {
-                    throw new DataLoadException("Duplicate listing id in " + sourceName + ": " + listingId);
+                    throw new DatasetIntegrityException("Duplicate listing id in " + sourceName + ": " + listingId);
                 }
 
                 RentalListing listing = new RentalListing(
@@ -72,10 +73,10 @@ public final class CsvListingRepository implements ListingRepository {
                 listings.put(listingId, listing);
             }
         } catch (java.io.IOException exception) {
-            throw new DataLoadException("Failed to close dataset: " + sourceName, exception);
+            throw new DatasetIOException("Failed to close dataset: " + sourceName, exception);
         }
         if (listings.isEmpty()) {
-            throw new DataLoadException("No listings found in " + sourceName);
+            throw new DatasetIntegrityException("No listings found in " + sourceName);
         }
         return listings;
     }

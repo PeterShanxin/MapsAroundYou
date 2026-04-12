@@ -1,6 +1,7 @@
 package mapsaroundyou.storage;
 
-import mapsaroundyou.common.DataLoadException;
+import mapsaroundyou.common.DatasetIntegrityException;
+import mapsaroundyou.common.DatasetIOException;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -16,8 +17,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 final class CsvSupport {
+    private static final Logger LOGGER = Logger.getLogger(CsvSupport.class.getName());
+
     private CsvSupport() {
     }
 
@@ -25,7 +30,7 @@ final class CsvSupport {
         return () -> {
             InputStream inputStream = CsvSupport.class.getClassLoader().getResourceAsStream(resourcePath);
             if (inputStream == null) {
-                throw new DataLoadException("Missing resource: " + resourcePath);
+                throw new DatasetIntegrityException("Missing resource: " + resourcePath);
             }
             return new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         };
@@ -48,15 +53,15 @@ final class CsvSupport {
             validateHeaders(parser.getHeaderMap(), sourceName, requiredHeaders);
             return parser;
         } catch (IOException exception) {
-            closeQuietly(reader);
-            throw new DataLoadException("Failed to read dataset: " + sourceName, exception);
+            closeQuietly(reader, sourceName);
+            throw new DatasetIOException("Failed to read dataset: " + sourceName, exception);
         }
     }
 
     static String requireValue(CSVRecord record, String header, String sourceName) {
         String value = record.get(header).trim();
         if (value.isEmpty()) {
-            throw new DataLoadException("Blank value for '" + header + "' in " + sourceName
+            throw new DatasetIntegrityException("Blank value for '" + header + "' in " + sourceName
                     + " at row " + record.getRecordNumber());
         }
         return value;
@@ -67,7 +72,7 @@ final class CsvSupport {
         try {
             return Integer.parseInt(value);
         } catch (NumberFormatException exception) {
-            throw new DataLoadException("Invalid integer for '" + header + "' in " + sourceName
+            throw new DatasetIntegrityException("Invalid integer for '" + header + "' in " + sourceName
                     + " at row " + record.getRecordNumber() + ": " + value, exception);
         }
     }
@@ -77,7 +82,7 @@ final class CsvSupport {
         try {
             return Double.parseDouble(value);
         } catch (NumberFormatException exception) {
-            throw new DataLoadException("Invalid decimal for '" + header + "' in " + sourceName
+            throw new DatasetIntegrityException("Invalid decimal for '" + header + "' in " + sourceName
                     + " at row " + record.getRecordNumber() + ": " + value, exception);
         }
     }
@@ -90,27 +95,27 @@ final class CsvSupport {
         if ("false".equalsIgnoreCase(value)) {
             return false;
         }
-        throw new DataLoadException("Invalid boolean for '" + header + "' in " + sourceName
+        throw new DatasetIntegrityException("Invalid boolean for '" + header + "' in " + sourceName
                 + " at row " + record.getRecordNumber() + ": " + value);
     }
 
     private static void validateHeaders(Map<String, Integer> headerMap, String sourceName, String... requiredHeaders) {
         for (String header : requiredHeaders) {
             if (!headerMap.containsKey(header)) {
-                throw new DataLoadException("Missing required column '" + header + "' in " + sourceName
+                throw new DatasetIntegrityException("Missing required column '" + header + "' in " + sourceName
                         + ". Present columns: " + Arrays.toString(headerMap.keySet().toArray()));
             }
         }
     }
 
-    private static void closeQuietly(Reader reader) {
+    private static void closeQuietly(Reader reader, String sourceName) {
         if (reader == null) {
             return;
         }
         try {
             reader.close();
-        } catch (IOException ignored) {
-            // Best-effort cleanup after parser construction fails.
+        } catch (IOException exception) {
+            LOGGER.log(Level.WARNING, "Failed to close reader after error opening dataset: " + sourceName, exception);
         }
     }
 }

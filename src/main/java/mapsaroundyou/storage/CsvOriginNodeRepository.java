@@ -1,6 +1,7 @@
 package mapsaroundyou.storage;
 
-import mapsaroundyou.common.DataLoadException;
+import mapsaroundyou.common.DatasetIntegrityException;
+import mapsaroundyou.common.DatasetIOException;
 import mapsaroundyou.model.OriginNode;
 
 import org.apache.commons.csv.CSVParser;
@@ -45,7 +46,8 @@ public final class CsvOriginNodeRepository implements OriginNodeRepository {
             for (CSVRecord record : parser) {
                 String originNodeId = CsvSupport.requireValue(record, "Flat_ID", sourceName);
                 if (originNodes.containsKey(originNodeId)) {
-                    throw new DataLoadException("Duplicate origin node id in " + sourceName + ": " + originNodeId);
+                    throw new DatasetIntegrityException(
+                            "Duplicate origin node id in " + sourceName + ": " + originNodeId);
                 }
 
                 OriginNode originNode = new OriginNode(
@@ -57,10 +59,10 @@ public final class CsvOriginNodeRepository implements OriginNodeRepository {
                 originNodes.put(originNodeId, originNode);
             }
         } catch (java.io.IOException exception) {
-            throw new DataLoadException("Failed to close dataset: " + sourceName, exception);
+            throw new DatasetIOException("Failed to close dataset: " + sourceName, exception);
         }
         if (originNodes.isEmpty()) {
-            throw new DataLoadException("No origin nodes found in " + sourceName);
+            throw new DatasetIntegrityException("No origin nodes found in " + sourceName);
         }
         return originNodes;
     }

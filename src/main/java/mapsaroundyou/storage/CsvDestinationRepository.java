@@ -1,6 +1,7 @@
 package mapsaroundyou.storage;
 
-import mapsaroundyou.common.DataLoadException;
+import mapsaroundyou.common.DatasetIntegrityException;
+import mapsaroundyou.common.DatasetIOException;
 import mapsaroundyou.model.Destination;
 
 import org.apache.commons.csv.CSVParser;
@@ -45,7 +46,8 @@ public final class CsvDestinationRepository implements DestinationRepository {
             for (CSVRecord record : parser) {
                 String destinationId = CsvSupport.requireValue(record, "ID", sourceName);
                 if (destinations.containsKey(destinationId)) {
-                    throw new DataLoadException("Duplicate destination id in " + sourceName + ": " + destinationId);
+                    throw new DatasetIntegrityException(
+                            "Duplicate destination id in " + sourceName + ": " + destinationId);
                 }
 
                 Destination destination = new Destination(
@@ -58,10 +60,10 @@ public final class CsvDestinationRepository implements DestinationRepository {
                 destinations.put(destinationId, destination);
             }
         } catch (java.io.IOException exception) {
-            throw new DataLoadException("Failed to close dataset: " + sourceName, exception);
+            throw new DatasetIOException("Failed to close dataset: " + sourceName, exception);
         }
         if (destinations.isEmpty()) {
-            throw new DataLoadException("No destinations found in " + sourceName);
+            throw new DatasetIntegrityException("No destinations found in " + sourceName);
         }
         return destinations;
     }
