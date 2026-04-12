@@ -18,6 +18,7 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -95,11 +96,21 @@ public final class MapsAroundYouGuiApp extends Application {
         stage.setMinWidth(MIN_WIDTH);
         stage.setMinHeight(MIN_HEIGHT);
         stage.setScene(scene);
+        configureWindowIcon(stage);
         stage.show();
 
         configureInteractions();
         initializeUiSettings();
         loadInitialData();
+    }
+
+    private static void configureWindowIcon(Stage stage) {
+        // JavaFX window icon must be set on the Stage explicitly.
+        var iconUrl = MapsAroundYouGuiApp.class.getResource("/mapsaroundyou/gui/MapsAroundYou_Logo.png");
+        if (iconUrl == null) {
+            return; // Resource not found; keep default icon.
+        }
+        stage.getIcons().add(new Image(iconUrl.toString()));
     }
 
     private VBox buildHeader() {
