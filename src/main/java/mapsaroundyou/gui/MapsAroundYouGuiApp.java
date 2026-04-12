@@ -347,10 +347,12 @@ public final class MapsAroundYouGuiApp extends Application {
     }
 
     private PersonaPreset getCurrentStudentOrWorkerPreset() {
-        if (currentPersonaPreset == PersonaPreset.WORKER) {
-            return PersonaPreset.WORKER;
+        if (currentPersonaPreset == PersonaPreset.STUDENT || currentPersonaPreset == PersonaPreset.WORKER) {
+            return currentPersonaPreset;
         }
-        return PersonaPreset.STUDENT;
+        // For presets not directly supported in the settings selector (e.g. NEW_USER/CUSTOM),
+        // return null so the UI can show no preselection instead of misrepresenting the current state.
+        return null;
     }
 
     private void applyPersonaPreset(PersonaPreset preset) {
