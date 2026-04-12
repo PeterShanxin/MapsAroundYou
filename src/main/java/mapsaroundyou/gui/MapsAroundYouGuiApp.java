@@ -26,10 +26,12 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import mapsaroundyou.app.ApplicationFactory;
+import mapsaroundyou.app.GuiSearchService;
+import mapsaroundyou.app.SearchRequest;
+import mapsaroundyou.app.SearchResponse;
 import mapsaroundyou.common.DataLoadException;
 import mapsaroundyou.common.InvalidInputException;
 import mapsaroundyou.common.MapsAroundYouException;
-import mapsaroundyou.logic.SearchLogic;
 import mapsaroundyou.model.CommuteEstimate;
 import mapsaroundyou.model.DatasetMetadata;
 import mapsaroundyou.model.Destination;
@@ -43,8 +45,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * JavaFX shell that wires filters, a results table, and an asynchronous {@link GuiSearchService}
- * facade.
+ * JavaFX shell that wires filters, a results table, and an asynchronous
+ * {@link GuiSearchService} facade from {@link ApplicationFactory}.
  */
 public final class MapsAroundYouGuiApp extends Application {
     private static final Logger LOGGER = Logger.getLogger(MapsAroundYouGuiApp.class.getName());
@@ -84,16 +86,13 @@ public final class MapsAroundYouGuiApp extends Application {
      */
     @Override
     public void start(Stage stage) {
-        // Bootstrap domain layer; surface dataset failures as a minimal error scene.
-        SearchLogic searchLogic;
+        // Bootstrap application service from the composition root; surface dataset failures.
         try {
-            searchLogic = ApplicationFactory.createSearchLogic();
+            this.searchService = ApplicationFactory.createGuiSearchService();
         } catch (DataLoadException exception) {
             showFatalStartupError(stage, exception.getMessage());
             return;
         }
-
-        this.searchService = new GuiSearchService(searchLogic);
 
         BorderPane root = new BorderPane();
         root.setPadding(new Insets(12));

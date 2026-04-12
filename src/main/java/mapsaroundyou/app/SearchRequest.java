@@ -1,9 +1,9 @@
-package mapsaroundyou.gui;
+package mapsaroundyou.app;
 
 import mapsaroundyou.model.TransportMode;
 
 /**
- * Immutable GUI form snapshot passed to {@link GuiSearchService#search(SearchRequest)}.
+ * Immutable form snapshot passed to {@link GuiSearchService#search(SearchRequest)}.
  *
  * @param destinationId selected destination identifier
  * @param maxRent maximum monthly rent in SGD
@@ -19,4 +19,3 @@ public record SearchRequest(
         TransportMode transportMode
 ) {
 }
-

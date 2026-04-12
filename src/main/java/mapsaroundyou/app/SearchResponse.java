@@ -1,4 +1,4 @@
-package mapsaroundyou.gui;
+package mapsaroundyou.app;
 
 import mapsaroundyou.model.DatasetMetadata;
 import mapsaroundyou.model.SearchResult;
@@ -25,4 +25,3 @@ public record SearchResponse(
         results = List.copyOf(results);
     }
 }
-
