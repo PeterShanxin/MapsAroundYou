@@ -15,6 +15,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * {@link TravelTimeRepository} backed by a UTF-8 CSV matrix with a header row.
+ */
 public final class CsvTravelTimeRepository implements TravelTimeRepository {
     private static final String[] REQUIRED_HEADERS = {
             "flat_id",
@@ -30,10 +33,24 @@ public final class CsvTravelTimeRepository implements TravelTimeRepository {
     private final Set<String> knownDestinations;
     private final Map<String, Set<String>> knownDestinationsByOrigin;
 
+    /**
+     * Loads travel times from a classpath resource.
+     *
+     * @param resourcePath resource path relative to the class loader
+     * @throws DatasetIOException if the file cannot be read or closed
+     * @throws DatasetIntegrityException if the CSV is empty, duplicated, or malformed
+     */
     public CsvTravelTimeRepository(String resourcePath) {
         this(CsvSupport.classpathReader(resourcePath), resourcePath);
     }
 
+    /**
+     * Loads travel times from an absolute filesystem path.
+     *
+     * @param filePath CSV location on disk
+     * @throws DatasetIOException if the file cannot be read or closed
+     * @throws DatasetIntegrityException if the CSV is empty, duplicated, or malformed
+     */
     public CsvTravelTimeRepository(Path filePath) {
         this(CsvSupport.fileReader(filePath), filePath.toString());
     }
@@ -47,6 +64,9 @@ public final class CsvTravelTimeRepository implements TravelTimeRepository {
         this.knownDestinationsByOrigin = buildKnownDestinationsByOrigin(commuteByOriginThenDestination);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Optional<CommuteEstimate> findByOriginAndDestination(String originNodeId, String destinationId) {
         return Optional.ofNullable(commuteByOriginThenDestination
@@ -54,11 +74,17 @@ public final class CsvTravelTimeRepository implements TravelTimeRepository {
                 .get(destinationId));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Set<String> findKnownOrigins() {
         return knownOrigins;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @SuppressFBWarnings(
             value = "EI_EXPOSE_REP",
@@ -68,6 +94,9 @@ public final class CsvTravelTimeRepository implements TravelTimeRepository {
         return knownDestinations;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @SuppressFBWarnings(
             value = "EI_EXPOSE_REP",

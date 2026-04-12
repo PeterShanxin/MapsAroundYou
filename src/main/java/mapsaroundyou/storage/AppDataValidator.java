@@ -15,6 +15,15 @@ public final class AppDataValidator {
     private AppDataValidator() {
     }
 
+    /**
+     * Validates referential integrity across origin nodes, destinations, listings, and travel times.
+     *
+     * @param originNodeRepository rental origin catalog
+     * @param destinationRepository supported destinations
+     * @param listingRepository curated listings
+     * @param travelTimeRepository commute matrix
+     * @throws DatasetIntegrityException when any cross-reference or coverage rule fails
+     */
     public static void validate(
             OriginNodeRepository originNodeRepository,
             DestinationRepository destinationRepository,

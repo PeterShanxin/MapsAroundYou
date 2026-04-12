@@ -13,15 +13,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * {@link OriginNodeRepository} backed by a UTF-8 CSV with a header row.
+ */
 public final class CsvOriginNodeRepository implements OriginNodeRepository {
     private static final String[] REQUIRED_HEADERS = {"Flat_ID", "Postal_Code", "Region", "Area_Name"};
 
     private final Map<String, OriginNode> originNodesById;
 
+    /**
+     * Loads origin nodes from a classpath resource.
+     *
+     * @param resourcePath resource path relative to the class loader
+     * @throws DatasetIOException if the file cannot be read or closed
+     * @throws DatasetIntegrityException if the CSV is empty, duplicated, or malformed
+     */
     public CsvOriginNodeRepository(String resourcePath) {
         this(CsvSupport.classpathReader(resourcePath), resourcePath);
     }
 
+    /**
+     * Loads origin nodes from an absolute filesystem path.
+     *
+     * @param filePath CSV location on disk
+     * @throws DatasetIOException if the file cannot be read or closed
+     * @throws DatasetIntegrityException if the CSV is empty, duplicated, or malformed
+     */
     public CsvOriginNodeRepository(Path filePath) {
         this(CsvSupport.fileReader(filePath), filePath.toString());
     }
@@ -30,11 +47,17 @@ public final class CsvOriginNodeRepository implements OriginNodeRepository {
         this.originNodesById = load(readerSupplier, sourceName);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<OriginNode> findAll() {
         return List.copyOf(originNodesById.values());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Optional<OriginNode> findById(String originNodeId) {
         return Optional.ofNullable(originNodesById.get(originNodeId));

@@ -25,5 +25,16 @@
         <module name="UnusedImports"/>
         <module name="WhitespaceAfter"/>
         <module name="WhitespaceAround"/>
+
+        <module name="MissingJavadocType">
+            <property name="scope" value="public"/>
+            <property name="tokens"
+                      value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, RECORD_DEF, ANNOTATION_DEF"/>
+        </module>
+        <module name="MissingJavadocMethod">
+            <property name="scope" value="public"/>
+            <property name="tokens" value="METHOD_DEF, CTOR_DEF, COMPACT_CTOR_DEF"/>
+            <property name="ignoreMethodNamesRegex" value="^main$"/>
+        </module>
     </module>
 </module>

@@ -4,6 +4,9 @@ import mapsaroundyou.app.ApplicationFactory;
 import mapsaroundyou.common.DataLoadException;
 import mapsaroundyou.logic.SearchLogic;
 
+/**
+ * Command-line entry point that wires {@link CliApplication} and exits with its status code.
+ */
 public final class MapsAroundYouApp {
     private MapsAroundYouApp() {
     }

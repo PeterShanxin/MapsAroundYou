@@ -25,6 +25,13 @@ public final class CliApplication {
     private final CliCommandParser commandParser;
     private final CliPrinter cliPrinter;
 
+    /**
+     * Creates a CLI runner with injected collaborators (used by tests and {@link MapsAroundYouApp}).
+     *
+     * @param searchLogic domain workflow
+     * @param commandParser argv parser
+     * @param cliPrinter stdout/stderr writer
+     */
     @SuppressFBWarnings(
             value = "EI_EXPOSE_REP2",
             justification = "CliApplication composes shared services and does not expose mutable collaborator state."
@@ -35,6 +42,13 @@ public final class CliApplication {
         this.cliPrinter = cliPrinter;
     }
 
+    /**
+     * Parses arguments, dispatches to help/interactive/search flows, and returns a process exit
+     * code.
+     *
+     * @param args raw CLI arguments
+     * @return {@code 0} on success, {@code 1} on user error or unexpected failure
+     */
     public int run(String[] args) {
         cliPrinter.printBanner(searchLogic.getDatasetMetadata());
 
@@ -64,11 +78,19 @@ public final class CliApplication {
         }
     }
 
+    /**
+     * Prints usage information and returns success.
+     */
     private int runHelp() {
         cliPrinter.printHelp();
         return 0;
     }
 
+    /**
+     * Prompts for destination and filters in a loop until the user exits.
+     *
+     * @return process exit code ({@code 0} on orderly exit)
+     */
     private int runInteractive() {
         List<Destination> destinations = searchLogic.getSupportedDestinations();
         cliPrinter.printDestinations(destinations);
@@ -76,6 +98,7 @@ public final class CliApplication {
 
         try (Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8)) {
             while (true) {
+                // Prompt loop: collect destination + filters, tolerate per-search failures, allow exit.
                 String destinationId = prompt(scanner, "Destination ID");
                 if (shouldExit(destinationId)) {
                     cliPrinter.printGoodbye();

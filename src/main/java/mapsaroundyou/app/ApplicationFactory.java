@@ -21,6 +21,14 @@ public final class ApplicationFactory {
     private ApplicationFactory() {
     }
 
+    /**
+     * Loads bundled CSV repositories, validates cross-dataset integrity, and returns a wired
+     * {@link SearchLogic} instance.
+     *
+     * @return configured search logic
+     * @throws mapsaroundyou.common.DatasetIOException if a dataset cannot be read
+     * @throws mapsaroundyou.common.DatasetIntegrityException if validation fails
+     */
     public static SearchLogic createSearchLogic() {
         CsvDestinationRepository destinationRepository =
                 new CsvDestinationRepository(AppConfig.DESTINATIONS_RESOURCE);

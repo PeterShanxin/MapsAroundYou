@@ -12,10 +12,23 @@ import mapsaroundyou.storage.TravelTimeRepository;
 public class CommuteEstimator {
     private final TravelTimeRepository travelTimeRepository;
 
+    /**
+     * @param travelTimeRepository matrix lookup backend
+     */
     public CommuteEstimator(TravelTimeRepository travelTimeRepository) {
         this.travelTimeRepository = travelTimeRepository;
     }
 
+    /**
+     * Looks up a public-transit commute between an origin node and destination.
+     *
+     * @param originNodeId matrix row key
+     * @param destinationId matrix column key
+     * @param transportMode currently only {@link TransportMode#PUBLIC_TRANSPORT} is supported
+     * @return commute breakdown
+     * @throws InvalidInputException if the mode is unsupported
+     * @throws DatasetIntegrityException if the matrix lacks the requested pair
+     */
     public CommuteEstimate estimate(String originNodeId, String destinationId, TransportMode transportMode) {
         if (transportMode != TransportMode.PUBLIC_TRANSPORT) {
             throw new InvalidInputException("Unsupported transport mode: " + transportMode);

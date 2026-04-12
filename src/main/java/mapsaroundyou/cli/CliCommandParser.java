@@ -15,6 +15,13 @@ public class CliCommandParser {
             "--max-commute"
     );
 
+    /**
+     * Parses CLI arguments into an interactive session, help request, or structured search command.
+     *
+     * @param args raw argv excluding the JVM entry class name
+     * @return parsed command intent
+     * @throws InvalidInputException if tokens are unknown or malformed
+     */
     public ParsedCommand parse(String[] args) {
         if (args.length == 0) {
             return new ParsedCommand(ParsedCommand.CommandType.INTERACTIVE, null);
@@ -36,6 +43,9 @@ public class CliCommandParser {
         return new ParsedCommand(ParsedCommand.CommandType.SEARCH, parseSearchArguments(args));
     }
 
+    /**
+     * Parses {@code search} flags into structured arguments, enforcing required options and ranges.
+     */
     private SearchCommandArguments parseSearchArguments(String[] args) {
         Map<String, String> options = new HashMap<>();
         boolean requireAircon = false;

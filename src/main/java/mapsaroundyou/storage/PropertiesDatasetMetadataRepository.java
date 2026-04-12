@@ -10,13 +10,26 @@ import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.util.Properties;
 
+/**
+ * {@link DatasetMetadataRepository} that reads a Java {@link Properties} resource at construction time.
+ */
 public final class PropertiesDatasetMetadataRepository implements DatasetMetadataRepository {
     private final DatasetMetadata datasetMetadata;
 
+    /**
+     * Parses metadata from a classpath properties file.
+     *
+     * @param resourcePath resource path relative to the class loader
+     * @throws DatasetIOException if the resource cannot be read
+     * @throws DatasetIntegrityException if required keys or date formats are invalid
+     */
     public PropertiesDatasetMetadataRepository(String resourcePath) {
         this.datasetMetadata = load(resourcePath);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public DatasetMetadata load() {
         return datasetMetadata;

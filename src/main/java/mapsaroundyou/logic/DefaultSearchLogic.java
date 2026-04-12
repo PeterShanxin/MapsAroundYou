@@ -25,6 +25,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Default {@link SearchLogic} implementation that coordinates repositories, filtering, commute
+ * lookup, and ranking.
+ */
 public class DefaultSearchLogic implements SearchLogic {
     private final DestinationRepository destinationRepository;
     private final ListingRepository listingRepository;
@@ -36,6 +40,18 @@ public class DefaultSearchLogic implements SearchLogic {
 
     private UserPreferences currentPreferences;
 
+    /**
+     * Creates a search coordinator with its collaborators. Preferences start as unset defaults until
+     * callers invoke setters.
+     *
+     * @param destinationRepository supported destinations
+     * @param listingRepository rental catalog
+     * @param datasetMetadataRepository provenance metadata
+     * @param listingFilter rent and air-conditioning filters
+     * @param commuteEstimator travel-time lookup
+     * @param listingRanker scoring and ordering
+     * @param routeAnalyzer walk-dominance helper for optional filtering
+     */
     public DefaultSearchLogic(
             DestinationRepository destinationRepository,
             ListingRepository listingRepository,
@@ -63,16 +79,25 @@ public class DefaultSearchLogic implements SearchLogic {
         );
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<Destination> getSupportedDestinations() {
         return destinationRepository.findAll();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public DatasetMetadata getDatasetMetadata() {
         return datasetMetadataRepository.load();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setDestination(String destinationId) {
         if (destinationId == null || destinationId.isBlank()) {
@@ -90,6 +115,9 @@ public class DefaultSearchLogic implements SearchLogic {
         );
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setPreferences(
             int maxRent,
@@ -117,15 +145,20 @@ public class DefaultSearchLogic implements SearchLogic {
         );
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<SearchResult> generateShortlist() {
         validateSearchReady();
+        // 1) Apply static listing filters (rent and optional air-conditioning).
         List<RentalListing> filteredListings = listingFilter.filterByRent(
                 listingRepository.findAll(),
                 currentPreferences.maxRent()
         );
         filteredListings = listingFilter.filterByAircon(filteredListings, currentPreferences.requireAircon());
 
+        // 2) Score each surviving listing using commute matrix data and ranking heuristics.
         List<SearchResult> results = new ArrayList<>();
         for (RentalListing listing : filteredListings) {
             CommuteEstimate commute = commuteEstimator.estimate(
@@ -149,6 +182,7 @@ public class DefaultSearchLogic implements SearchLogic {
             results.add(new SearchResult(listing, commute, score));
         }
 
+        // 3) Deterministic sort, cap, and guard against empty output for the UI/CLI.
         List<SearchResult> rankedResults = listingRanker.rank(results).stream()
                 .limit(currentPreferences.resultLimit())
                 .toList();
@@ -158,6 +192,9 @@ public class DefaultSearchLogic implements SearchLogic {
         return rankedResults;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ListingDetails getListingDetails(String listingId) {
         RentalListing listing = getListing(listingId);
@@ -172,6 +209,9 @@ public class DefaultSearchLogic implements SearchLogic {
         return new ListingDetails(listing, commuteEstimate);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public CommuteEstimate getCommuteDetails(String listingId) {
         validateSearchReady();
@@ -183,11 +223,20 @@ public class DefaultSearchLogic implements SearchLogic {
         );
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public UserPreferences getCurrentPreferences() {
         return currentPreferences;
     }
 
+    /**
+     * Ensures destination and commute preferences are configured before a search.
+     *
+     * @throws InvalidInputException if prerequisites are missing
+     * @throws DestinationNotFoundException if the stored destination id is unknown
+     */
     private void validateSearchReady() {
         if (currentPreferences.destinationId() == null || currentPreferences.destinationId().isBlank()) {
             throw new InvalidInputException("Destination must be set before searching.");
@@ -198,12 +247,26 @@ public class DefaultSearchLogic implements SearchLogic {
         }
     }
 
+    /**
+     * Verifies a destination id exists in the repository.
+     *
+     * @param destinationId candidate id
+     * @throws DestinationNotFoundException when absent
+     */
     private void ensureDestinationExists(String destinationId) {
         destinationRepository.findById(destinationId)
                 .orElseThrow(() -> new DestinationNotFoundException(
                         "Unknown destination. Please select a supported destination id."));
     }
 
+    /**
+     * Loads a listing by id with validation.
+     *
+     * @param listingId candidate id
+     * @return matching listing
+     * @throws InvalidInputException if {@code listingId} is null or blank
+     * @throws ListingNotFoundException if not present
+     */
     private RentalListing getListing(String listingId) {
         if (listingId == null || listingId.isBlank()) {
             throw new InvalidInputException("Listing id must not be blank.");

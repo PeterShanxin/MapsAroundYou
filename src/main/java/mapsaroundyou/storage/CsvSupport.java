@@ -20,12 +20,18 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Shared CSV helpers: resource suppliers, header validation, typed parsing, and safe cleanup.
+ */
 final class CsvSupport {
     private static final Logger LOGGER = Logger.getLogger(CsvSupport.class.getName());
 
     private CsvSupport() {
     }
 
+    /**
+     * Supplies readers for classpath resources (typically under {@code commute_data/}).
+     */
     static ReaderSupplier classpathReader(String resourcePath) {
         return () -> {
             InputStream inputStream = CsvSupport.class.getClassLoader().getResourceAsStream(resourcePath);
@@ -36,10 +42,17 @@ final class CsvSupport {
         };
     }
 
+    /** Supplies readers for arbitrary filesystem paths (tests and tooling). */
     static ReaderSupplier fileReader(Path filePath) {
         return () -> Files.newBufferedReader(filePath, StandardCharsets.UTF_8);
     }
 
+    /**
+     * Opens a {@link CSVParser} with default formatting, validating required headers up front.
+     *
+     * @throws DatasetIOException on read failures (reader closed on error)
+     * @throws DatasetIntegrityException when headers are missing or the resource is absent
+     */
     static CSVParser openParser(ReaderSupplier readerSupplier, String sourceName, String... requiredHeaders) {
         Reader reader = null;
         try {
@@ -58,6 +71,7 @@ final class CsvSupport {
         }
     }
 
+    /** Returns a trimmed, non-blank column value or throws a row-aware integrity error. */
     static String requireValue(CSVRecord record, String header, String sourceName) {
         String value = record.get(header).trim();
         if (value.isEmpty()) {
@@ -67,6 +81,7 @@ final class CsvSupport {
         return value;
     }
 
+    /** Parses a required integer column, preserving row numbers in error messages. */
     static int parseRequiredInt(CSVRecord record, String header, String sourceName) {
         String value = requireValue(record, header, sourceName);
         try {
@@ -77,6 +92,7 @@ final class CsvSupport {
         }
     }
 
+    /** Parses a required floating-point column. */
     static double parseRequiredDouble(CSVRecord record, String header, String sourceName) {
         String value = requireValue(record, header, sourceName);
         try {
@@ -87,6 +103,7 @@ final class CsvSupport {
         }
     }
 
+    /** Parses {@code true}/{@code false} (case-insensitive) boolean columns. */
     static boolean parseRequiredBoolean(CSVRecord record, String header, String sourceName) {
         String value = requireValue(record, header, sourceName);
         if ("true".equalsIgnoreCase(value)) {
@@ -99,6 +116,7 @@ final class CsvSupport {
                 + " at row " + record.getRecordNumber() + ": " + value);
     }
 
+    /** Ensures every required header exists in the parsed header map. */
     private static void validateHeaders(Map<String, Integer> headerMap, String sourceName, String... requiredHeaders) {
         for (String header : requiredHeaders) {
             if (!headerMap.containsKey(header)) {
@@ -108,6 +126,7 @@ final class CsvSupport {
         }
     }
 
+    /** Closes readers after failures without masking the original parsing error. */
     private static void closeQuietly(Reader reader, String sourceName) {
         if (reader == null) {
             return;

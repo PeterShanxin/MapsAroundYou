@@ -42,6 +42,10 @@ import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * JavaFX shell that wires filters, a results table, and an asynchronous {@link GuiSearchService}
+ * facade.
+ */
 public final class MapsAroundYouGuiApp extends Application {
     private static final Logger LOGGER = Logger.getLogger(MapsAroundYouGuiApp.class.getName());
 
@@ -72,8 +76,15 @@ public final class MapsAroundYouGuiApp extends Application {
     private final Label detailsSource = new Label("-");
     private final Label detailsNotes = new Label("-");
 
+    /**
+     * Builds the scene graph, loads initial dataset metadata off the FX thread, and attaches search
+     * handlers.
+     *
+     * @param stage primary window provided by JavaFX
+     */
     @Override
     public void start(Stage stage) {
+        // Bootstrap domain layer; surface dataset failures as a minimal error scene.
         SearchLogic searchLogic;
         try {
             searchLogic = ApplicationFactory.createSearchLogic();
@@ -236,6 +247,7 @@ public final class MapsAroundYouGuiApp extends Application {
     }
 
     private void configureInteractions() {
+        // ComboBox display strings; fromString is unused for read-only selection UX.
         destinationComboBox.setConverter(new javafx.util.StringConverter<>() {
             @Override
             public String toString(Destination destination) {
@@ -275,6 +287,7 @@ public final class MapsAroundYouGuiApp extends Application {
     private void loadInitialData() {
         setBusy(true, "Loading dataset...");
 
+        // Load repositories off the JavaFX thread, then marshal UI mutations via runLater.
         Task<Void> initTask = new Task<>() {
             @Override
             protected Void call() {
@@ -308,6 +321,7 @@ public final class MapsAroundYouGuiApp extends Application {
             return;
         }
 
+        // Validate numeric fields on the FX thread before spawning the worker.
         SearchRequest request;
         try {
             int maxRent = parseInt(maxRentField.getText(), "Max rent");
@@ -328,6 +342,7 @@ public final class MapsAroundYouGuiApp extends Application {
         resultsTable.getItems().clear();
         clearDetails();
 
+        // Execute search logic on a background thread; publish rows on success.
         Task<SearchResponse> task = new Task<>() {
             @Override
             protected SearchResponse call() {
@@ -359,6 +374,7 @@ public final class MapsAroundYouGuiApp extends Application {
     private void populateDetails(SearchRow row) {
         Objects.requireNonNull(row, "row");
 
+        // Listing details honor the current SearchLogic destination state set by the last search.
         ListingDetails details;
         try {
             details = searchService.getListingDetails(row.getListingId());
@@ -446,6 +462,9 @@ public final class MapsAroundYouGuiApp extends Application {
         }
     }
 
+    /**
+     * Maps throwables to concise status-bar text, preferring domain messages over raw class names.
+     */
     private static String userMessage(Throwable throwable) {
         if (throwable == null) {
             return "Unknown error.";

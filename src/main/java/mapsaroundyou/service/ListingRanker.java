@@ -14,12 +14,26 @@ public class ListingRanker {
             .thenComparingInt(result -> result.listing().monthlyRent())
             .thenComparing(result -> result.listing().listingId());
 
+    /**
+     * Sorts results by commute time, rent, then listing id for deterministic output.
+     *
+     * @param results scored candidates
+     * @return sorted immutable list
+     */
     public List<SearchResult> rank(List<SearchResult> results) {
         return results.stream()
                 .sorted(DEFAULT_COMPARATOR)
                 .toList();
     }
 
+    /**
+     * Computes a bounded heuristic score using normalized commute and rent versus caller caps.
+     *
+     * @param result listing and commute to score
+     * @param maxRent rent normalization baseline (should be positive)
+     * @param maxCommuteMinutes commute normalization baseline (should be positive)
+     * @return score in the range {@code [0.0, 1.0]}
+     */
     public double computeScore(SearchResult result, int maxRent, int maxCommuteMinutes) {
         double normalizedCommute = (double) result.commute().totalMinutes() / maxCommuteMinutes;
         double normalizedRent = (double) result.listing().monthlyRent() / maxRent;

@@ -6,6 +6,9 @@ package mapsaroundyou.common;
 public class ListingNotFoundException extends MapsAroundYouException {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * @param message explanation referencing the missing listing id
+     */
     public ListingNotFoundException(String message) {
         super(message);
     }

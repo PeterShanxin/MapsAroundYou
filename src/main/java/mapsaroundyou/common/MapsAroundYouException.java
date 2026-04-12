@@ -6,10 +6,17 @@ package mapsaroundyou.common;
 public abstract class MapsAroundYouException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * @param message user-safe explanation
+     */
     protected MapsAroundYouException(String message) {
         super(message);
     }
 
+    /**
+     * @param message user-safe explanation
+     * @param cause underlying failure
+     */
     protected MapsAroundYouException(String message, Throwable cause) {
         super(message, cause);
     }
