@@ -53,14 +53,12 @@ public final class MapsAroundYouGuiApp extends Application {
     private static final int WALK_COLUMN_MIN_WIDTH = 80;
     private static final int TRANSFERS_COLUMN_MIN_WIDTH = 90;
     private static final int AIRCON_COLUMN_MIN_WIDTH = 70;
-    private static final int SCORE_COLUMN_MIN_WIDTH = 80;
-    private static final double LISTING_COLUMN_WIDTH_RATIO = 0.30d;
-    private static final double RENT_COLUMN_WIDTH_RATIO = 0.12d;
-    private static final double COMMUTE_COLUMN_WIDTH_RATIO = 0.12d;
-    private static final double WALK_COLUMN_WIDTH_RATIO = 0.11d;
-    private static final double TRANSFERS_COLUMN_WIDTH_RATIO = 0.10d;
-    private static final double AIRCON_COLUMN_WIDTH_RATIO = 0.10d;
-    private static final double SCORE_COLUMN_WIDTH_RATIO = 0.15d;
+    private static final double LISTING_COLUMN_WIDTH_RATIO = 0.38d;
+    private static final double RENT_COLUMN_WIDTH_RATIO = 0.14d;
+    private static final double COMMUTE_COLUMN_WIDTH_RATIO = 0.14d;
+    private static final double WALK_COLUMN_WIDTH_RATIO = 0.12d;
+    private static final double TRANSFERS_COLUMN_WIDTH_RATIO = 0.13d;
+    private static final double AIRCON_COLUMN_WIDTH_RATIO = 0.09d;
     private static final int DETAILS_PANEL_HEIGHT = 220;
     private static final int DETAILS_LABEL_WIDTH = 92;
 
@@ -83,7 +81,6 @@ public final class MapsAroundYouGuiApp extends Application {
     private final TableColumn<SearchRow, Number> walkColumn = new TableColumn<>("Walk");
     private final TableColumn<SearchRow, Number> transfersColumn = new TableColumn<>("Transfers");
     private final TableColumn<SearchRow, Boolean> airconColumn = new TableColumn<>("A/C");
-    private final TableColumn<SearchRow, Number> matchColumn = new TableColumn<>("Match");
     private final Label statusLabel = new Label("App status: Ready.");
     private final ProgressIndicator loadingIndicator = new ProgressIndicator();
     private final Label datasetLabel = new Label();
@@ -214,8 +211,7 @@ public final class MapsAroundYouGuiApp extends Application {
                 commuteColumn,
                 walkColumn,
                 transfersColumn,
-                airconColumn,
-                matchColumn
+                airconColumn
         ));
 
         VBox box = new VBox(resultsTable);
@@ -347,10 +343,6 @@ public final class MapsAroundYouGuiApp extends Application {
         airconColumn.setSortable(false);
         airconColumn.setCellFactory(createCenteredCellFactory(item -> item ? "Yes" : "No"));
 
-        matchColumn.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(cell.getValue().getScore()));
-        matchColumn.setMinWidth(SCORE_COLUMN_MIN_WIDTH);
-        matchColumn.prefWidthProperty().bind(resultsTable.widthProperty().multiply(SCORE_COLUMN_WIDTH_RATIO));
-        matchColumn.setCellFactory(createCenteredCellFactory(item -> String.format("%.3f", item.doubleValue())));
     }
 
     private void configureInteractions() {
@@ -588,10 +580,7 @@ public final class MapsAroundYouGuiApp extends Application {
             commuteColumn.setSortType(TableColumn.SortType.ASCENDING);
             resultsTable.getSortOrder().setAll(List.of(commuteColumn));
         }
-        case BALANCED -> {
-            matchColumn.setSortType(TableColumn.SortType.DESCENDING);
-            resultsTable.getSortOrder().setAll(List.of(matchColumn));
-        }
+        case BALANCED -> resultsTable.getSortOrder().clear();
         default -> throw new IllegalStateException("Unsupported sort mode: " + resolvedSortMode);
         }
     }
@@ -607,9 +596,6 @@ public final class MapsAroundYouGuiApp extends Application {
         }
         if (primaryColumn == commuteColumn) {
             return SortMode.COMMUTE;
-        }
-        if (primaryColumn == matchColumn) {
-            return SortMode.BALANCED;
         }
         applyTableSort(SortMode.BALANCED);
         return SortMode.BALANCED;
