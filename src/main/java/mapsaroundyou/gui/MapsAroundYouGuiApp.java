@@ -10,15 +10,18 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.Separator;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
@@ -27,6 +30,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import mapsaroundyou.app.ApplicationFactory;
 import mapsaroundyou.app.GuiSearchService;
@@ -37,6 +41,8 @@ import mapsaroundyou.common.InvalidInputException;
 import mapsaroundyou.model.DatasetMetadata;
 import mapsaroundyou.model.Destination;
 import mapsaroundyou.model.ListingDetails;
+import mapsaroundyou.model.PersonaPreset;
+import mapsaroundyou.model.PersonaPresetAppliedValues;
 import mapsaroundyou.model.SortMode;
 import mapsaroundyou.model.UserPreferences;
 
@@ -44,10 +50,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
-/**
- * JavaFX shell that wires filters, a results table, and an asynchronous
- * {@link GuiSearchService} facade from {@link ApplicationFactory}.
- */
 public final class MapsAroundYouGuiApp extends Application {
     private static final int MIN_WIDTH = 1000;
     private static final int MIN_HEIGHT = 600;
@@ -65,8 +67,13 @@ public final class MapsAroundYouGuiApp extends Application {
     private static final double SCORE_COLUMN_WIDTH_RATIO = 0.15d;
     private static final int DETAILS_PANEL_HEIGHT = 165;
     private static final int DETAILS_LABEL_WIDTH = 72;
+    private static final String ICON_RESOURCE = "/mapsaroundyou/gui/MapsAroundYou_Logo.png";
+    private static final String DARK_THEME_CSS_RESOURCE = "/mapsaroundyou/gui/dark-theme.css";
 
     private GuiSearchService searchService;
+    private final UiSettingsStore uiSettingsStore = new UiSettingsStore();
+    private Scene mainScene;
+    private PersonaPreset currentPersonaPreset = PersonaPreset.NEW_USER;
 
     private final ComboBox<Destination> destinationComboBox = new ComboBox<>();
     private final TextField maxRentField = new TextField();
@@ -76,6 +83,7 @@ public final class MapsAroundYouGuiApp extends Application {
     private final CheckBox requireAirconCheckBox = new CheckBox("Require aircon");
     private final TextField resultLimitField = new TextField();
     private final CheckBox excludeWalkDominantRoutesCheckBox = new CheckBox("No walk-dominant routes");
+    private final Button settingsButton = new Button("Settings");
     private final Button searchButton = new Button("Search");
 
     private final TableView<SearchRow> resultsTable = new TableView<>();
@@ -98,12 +106,6 @@ public final class MapsAroundYouGuiApp extends Application {
     private final Label detailsSource = new Label("-");
     private final Label detailsNotes = new Label("-");
 
-    /**
-     * Builds the scene graph, loads initial dataset metadata off the FX thread, and attaches search
-     * handlers.
-     *
-     * @param stage primary window provided by JavaFX
-     */
     @Override
     public void start(Stage stage) {
         try {
@@ -120,14 +122,25 @@ public final class MapsAroundYouGuiApp extends Application {
         root.setCenter(buildContentArea());
 
         Scene scene = new Scene(root, MIN_WIDTH, MIN_HEIGHT);
+        this.mainScene = scene;
         stage.setTitle("MapsAroundYou");
         stage.setMinWidth(MIN_WIDTH);
         stage.setMinHeight(MIN_HEIGHT);
         stage.setScene(scene);
+        configureWindowIcon(stage);
         stage.show();
 
         configureInteractions();
+        initializeUiSettings();
         loadInitialData();
+    }
+
+    private static void configureWindowIcon(Stage stage) {
+        var iconUrl = MapsAroundYouGuiApp.class.getResource(ICON_RESOURCE);
+        if (iconUrl == null) {
+            return;
+        }
+        stage.getIcons().add(new Image(iconUrl.toString()));
     }
 
     private VBox buildHeader() {
@@ -139,7 +152,8 @@ public final class MapsAroundYouGuiApp extends Application {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        HBox topRow = new HBox(12, title, spacer, buildStatusIndicator());
+        settingsButton.setOnAction(event -> openSettingsWindow());
+        HBox topRow = new HBox(12, title, settingsButton, spacer, buildStatusIndicator());
         topRow.setAlignment(Pos.CENTER_LEFT);
 
         VBox header = new VBox(4, topRow, datasetLabel);
@@ -337,7 +351,6 @@ public final class MapsAroundYouGuiApp extends Application {
     }
 
     private void configureInteractions() {
-        // ComboBox display strings; fromString is unused for read-only selection UX.
         destinationComboBox.setConverter(new javafx.util.StringConverter<>() {
             @Override
             public String toString(Destination destination) {
@@ -359,6 +372,155 @@ public final class MapsAroundYouGuiApp extends Application {
             }
             populateDetails(newVal);
         });
+    }
+
+    private void initializeUiSettings() {
+        applyDarkMode(uiSettingsStore.isDarkModeEnabled());
+
+        PersonaPreset loadedPreset = uiSettingsStore.loadPersonaPreset();
+        if (loadedPreset == PersonaPreset.NEW_USER) {
+            PersonaPreset selected = maybePromptForNewUserPersonaPreset();
+            uiSettingsStore.savePersonaPreset(selected);
+            loadedPreset = selected;
+        }
+
+        currentPersonaPreset = loadedPreset;
+        applyPersonaPreset(currentPersonaPreset);
+    }
+
+    private PersonaPreset maybePromptForNewUserPersonaPreset() {
+        ChoiceDialog<PersonaPreset> dialog = new ChoiceDialog<>(
+                PersonaPreset.STUDENT,
+                List.of(PersonaPreset.STUDENT, PersonaPreset.WORKER)
+        );
+        dialog.setTitle("Persona preset");
+        dialog.setHeaderText("Welcome! Choose a persona");
+        dialog.setContentText("Pick a preset to pre-fill your search defaults:");
+        maybeAddStylesheet(dialog.getDialogPane().getScene());
+        return dialog.showAndWait().orElse(PersonaPreset.STUDENT);
+    }
+
+    private void openSettingsWindow() {
+        if (mainScene == null) {
+            return;
+        }
+
+        Stage settingsStage = new Stage();
+        settingsStage.initModality(Modality.WINDOW_MODAL);
+        settingsStage.initOwner(mainScene.getWindow());
+        settingsStage.setTitle("Settings");
+        configureWindowIcon(settingsStage);
+
+        ComboBox<PersonaPreset> personaPresetSelector = new ComboBox<>();
+        personaPresetSelector.setItems(FXCollections.observableArrayList(
+                PersonaPreset.STUDENT,
+                PersonaPreset.WORKER
+        ));
+        personaPresetSelector.setValue(getCurrentStudentOrWorkerPreset());
+
+        CheckBox darkModeToggle = new CheckBox("Dark mode");
+        darkModeToggle.setSelected(uiSettingsStore.isDarkModeEnabled());
+
+        personaPresetSelector.setOnAction(event -> {
+            PersonaPreset selected = personaPresetSelector.getValue();
+            if (selected == null) {
+                return;
+            }
+            currentPersonaPreset = selected;
+            uiSettingsStore.savePersonaPreset(selected);
+            applyPersonaPreset(selected);
+        });
+
+        darkModeToggle.setOnAction(event -> {
+            boolean enabled = darkModeToggle.isSelected();
+            uiSettingsStore.setDarkModeEnabled(enabled);
+            applyDarkMode(enabled);
+        });
+
+        Button closeButton = new Button("Close");
+        closeButton.setOnAction(event -> settingsStage.close());
+
+        GridPane form = new GridPane();
+        form.setHgap(8);
+        form.setVgap(10);
+
+        int row = 0;
+        form.add(new Label("Persona preset"), 0, row);
+        form.add(personaPresetSelector, 1, row++);
+        form.add(new Separator(), 0, row++, 2, 1);
+        form.add(darkModeToggle, 0, row, 2, 1);
+        form.add(closeButton, 0, row + 1, 2, 1);
+
+        VBox content = new VBox(10, form);
+        content.setPadding(new Insets(12));
+
+        Scene settingsScene = new Scene(content, 320, 210);
+        if (uiSettingsStore.isDarkModeEnabled()) {
+            maybeAddStylesheet(settingsScene);
+        }
+        settingsStage.setScene(settingsScene);
+        settingsStage.setResizable(false);
+        settingsStage.showAndWait();
+    }
+
+    private PersonaPreset getCurrentStudentOrWorkerPreset() {
+        if (currentPersonaPreset == PersonaPreset.WORKER) {
+            return PersonaPreset.WORKER;
+        }
+        return PersonaPreset.STUDENT;
+    }
+
+    private void applyPersonaPreset(PersonaPreset preset) {
+        if (preset == null) {
+            return;
+        }
+        preset.defaultValues().ifPresent(this::applyPresetValues);
+    }
+
+    private void applyPresetValues(PersonaPresetAppliedValues values) {
+        maxRentField.setText(String.valueOf(values.maxRent()));
+        maxCommuteField.setText(String.valueOf(values.maxCommuteMinutes()));
+        requireAirconCheckBox.setSelected(values.requireAircon());
+    }
+
+    private void applyDarkMode(boolean enabled) {
+        if (mainScene == null) {
+            return;
+        }
+
+        String cssUrl = resolveDarkThemeCssUrl();
+        if (cssUrl == null) {
+            return;
+        }
+
+        if (enabled) {
+            if (!mainScene.getStylesheets().contains(cssUrl)) {
+                mainScene.getStylesheets().add(cssUrl);
+            }
+        } else {
+            mainScene.getStylesheets().remove(cssUrl);
+        }
+    }
+
+    private void maybeAddStylesheet(Scene scene) {
+        if (!uiSettingsStore.isDarkModeEnabled() || scene == null) {
+            return;
+        }
+        String cssUrl = resolveDarkThemeCssUrl();
+        if (cssUrl == null) {
+            return;
+        }
+        if (!scene.getStylesheets().contains(cssUrl)) {
+            scene.getStylesheets().add(cssUrl);
+        }
+    }
+
+    private String resolveDarkThemeCssUrl() {
+        var resource = getClass().getResource(DARK_THEME_CSS_RESOURCE);
+        if (resource == null) {
+            return null;
+        }
+        return resource.toExternalForm();
     }
 
     private static <T> javafx.util.Callback<TableColumn<SearchRow, T>, TableCell<SearchRow, T>>
@@ -419,7 +581,6 @@ public final class MapsAroundYouGuiApp extends Application {
             return;
         }
 
-        // Validate numeric fields on the FX thread before spawning the worker.
         SearchRequest request;
         try {
             request = GuiSearchRequestParser.parse(
@@ -442,7 +603,6 @@ public final class MapsAroundYouGuiApp extends Application {
         resultsTable.getItems().clear();
         clearDetails();
 
-        // Execute search logic on a background thread; publish rows on success.
         Task<SearchResponse> task = new Task<>() {
             @Override
             protected SearchResponse call() {
@@ -473,7 +633,6 @@ public final class MapsAroundYouGuiApp extends Application {
     private void populateDetails(SearchRow row) {
         Objects.requireNonNull(row, "row");
 
-        // Listing details honor the current SearchLogic destination state set by the last search.
         ListingDetails details;
         try {
             details = searchService.getListingDetails(row.getListingId());
@@ -508,6 +667,7 @@ public final class MapsAroundYouGuiApp extends Application {
     private void setBusy(boolean busy, String message) {
         loadingIndicator.setVisible(busy);
         destinationComboBox.setDisable(busy);
+        settingsButton.setDisable(busy);
         maxRentField.setDisable(busy);
         maxCommuteField.setDisable(busy);
         maxTransfersField.setDisable(busy);
