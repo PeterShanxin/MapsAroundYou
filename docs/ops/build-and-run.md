@@ -1,12 +1,12 @@
 # Build and Run Guide
 
-## Current App Entry Point
+## Current App Entry Points
 
-The Week 8 scaffold ships with a Gradle-based Java CLI. No global Gradle installation is required because the repository includes the Gradle wrapper.
+The project ships with Gradle-based GUI and CLI entrypoints. No global Gradle installation is required because the repository includes the Gradle wrapper.
 
 ### Requirements
 
-- Java 21 or newer available through `JAVA_HOME` or `PATH`
+- Java 21 or newer (x86_64/AMD64) available through `JAVA_HOME` or `PATH`
 
 ### Build and Test
 
@@ -15,6 +15,14 @@ From the repository root:
 ```powershell
 .\gradlew test
 ```
+
+### Run the JavaFX GUI
+
+```powershell
+.\gradlew runGui
+```
+
+Use this entrypoint for the current desktop user flow.
 
 ### Run the Interactive CLI
 
@@ -28,12 +36,19 @@ Each search will prompt for:
 - destination id
 - max rent
 - max commute minutes
+- max transfers
+- max walking minutes
 - aircon requirement
+- result limit
+- sort mode
+- walk-dominant route toggle
+
+Blank interactive answers keep the value shown in brackets.
 
 ### Run the Flag-Driven CLI
 
 ```powershell
-.\gradlew run --args="search --destination D01 --max-rent 2200 --max-commute 45 --require-aircon"
+.\gradlew run --args="search --destination D01 --max-rent 2200 --max-commute 45 --max-transfers 1 --max-walk 10 --result-limit 5 --sort balanced --require-aircon --exclude-walk-dominant"
 ```
 
 Supported flags:
@@ -41,13 +56,28 @@ Supported flags:
 - `--destination <ID>`
 - `--max-rent <SGD>`
 - `--max-commute <minutes>`
+- `--max-transfers <count>`
+- `--max-walk <minutes>`
+- `--result-limit <count>`
+- `--sort <commute|rent|balanced>`
 - `--require-aircon`
+- `--exclude-walk-dominant`
 
 ### Help Output
 
 ```powershell
 .\gradlew run --args="--help"
 ```
+
+### Local Preferences
+
+Successful searches persist the last-used preferences to:
+
+```text
+<user-home>/.mapsaroundyou/user-preferences.properties
+```
+
+Missing or invalid preference files are ignored safely at startup.
 
 ## Offline Commute Data Regeneration
 

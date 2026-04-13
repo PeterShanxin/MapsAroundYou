@@ -50,7 +50,7 @@ public final class SearchRow {
     /**
      * @return {@code true} when the listing advertises air-conditioning
      */
-    public boolean isHasAircon() {
+    public boolean hasAircon() {
         return listing().hasAircon();
     }
 

@@ -5,7 +5,6 @@ import mapsaroundyou.model.DatasetMetadata;
 import mapsaroundyou.model.Destination;
 import mapsaroundyou.model.ListingDetails;
 import mapsaroundyou.model.SearchResult;
-import mapsaroundyou.model.TransportMode;
 import mapsaroundyou.model.UserPreferences;
 
 import java.util.List;
@@ -33,25 +32,7 @@ public interface SearchLogic {
      */
     DatasetMetadata getDatasetMetadata();
 
-    /**
-     * Sets the active destination used for commute lookups and ranking.
-     *
-     * @param destinationId non-blank destination identifier
-     * @throws mapsaroundyou.common.InvalidInputException if {@code destinationId} is null or blank
-     * @throws mapsaroundyou.common.DestinationNotFoundException if the id is unknown
-     */
-    void setDestination(String destinationId);
-
-    /**
-     * Updates affordability, commute cap, air-conditioning, and transport mode preferences.
-     *
-     * @param maxRent maximum monthly rent in SGD (non-negative)
-     * @param maxCommuteMinutes inclusive upper bound on commute time in minutes (at least 1)
-     * @param requireAircon when {@code true}, only listings with air-conditioning are considered
-     * @param transportMode commute mode to use for matrix lookup
-     * @throws mapsaroundyou.common.InvalidInputException if inputs are out of range or null mode
-     */
-    void setPreferences(int maxRent, int maxCommuteMinutes, boolean requireAircon, TransportMode transportMode);
+    void updatePreferences(UserPreferences preferences);
 
     /**
      * Filters, ranks, and returns the top shortlist for the current preferences.

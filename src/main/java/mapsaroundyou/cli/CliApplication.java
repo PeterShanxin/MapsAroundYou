@@ -1,12 +1,13 @@
 package mapsaroundyou.cli;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import mapsaroundyou.common.InvalidInputException;
 import mapsaroundyou.common.MapsAroundYouException;
 import mapsaroundyou.common.NoResultsException;
 import mapsaroundyou.logic.SearchLogic;
 import mapsaroundyou.model.Destination;
+import mapsaroundyou.model.SortMode;
 import mapsaroundyou.model.TransportMode;
+import mapsaroundyou.model.UserPreferences;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -97,25 +98,55 @@ public final class CliApplication {
 
         try (Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8)) {
             while (true) {
-                // Prompt loop: collect destination + filters, tolerate per-search failures, allow exit.
-                String destinationId = prompt(scanner, "Destination ID");
+                UserPreferences currentPreferences = searchLogic.getCurrentPreferences();
+                String destinationId = promptWithDefault(scanner, "Destination ID", currentPreferences.destinationId());
                 if (shouldExit(destinationId)) {
                     cliPrinter.printGoodbye();
                     return 0;
                 }
 
                 try {
-                    int maxRent = parseInteger(prompt(scanner, "Max rent (SGD)"), "Max rent");
-                    int maxCommute = parseInteger(prompt(scanner, "Max commute (minutes)"), "Max commute");
-                    boolean requireAircon = parseYesNo(prompt(scanner, "Require aircon? [y/N]"));
-
-                    SearchCommandArguments arguments = new SearchCommandArguments(
+                    UserPreferences preferences = new UserPreferences(
                             destinationId,
-                            maxRent,
-                            maxCommute,
-                            requireAircon
+                            promptIntegerWithDefault(scanner, "Max rent (SGD)", currentPreferences.maxRent(), 0),
+                            promptIntegerWithDefault(
+                                    scanner,
+                                    "Max commute (minutes)",
+                                    currentPreferences.maxCommuteMinutes(),
+                                    1
+                            ),
+                            promptIntegerWithDefault(
+                                    scanner,
+                                    "Max transfers",
+                                    currentPreferences.maxTransfers(),
+                                    0
+                            ),
+                            promptIntegerWithDefault(
+                                    scanner,
+                                    "Max walking time (minutes)",
+                                    currentPreferences.maxWalkMinutes(),
+                                    0
+                            ),
+                            promptYesNoWithDefault(
+                                    scanner,
+                                    "Require aircon?",
+                                    currentPreferences.requireAircon()
+                            ),
+                            TransportMode.PUBLIC_TRANSPORT,
+                            promptIntegerWithDefault(
+                                    scanner,
+                                    "Result limit",
+                                    currentPreferences.resultLimit(),
+                                    1
+                            ),
+                            promptSortModeWithDefault(scanner, currentPreferences.sortMode()),
+                            promptYesNoWithDefault(
+                                    scanner,
+                                    "Exclude walk-dominant routes?",
+                                    currentPreferences.excludeWalkDominantRoutes()
+                            )
                     );
-                    runSearch(arguments);
+                    runSearch(preferences);
                 } catch (NoResultsException exception) {
                     cliPrinter.printNoResults(exception.getMessage());
                 } catch (MapsAroundYouException exception) {
@@ -136,13 +167,28 @@ public final class CliApplication {
     }
 
     private int runSearch(SearchCommandArguments arguments) {
-        searchLogic.setDestination(arguments.destinationId());
-        searchLogic.setPreferences(
+        UserPreferences currentPreferences = searchLogic.getCurrentPreferences();
+        UserPreferences preferences = new UserPreferences(
+                arguments.destinationId(),
                 arguments.maxRent(),
                 arguments.maxCommuteMinutes(),
+                arguments.maxTransfers() == null
+                        ? currentPreferences.maxTransfers()
+                        : arguments.maxTransfers(),
+                arguments.maxWalkMinutes() == null
+                        ? currentPreferences.maxWalkMinutes()
+                        : arguments.maxWalkMinutes(),
                 arguments.requireAircon(),
-                TransportMode.PUBLIC_TRANSPORT
+                TransportMode.PUBLIC_TRANSPORT,
+                arguments.resultLimit() == null ? currentPreferences.resultLimit() : arguments.resultLimit(),
+                arguments.sortMode() == null ? currentPreferences.sortMode() : arguments.sortMode(),
+                arguments.excludeWalkDominantRoutes()
         );
+        return runSearch(preferences);
+    }
+
+    private int runSearch(UserPreferences preferences) {
+        searchLogic.updatePreferences(preferences);
         cliPrinter.printResults(searchLogic.generateShortlist());
         return 0;
     }
@@ -160,14 +206,57 @@ public final class CliApplication {
         }
     }
 
-    private static boolean parseYesNo(String rawValue) {
+    private static String promptWithDefault(Scanner scanner, String label, String defaultValue) {
+        String promptLabel = defaultValue == null || defaultValue.isBlank()
+                ? label
+                : label + " [" + defaultValue + "]";
+        String rawValue = prompt(scanner, promptLabel);
+        if (rawValue.isBlank()) {
+            if (defaultValue == null || defaultValue.isBlank()) {
+                throw new InvalidInputException(label + " is required.");
+            }
+            return defaultValue;
+        }
+        return rawValue;
+    }
+
+    private static int promptIntegerWithDefault(Scanner scanner, String label, int defaultValue, int minimumValue) {
+        int normalizedDefaultValue = Math.max(defaultValue, minimumValue);
+        int value = parseInteger(
+                promptWithDefault(scanner, label, Integer.toString(normalizedDefaultValue)),
+                label
+        );
+        if (value < minimumValue) {
+            throw new InvalidInputException(label + " must be at least " + minimumValue + ".");
+        }
+        return value;
+    }
+
+    private static boolean promptYesNoWithDefault(Scanner scanner, String label, boolean defaultValue) {
+        String defaultToken = defaultValue ? "y" : "n";
+        return parseYesNo(promptWithDefault(scanner, label + " [y/n]", defaultToken), label);
+    }
+
+    private static SortMode promptSortModeWithDefault(Scanner scanner, SortMode defaultValue) {
+        try {
+            return SortMode.fromCliValue(promptWithDefault(
+                    scanner,
+                    "Sort mode (commute/rent/balanced)",
+                    defaultValue.cliValue()
+            ));
+        } catch (IllegalArgumentException exception) {
+            throw new InvalidInputException(exception.getMessage());
+        }
+    }
+
+    private static boolean parseYesNo(String rawValue, String label) {
         if (rawValue.isBlank() || rawValue.equalsIgnoreCase("n") || rawValue.equalsIgnoreCase("no")) {
             return false;
         }
         if (rawValue.equalsIgnoreCase("y") || rawValue.equalsIgnoreCase("yes")) {
             return true;
         }
-        throw new InvalidInputException("Please answer y/yes or n/no for the aircon prompt.");
+        throw new InvalidInputException("Please answer y/yes or n/no for " + label + ".");
     }
 
     private static boolean shouldExit(String rawValue) {

@@ -6,6 +6,7 @@ import mapsaroundyou.model.DatasetMetadata;
 import mapsaroundyou.model.Destination;
 import mapsaroundyou.model.ListingDetails;
 import mapsaroundyou.model.SearchResult;
+import mapsaroundyou.model.UserPreferences;
 
 import java.util.List;
 import java.util.Objects;
@@ -52,13 +53,7 @@ public final class DefaultGuiSearchService implements GuiSearchService {
     public SearchResponse search(SearchRequest request) {
         Objects.requireNonNull(request, "request");
         return guard("search", () -> {
-            searchLogic.setDestination(request.destinationId());
-            searchLogic.setPreferences(
-                    request.maxRent(),
-                    request.maxCommuteMinutes(),
-                    request.requireAircon(),
-                    request.transportMode()
-            );
+            searchLogic.updatePreferences(request.toUserPreferences());
             List<SearchResult> results = searchLogic.generateShortlist();
             return new SearchResponse(searchLogic.getDatasetMetadata(), results);
         });
@@ -70,6 +65,14 @@ public final class DefaultGuiSearchService implements GuiSearchService {
     @Override
     public ListingDetails getListingDetails(String listingId) {
         return guard("loading listing details", () -> searchLogic.getListingDetails(listingId));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public UserPreferences getCurrentPreferences() {
+        return guard("loading preferences", () -> searchLogic.getCurrentPreferences());
     }
 
     /**

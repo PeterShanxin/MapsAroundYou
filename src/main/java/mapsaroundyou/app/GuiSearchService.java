@@ -3,6 +3,7 @@ package mapsaroundyou.app;
 import mapsaroundyou.model.DatasetMetadata;
 import mapsaroundyou.model.Destination;
 import mapsaroundyou.model.ListingDetails;
+import mapsaroundyou.model.UserPreferences;
 
 import java.util.List;
 
@@ -40,4 +41,11 @@ public interface GuiSearchService {
      * @return listing and optional commute estimate
      */
     ListingDetails getListingDetails(String listingId);
+
+    /**
+     * Loads the latest preference snapshot (including persisted values when available).
+     *
+     * @return preferences used to prefill the UI
+     */
+    UserPreferences getCurrentPreferences();
 }

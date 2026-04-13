@@ -11,7 +11,6 @@ import mapsaroundyou.model.Destination;
 import mapsaroundyou.model.ListingDetails;
 import mapsaroundyou.model.RentalListing;
 import mapsaroundyou.model.SearchResult;
-import mapsaroundyou.model.TransportMode;
 import mapsaroundyou.model.UserPreferences;
 import mapsaroundyou.service.CommuteEstimator;
 import mapsaroundyou.service.ListingFilter;
@@ -68,15 +67,7 @@ public class DefaultSearchLogic implements SearchLogic {
         this.commuteEstimator = commuteEstimator;
         this.listingRanker = listingRanker;
         this.routeAnalyzer = routeAnalyzer;
-        this.currentPreferences = new UserPreferences(
-                null,
-                0,
-                0,
-                false,
-                AppConfig.DEFAULT_TRANSPORT_MODE,
-                AppConfig.DEFAULT_RESULT_LIMIT,
-                false
-        );
+        this.currentPreferences = AppConfig.defaultUserPreferences();
     }
 
     /**
@@ -99,49 +90,48 @@ public class DefaultSearchLogic implements SearchLogic {
      * {@inheritDoc}
      */
     @Override
-    public void setDestination(String destinationId) {
-        if (destinationId == null || destinationId.isBlank()) {
-            throw new InvalidInputException("Destination id must not be blank.");
+    public void updatePreferences(UserPreferences preferences) {
+        if (preferences == null) {
+            throw new InvalidInputException("Preferences must not be null.");
         }
-        ensureDestinationExists(destinationId.trim());
-        currentPreferences = new UserPreferences(
-                destinationId.trim(),
-                currentPreferences.maxRent(),
-                currentPreferences.maxCommuteMinutes(),
-                currentPreferences.requireAircon(),
-                currentPreferences.transportMode(),
-                currentPreferences.resultLimit(),
-                currentPreferences.excludeWalkDominantRoutes()
-        );
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setPreferences(
-            int maxRent,
-            int maxCommuteMinutes,
-            boolean requireAircon,
-            TransportMode transportMode
-    ) {
-        if (maxRent < 0) {
+        if (preferences.maxRent() < 0) {
             throw new InvalidInputException("Maximum rent must be at least 0.");
         }
-        if (maxCommuteMinutes < 1) {
+        if (preferences.maxCommuteMinutes() < 1) {
             throw new InvalidInputException("Maximum commute must be at least 1 minute.");
         }
-        if (transportMode == null) {
+        if (preferences.maxTransfers() < 0) {
+            throw new InvalidInputException("Maximum transfers must be at least 0.");
+        }
+        if (preferences.maxWalkMinutes() < 0) {
+            throw new InvalidInputException("Maximum walk must be at least 0 minutes.");
+        }
+        if (preferences.transportMode() == null) {
             throw new InvalidInputException("Transport mode must not be null.");
         }
+        if (preferences.resultLimit() < 1) {
+            throw new InvalidInputException("Result limit must be at least 1.");
+        }
+        if (preferences.sortMode() == null) {
+            throw new InvalidInputException("Sort mode must not be null.");
+        }
+
+        String normalizedDestinationId = normalizeDestinationId(preferences.destinationId());
+        if (normalizedDestinationId != null) {
+            ensureDestinationExists(normalizedDestinationId);
+        }
+
         currentPreferences = new UserPreferences(
-                currentPreferences.destinationId(),
-                maxRent,
-                maxCommuteMinutes,
-                requireAircon,
-                transportMode,
-                AppConfig.DEFAULT_RESULT_LIMIT,
-                false
+                normalizedDestinationId,
+                preferences.maxRent(),
+                preferences.maxCommuteMinutes(),
+                preferences.maxTransfers(),
+                preferences.maxWalkMinutes(),
+                preferences.requireAircon(),
+                preferences.transportMode(),
+                preferences.resultLimit(),
+                preferences.sortMode(),
+                preferences.excludeWalkDominantRoutes()
         );
     }
 
@@ -169,6 +159,12 @@ public class DefaultSearchLogic implements SearchLogic {
             if (commute.totalMinutes() > currentPreferences.maxCommuteMinutes()) {
                 continue;
             }
+            if (commute.transfers() > currentPreferences.maxTransfers()) {
+                continue;
+            }
+            if (commute.walkMinutes() > currentPreferences.maxWalkMinutes()) {
+                continue;
+            }
             if (currentPreferences.excludeWalkDominantRoutes() && routeAnalyzer.isWalkDominant(commute)) {
                 continue;
             }
@@ -182,12 +178,13 @@ public class DefaultSearchLogic implements SearchLogic {
             results.add(new SearchResult(listing, commute, score));
         }
 
-        // 3) Deterministic sort, cap, and guard against empty output for the UI/CLI.
-        List<SearchResult> rankedResults = listingRanker.rank(results).stream()
+        List<SearchResult> rankedResults = listingRanker.rank(results, currentPreferences.sortMode()).stream()
                 .limit(currentPreferences.resultLimit())
                 .toList();
         if (rankedResults.isEmpty()) {
-            throw new NoResultsException("No listings match your filters. Try relaxing rent or commute limits.");
+            throw new NoResultsException(
+                    "No listings match your filters. Try relaxing your rent, commute, transfer, or walking limits."
+            );
         }
         return rankedResults;
     }
@@ -259,14 +256,13 @@ public class DefaultSearchLogic implements SearchLogic {
                         "Unknown destination. Please select a supported destination id."));
     }
 
-    /**
-     * Loads a listing by id with validation.
-     *
-     * @param listingId candidate id
-     * @return matching listing
-     * @throws InvalidInputException if {@code listingId} is null or blank
-     * @throws ListingNotFoundException if not present
-     */
+    private static String normalizeDestinationId(String destinationId) {
+        if (destinationId == null || destinationId.isBlank()) {
+            return null;
+        }
+        return destinationId.trim();
+    }
+
     private RentalListing getListing(String listingId) {
         if (listingId == null || listingId.isBlank()) {
             throw new InvalidInputException("Listing id must not be blank.");
