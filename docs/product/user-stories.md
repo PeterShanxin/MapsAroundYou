@@ -39,7 +39,7 @@
 - [ ] **US5 - Generate GUI Output**
   - **As a** renter, **I want** to see a clean output of the best matching listings in a display panel **so that** I can review my options.
   - **AC1:** System outputs the top N listings (default N=10) that pass all filters to the right display panel.
-  - **AC2:** Each unit card displays the rent, address, and commute summary.
+  - **AC2:** Each result row displays the rent, aircon status, and commute summary, including total commute, walking time, and transfers.
 
 ---
 
@@ -52,7 +52,7 @@
 
 - [ ] **US7 - Commute Summary Breakdown**
   - **As a** renter, **I want** to see the commute details split by transit and walking **so that** I understand the journey better.
-  - **AC1:** The output for each shortlisted item specifies "Transit Time" and "Walking Time".
+  - **AC1:** The output for each shortlisted item specifies "Transit Time", "Walking Time", and "Transfers".
 
 - [ ] **US8 - Set Persona Preset (Optional/Stretch)**
   - **As a** renter, **I want** to select a preset (Student vs. Worker) **so that** default time caps and budgets are automatically applied.

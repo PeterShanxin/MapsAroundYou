@@ -26,7 +26,7 @@ International students and new working professionals arriving in Singapore face 
 - Help users filter rental listings by commute time from a chosen supported destination.
 - Surface only listings within the user's rent budget, commute cap, and walking cap.
 - Let users choose shortlist size and sort mode while preserving deterministic ordering.
-- Provide a breakdown of transit vs. walking time for each shortlisted listing (V1.4).
+- Provide a breakdown of transit time, walking time, and transfers for each shortlisted listing (V1.4).
 - Deliver the product as a runnable offline JAR with a GUI.
 
 ### Non-Goals
@@ -104,7 +104,7 @@ As a renter, I want to see a clean output of the best matching listings in a dis
 
 **Acceptance Criteria:**
 - System outputs the top N listings (default N=10) that pass all filters to the right display panel.
-- Each listing card displays the rent, address, and commute summary.
+- Each listing card displays the rent, aircon status, and commute summary, including total commute, walking time, and transfers.
 - User can choose whether results are sorted by commute, rent, or a balanced score.
 
 ---
@@ -122,7 +122,7 @@ As a renter, I want the system to reject routes that are primarily walking so th
 As a renter, I want to see the commute details split by transit and walking so that I understand the journey better.
 
 **Acceptance Criteria:**
-- The output for each shortlisted item specifies "Transit Time" and "Walking Time".
+- The output for each shortlisted item specifies "Transit Time", "Walking Time", and "Transfers".
 
 #### US8 — Set Persona Preset *(Stretch)*
 As a renter, I want to select a preset (Student vs. Worker) so that default time caps and budgets are automatically applied.
@@ -167,14 +167,14 @@ As a renter, I want to select a preset (Student vs. Worker) so that default time
 | ID | Requirement |
 |----|-------------|
 | FR-14 | Shortlisted listings are ranked deterministically according to the selected sort mode, with stable tie-breakers. |
-| FR-15 | Results panel displays the top N listings (default N=10) with rent, address, and commute summary per card. |
-| FR-16 | User can click a listing to view full details including commute breakdown (V1.4). |
+| FR-15 | Results panel displays the top N listings (default N=10) with rent, aircon status, total commute, walking time, and transfers per row. |
+| FR-16 | User can click a listing to view full details including a split commute breakdown for total time, transit, walk, transfers, and fare (V1.4). |
 
 ### 7.4 Commute Breakdown (V1.4)
 
 | ID | Requirement |
 |----|-------------|
-| FR-17 | System provides transit time, walking time, number of transfers, and route stations for each listing. |
+| FR-17 | System provides transit time, walking time, number of transfers, and fare for each listing. |
 | FR-18 | System can reject listings where the walking ratio (`walkMinutes / totalMinutes`) is greater than or equal to the configured walk-dominant threshold when the user enables the filter. |
 
 ### 7.5 Data Freshness Notice

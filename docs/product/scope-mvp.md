@@ -14,7 +14,7 @@ The Smart Rental Search Algorithm is a desktop Java application designed to reve
 
 ## 3. Graphical User Interface (GUI) Requirements
 - [ ] **Left Input Panel (Constraints):** Contains text fields, dropdowns, and toggle switches for all user inputs (Destination, Max Rent, Max Commute Time, Air-Conditioning, Walking Tolerance).
-- [ ] **Right Display Panel (Results):** A scrollable list displaying the generated shortlist of rental units. Each unit card will show the rent, address, and a breakdown of the commute summary.
+- [ ] **Right Display Panel (Results):** A scrollable list displaying the generated shortlist of rental units. Each unit card will show the rent, aircon status, and the key commute values users filter on, including total commute, walking time, and transfers.
 
 ## 4. Functional Requirements (MVP Scope)
 
@@ -29,12 +29,12 @@ The Smart Rental Search Algorithm is a desktop Java application designed to reve
 ### 4.3 Anti-Walk-Dominant Routing Logic
 - [ ] **REQ-3A (Walking Cap):** The user must be able to set an acceptable walking time per trip segment (defaulting to 10 minutes).
 - [ ] **REQ-3B (Route Rejection):** The algorithm must implement a sanity rule to reject routes where the walking time ratio is disproportionately high (e.g., walking ratio >= 0.6 of total time), ensuring practical public transport suggestions.
-- [ ] **REQ-4A (Result Controls):** The user must be able to set the shortlist size and choose a supported sort mode.
-- [ ] **REQ-4B (Preference Persistence):** The application should restore the last successful search preferences locally on startup.
+- [ ] **REQ-3C (Result Controls):** The user must be able to set the shortlist size and choose a supported sort mode.
+- [ ] **REQ-3D (Preference Persistence):** The application should restore the last successful search preferences locally on startup.
 
 ### 4.4 Output and Display
 - [ ] **REQ-4A (Shortlist Generation):** The system must deterministically output a shortlist of the top N listings (default N=10) that pass all filters.
-- [ ] **REQ-4B (Commute Summary):** The GUI must display the commute details for each shortlisted listing, explicitly separating "Transit Time" and "Walking Time".
+- [ ] **REQ-4B (Commute Summary):** The GUI must display the commute details for each shortlisted listing, explicitly separating "Transit Time", "Walking Time", and "Transfers".
 
 ## 5. Data & Architecture Strategy (JAR Constraints)
 - [ ] **Static Listing Database:** Rental unit data will be stored locally within the application package (e.g., a bundled listings.json or listings.csv file containing 50-100 sample units with attributes like rent, coordinates/nearest station, and aircon availability).

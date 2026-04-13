@@ -40,6 +40,14 @@ public final class SearchRow {
         return commute().totalMinutes();
     }
 
+    public int getWalkMinutes() {
+        return commute().walkMinutes();
+    }
+
+    public int getTransfers() {
+        return commute().transfers();
+    }
+
     public double getScore() {
         return result.score();
     }

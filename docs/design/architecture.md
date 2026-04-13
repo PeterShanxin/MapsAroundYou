@@ -15,9 +15,9 @@
 ┌─────────────────────────────────────────────────────────────────┐
 │                         UI (GUI)                                 │
 │  • Destination selection (supported destination picker)          │
-│  • Filter inputs (max rent, max commute, max walk, aircon, sort) │
-│  • Results list/table                                            │
-│  • Details panel/dialog (V1.4: commute breakdown)                │
+│  • Filter inputs (max rent, max commute, max transfers, max walk, aircon, sort) │
+│  • Results list/table (rent, commute, walk, transfers, aircon)  │
+│  • Details panel/dialog (V1.4: split commute breakdown)          │
 └────────────────────────────┬────────────────────────────────────┘
                              │ User actions → Logic calls
                              │ Rendered SearchResultViewModel[]
@@ -50,7 +50,7 @@
 - Collects inputs from user
 - Displays ranked results
 - Restores last-used preferences on startup
-- Displays listing details + commute breakdown (V1.4)
+- Displays listing details + split commute breakdown (total, transit, walk, transfers, fare)
 
 ### Logic
 

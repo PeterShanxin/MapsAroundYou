@@ -51,9 +51,9 @@ See [Architecture Overview](./architecture.md) for details.
 **Responsibilities**
 
 - Destination selection UI (supported destination picker)
-- Filter inputs: max rent, max commute mins, max walk mins, require aircon, result limit, sort mode, walk-dominant toggle
-- Results list/table: top matches + basic fields
-- Details panel/dialog: full listing + commute breakdown (V1.4)
+- Filter inputs: max rent, max commute mins, max transfers, max walk mins, require aircon, result limit, sort mode, walk-dominant toggle
+- Results list/table: top matches + rent, total commute, walk time, transfers, aircon, and match score
+- Details panel/dialog: full listing + split commute breakdown (V1.4)
 
 **Outputs**
 
@@ -177,7 +177,7 @@ flowchart TD
 1. User opens listing details (click result).
 2. Logic returns CommuteEstimate + route summary.
 3. `RouteAnalyzer.summarize()` formats the transit, walking, transfer, and total-time breakdown.
-4. UI displays breakdown: transit vs walking, transfers, total time.
+4. UI displays breakdown: total time, transit, walking, transfers, and fare.
 
 ```mermaid
 flowchart TD
