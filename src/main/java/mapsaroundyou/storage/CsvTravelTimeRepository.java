@@ -11,7 +11,6 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import mapsaroundyou.common.DataLoadException;
 import mapsaroundyou.common.DatasetIntegrityException;
 import mapsaroundyou.common.DatasetIOException;
 import mapsaroundyou.model.CommuteEstimate;
@@ -124,7 +123,7 @@ public final class CsvTravelTimeRepository implements TravelTimeRepository {
 
                 int ptTransfers = CsvSupport.parseRequiredInt(record, "pt_transfers", sourceName);
                 if (ptTransfers < 0) {
-                    throw new DataLoadException("Invalid pt_transfers value (must be non-negative) in "
+                    throw new DatasetIntegrityException("Invalid pt_transfers value (must be non-negative) in "
                             + sourceName + " for " + originNodeId + " -> " + destinationId + ": " + ptTransfers);
                 }
 

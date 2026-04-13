@@ -1,5 +1,6 @@
 package mapsaroundyou.gui;
 
+import mapsaroundyou.app.SearchRequest;
 import mapsaroundyou.common.InvalidInputException;
 import mapsaroundyou.model.Destination;
 import mapsaroundyou.model.SortMode;

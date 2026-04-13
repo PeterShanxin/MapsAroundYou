@@ -32,6 +32,13 @@ public interface SearchLogic {
      */
     DatasetMetadata getDatasetMetadata();
 
+    /**
+     * Replaces the active search preferences.
+     *
+     * @param preferences complete preference snapshot (non-null)
+     * @throws mapsaroundyou.common.InvalidInputException if values are out of range or inconsistent
+     * @throws mapsaroundyou.common.DestinationNotFoundException if the destination id is unknown
+     */
     void updatePreferences(UserPreferences preferences);
 
     /**

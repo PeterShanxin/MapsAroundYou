@@ -1,5 +1,4 @@
 package mapsaroundyou.cli;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import mapsaroundyou.common.InvalidInputException;
 import mapsaroundyou.common.MapsAroundYouException;
 import mapsaroundyou.common.NoResultsException;
@@ -33,10 +32,6 @@ public final class CliApplication {
      * @param commandParser argv parser
      * @param cliPrinter stdout/stderr writer
      */
-    @SuppressFBWarnings(
-            value = "EI_EXPOSE_REP2",
-            justification = "CliApplication composes shared services and does not expose mutable collaborator state."
-    )
     public CliApplication(SearchLogic searchLogic, CliCommandParser commandParser, CliPrinter cliPrinter) {
         this.searchLogic = searchLogic;
         this.commandParser = commandParser;

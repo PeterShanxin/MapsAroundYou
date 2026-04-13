@@ -34,6 +34,11 @@ public final class AppConfig {
     private AppConfig() {
     }
 
+    /**
+     * Creates default preferences used on first run (before user changes are persisted).
+     *
+     * @return default preference snapshot
+     */
     public static UserPreferences defaultUserPreferences() {
         return new UserPreferences(
                 null,
@@ -49,6 +54,11 @@ public final class AppConfig {
         );
     }
 
+    /**
+     * Returns the filesystem location used to store last-used preferences for the current user.
+     *
+     * @return preference file path under the user home directory
+     */
     public static Path userPreferencesPath() {
         return Paths.get(System.getProperty("user.home"), ".mapsaroundyou", "user-preferences.properties");
     }

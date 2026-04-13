@@ -30,6 +30,11 @@ public record SearchRequest(
         SortMode sortMode,
         boolean excludeWalkDominantRoutes
 ) {
+    /**
+     * Converts this request into a {@link UserPreferences} snapshot for the domain logic layer.
+     *
+     * @return preferences equivalent to this request
+     */
     public UserPreferences toUserPreferences() {
         return new UserPreferences(
                 destinationId,

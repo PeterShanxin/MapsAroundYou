@@ -13,6 +13,12 @@ public final class GuiErrorTranslator {
     private GuiErrorTranslator() {
     }
 
+    /**
+     * Produces a user-facing message for errors thrown by the app/logic layers.
+     *
+     * @param throwable exception or error raised by a background task
+     * @return concise message suitable for the GUI status bar
+     */
     public static String toUserMessage(Throwable throwable) {
         if (throwable == null) {
             return "Unknown error.";

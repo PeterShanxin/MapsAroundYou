@@ -15,6 +15,12 @@ public final class GuiTextFormatter {
     private GuiTextFormatter() {
     }
 
+    /**
+     * Formats a destination for combo-box display.
+     *
+     * @param destination destination payload (nullable)
+     * @return human-friendly label
+     */
     public static String formatDestination(Destination destination) {
         if (destination == null) {
             return "";
@@ -33,6 +39,12 @@ public final class GuiTextFormatter {
         return destination.name() + suffix;
     }
 
+    /**
+     * Formats dataset metadata for the header line.
+     *
+     * @param metadata metadata payload (nullable)
+     * @return human-friendly description
+     */
     public static String formatDatasetMetadata(DatasetMetadata metadata) {
         if (metadata == null) {
             return "";
@@ -46,6 +58,12 @@ public final class GuiTextFormatter {
         return "Dataset last updated: " + updated + " • " + source;
     }
 
+    /**
+     * Formats a commute breakdown for the listing details section.
+     *
+     * @param commute commute payload
+     * @return human-friendly breakdown
+     */
     public static String formatCommute(CommuteEstimate commute) {
         return commute.totalMinutes()
                 + " min total ("
@@ -56,6 +74,12 @@ public final class GuiTextFormatter {
                 + ")";
     }
 
+    /**
+     * Normalizes optional free-text fields for the details pane.
+     *
+     * @param value optional text
+     * @return {@code "-"} when blank; otherwise the original value
+     */
     public static String formatOptionalText(String value) {
         if (value == null || value.isBlank()) {
             return "-";

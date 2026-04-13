@@ -20,6 +20,9 @@ public final class UiSettingsStore {
 
     private final Preferences preferences;
 
+    /**
+     * Creates a settings store backed by the current user's preference node.
+     */
     public UiSettingsStore() {
         this(Preferences.userNodeForPackage(UiSettingsStore.class));
     }
@@ -28,6 +31,11 @@ public final class UiSettingsStore {
         this.preferences = Objects.requireNonNull(preferences, "preferences");
     }
 
+    /**
+     * Loads the last-selected persona preset.
+     *
+     * @return stored preset, or {@link PersonaPreset#NEW_USER} when unset/invalid
+     */
     public PersonaPreset loadPersonaPreset() {
         String stored;
         try {
@@ -46,6 +54,11 @@ public final class UiSettingsStore {
         }
     }
 
+    /**
+     * Persists the selected persona preset.
+     *
+     * @param preset preset to store
+     */
     public void savePersonaPreset(PersonaPreset preset) {
         Objects.requireNonNull(preset, "preset");
         try {
@@ -55,6 +68,11 @@ public final class UiSettingsStore {
         }
     }
 
+    /**
+     * Returns whether dark mode is enabled.
+     *
+     * @return {@code true} if enabled
+     */
     public boolean isDarkModeEnabled() {
         try {
             return preferences.getBoolean(KEY_DARK_MODE_ENABLED, false);
@@ -63,6 +81,11 @@ public final class UiSettingsStore {
         }
     }
 
+    /**
+     * Persists the dark mode toggle value.
+     *
+     * @param enabled whether dark mode is enabled
+     */
     public void setDarkModeEnabled(boolean enabled) {
         try {
             preferences.putBoolean(KEY_DARK_MODE_ENABLED, enabled);

@@ -28,6 +28,13 @@ public class ListingRanker {
             .thenComparingInt(result -> result.listing().monthlyRent())
             .thenComparing(result -> result.listing().listingId());
 
+    /**
+     * Sorts results deterministically based on the chosen {@link SortMode}.
+     *
+     * @param results scored candidates
+     * @param sortMode requested ordering strategy
+     * @return sorted immutable list
+     */
     public List<SearchResult> rank(List<SearchResult> results, SortMode sortMode) {
         Comparator<SearchResult> comparator = switch (sortMode) {
         case COMMUTE -> COMMUTE_COMPARATOR;

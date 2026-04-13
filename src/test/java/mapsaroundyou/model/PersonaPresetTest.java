@@ -2,7 +2,7 @@ package mapsaroundyou.model;
 
 import mapsaroundyou.common.InvalidInputException;
 import mapsaroundyou.gui.GuiSearchRequestParser;
-import mapsaroundyou.gui.SearchRequest;
+import mapsaroundyou.app.SearchRequest;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
