@@ -55,6 +55,7 @@ final class CsvSupport {
      */
     static CSVParser openParser(ReaderSupplier readerSupplier, String sourceName, String... requiredHeaders) {
         Reader reader = null;
+        CSVParser parser = null;
         try {
             reader = readerSupplier.open();
             CSVFormat format = CSVFormat.DEFAULT.builder()
@@ -62,10 +63,16 @@ final class CsvSupport {
                     .setSkipHeaderRecord(true)
                     .setTrim(true)
                     .get();
-            CSVParser parser = format.parse(reader);
-            validateHeaders(parser.getHeaderMap(), sourceName, requiredHeaders);
+            parser = format.parse(reader);
+            try {
+                validateHeaders(parser.getHeaderMap(), sourceName, requiredHeaders);
+            } catch (RuntimeException exception) {
+                closeQuietly(parser, sourceName);
+                throw exception;
+            }
             return parser;
         } catch (IOException exception) {
+            closeQuietly(parser, sourceName);
             closeQuietly(reader, sourceName);
             throw new DatasetIOException("Failed to read dataset: " + sourceName, exception);
         }
@@ -135,6 +142,18 @@ final class CsvSupport {
             reader.close();
         } catch (IOException exception) {
             LOGGER.log(Level.WARNING, "Failed to close reader after error opening dataset: " + sourceName, exception);
+        }
+    }
+
+    /** Closes parsers after failures without masking the original error. */
+    private static void closeQuietly(CSVParser parser, String sourceName) {
+        if (parser == null) {
+            return;
+        }
+        try {
+            parser.close();
+        } catch (IOException exception) {
+            LOGGER.log(Level.WARNING, "Failed to close parser after error opening dataset: " + sourceName, exception);
         }
     }
 }
