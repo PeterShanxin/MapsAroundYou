@@ -50,6 +50,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
+/**
+ * JavaFX GUI entry point for MapsAroundYou.
+ *
+ * <p>Bootstraps the UI, loads destination/metadata via {@link GuiSearchService}, and renders search
+ * results plus listing details.
+ */
 public final class MapsAroundYouGuiApp extends Application {
     private static final int MIN_WIDTH = 1000;
     private static final int MIN_HEIGHT = 600;

@@ -2,7 +2,7 @@
 
 MapsAroundYou is an **offline smart rental search** app that helps you shortlist rental listings using a bundled local dataset (listings + precomputed commute times). It’s for users who want **fast, repeatable filtering** (rent/commute/walk/aircon) without relying on live APIs.
 
-![Main window screenshot](images/main-window.png)
+![MapsAroundYou logo](../src/main/resources/mapsaroundyou/gui/MapsAroundYou_Logo.png)
 
 ## Table of Contents
 
