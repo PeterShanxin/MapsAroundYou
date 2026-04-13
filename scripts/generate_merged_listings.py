@@ -37,6 +37,7 @@ TRANSIT_HEADERS = [
     "pt_bus",
     "pt_rail",
     "pt_transit",
+    "pt_transfers",
     "pt_fare",
     "drive_total",
     "cycle_total",
@@ -338,6 +339,17 @@ def estimate_transit_metrics(distance_km: float, rng: random.Random) -> dict[str
         pt_bus = max(0, pt_transit - pt_rail)
         pt_total = pt_walk + pt_transit + rng.randint(4, 10)
 
+    if pt_transit <= 0:
+        pt_transfers = 0
+    elif effective_km <= 4.0:
+        pt_transfers = 0
+    elif effective_km <= 10.0:
+        pt_transfers = 1
+    elif effective_km <= 18.0:
+        pt_transfers = 2
+    else:
+        pt_transfers = 3
+
     fare = estimate_fare(effective_km, pt_transit)
     return {
         "pt_total": pt_total,
@@ -345,6 +357,7 @@ def estimate_transit_metrics(distance_km: float, rng: random.Random) -> dict[str
         "pt_bus": pt_bus,
         "pt_rail": pt_rail,
         "pt_transit": pt_transit,
+        "pt_transfers": pt_transfers,
         "pt_fare": fare,
         "drive_total": drive_total,
         "cycle_total": cycle_total,
