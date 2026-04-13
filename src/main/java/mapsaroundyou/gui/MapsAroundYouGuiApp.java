@@ -46,19 +46,19 @@ public final class MapsAroundYouGuiApp extends Application {
     private static final int MIN_WIDTH = 1000;
     private static final int MIN_HEIGHT = 600;
     private static final int CONTROLS_PANEL_WIDTH = 340;
-    private static final int RESULTS_TABLE_MIN_WIDTH = 560;
-    private static final int LISTING_COLUMN_MIN_WIDTH = 210;
-    private static final int RENT_COLUMN_MIN_WIDTH = 90;
-    private static final int COMMUTE_COLUMN_MIN_WIDTH = 90;
-    private static final int WALK_COLUMN_MIN_WIDTH = 80;
-    private static final int TRANSFERS_COLUMN_MIN_WIDTH = 90;
-    private static final int AIRCON_COLUMN_MIN_WIDTH = 70;
-    private static final double LISTING_COLUMN_WIDTH_RATIO = 0.38d;
+    private static final int RESULTS_TABLE_MIN_WIDTH = 500;
+    private static final int LISTING_COLUMN_MIN_WIDTH = 180;
+    private static final int RENT_COLUMN_MIN_WIDTH = 80;
+    private static final int COMMUTE_COLUMN_MIN_WIDTH = 80;
+    private static final int WALK_COLUMN_MIN_WIDTH = 70;
+    private static final int TRANSFERS_COLUMN_MIN_WIDTH = 80;
+    private static final int AIRCON_COLUMN_MIN_WIDTH = 55;
+    private static final double LISTING_COLUMN_WIDTH_RATIO = 0.40d;
     private static final double RENT_COLUMN_WIDTH_RATIO = 0.14d;
     private static final double COMMUTE_COLUMN_WIDTH_RATIO = 0.14d;
     private static final double WALK_COLUMN_WIDTH_RATIO = 0.12d;
     private static final double TRANSFERS_COLUMN_WIDTH_RATIO = 0.13d;
-    private static final double AIRCON_COLUMN_WIDTH_RATIO = 0.09d;
+    private static final double AIRCON_COLUMN_WIDTH_RATIO = 0.07d;
     private static final int DETAILS_PANEL_HEIGHT = 220;
     private static final int DETAILS_LABEL_WIDTH = 92;
 
@@ -216,7 +216,6 @@ public final class MapsAroundYouGuiApp extends Application {
 
         VBox box = new VBox(resultsTable);
         VBox.setVgrow(resultsTable, Priority.ALWAYS);
-        box.setPadding(new Insets(0, 12, 0, 0));
         return box;
     }
 
