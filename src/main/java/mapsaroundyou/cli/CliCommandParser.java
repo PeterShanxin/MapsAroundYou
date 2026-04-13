@@ -1,6 +1,7 @@
 package mapsaroundyou.cli;
 
 import mapsaroundyou.common.InvalidInputException;
+import mapsaroundyou.model.SortMode;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +14,10 @@ public class CliCommandParser {
             "--destination",
             "--max-rent",
             "--max-commute",
-            "--max-transfers"
+            "--max-transfers",
+            "--max-walk",
+            "--result-limit",
+            "--sort"
     );
 
     public ParsedCommand parse(String[] args) {
@@ -40,11 +44,16 @@ public class CliCommandParser {
     private SearchCommandArguments parseSearchArguments(String[] args) {
         Map<String, String> options = new HashMap<>();
         boolean requireAircon = false;
+        boolean excludeWalkDominantRoutes = false;
 
         for (int index = 1; index < args.length; index++) {
             String token = args[index];
             if ("--require-aircon".equals(token)) {
                 requireAircon = true;
+                continue;
+            }
+            if ("--exclude-walk-dominant".equals(token)) {
+                excludeWalkDominantRoutes = true;
                 continue;
             }
             if (!token.startsWith("--")) {
@@ -62,8 +71,21 @@ public class CliCommandParser {
         String destinationId = requireOption(options, "--destination");
         int maxRent = parsePositiveOrZeroInt(requireOption(options, "--max-rent"), "--max-rent");
         int maxCommute = parsePositiveInt(requireOption(options, "--max-commute"), "--max-commute");
-        int maxTransfers = parsePositiveOrZeroInt(requireOption(options, "--max-transfers"), "--max-transfers");
-        return new SearchCommandArguments(destinationId, maxRent, maxCommute, maxTransfers, requireAircon);
+        Integer maxTransfers = parseOptionalPositiveOrZeroInt(options.get("--max-transfers"), "--max-transfers");
+        Integer maxWalkMinutes = parseOptionalPositiveOrZeroInt(options.get("--max-walk"), "--max-walk");
+        Integer resultLimit = parseOptionalPositiveInt(options.get("--result-limit"), "--result-limit");
+        SortMode sortMode = parseOptionalSortMode(options.get("--sort"));
+        return new SearchCommandArguments(
+                destinationId,
+                maxRent,
+                maxCommute,
+                maxTransfers,
+                maxWalkMinutes,
+                requireAircon,
+                resultLimit,
+                sortMode,
+                excludeWalkDominantRoutes
+        );
     }
 
     private static String requireOption(Map<String, String> options, String optionName) {
@@ -88,6 +110,31 @@ public class CliCommandParser {
             throw new InvalidInputException(optionName + " must be at least 0.");
         }
         return value;
+    }
+
+    private static Integer parseOptionalPositiveInt(String rawValue, String optionName) {
+        if (rawValue == null) {
+            return null;
+        }
+        return parsePositiveInt(rawValue, optionName);
+    }
+
+    private static Integer parseOptionalPositiveOrZeroInt(String rawValue, String optionName) {
+        if (rawValue == null) {
+            return null;
+        }
+        return parsePositiveOrZeroInt(rawValue, optionName);
+    }
+
+    private static SortMode parseOptionalSortMode(String rawValue) {
+        if (rawValue == null || rawValue.isBlank()) {
+            return null;
+        }
+        try {
+            return SortMode.fromCliValue(rawValue);
+        } catch (IllegalArgumentException exception) {
+            throw new InvalidInputException(exception.getMessage());
+        }
     }
 
     private static int parseInteger(String rawValue, String optionName) {

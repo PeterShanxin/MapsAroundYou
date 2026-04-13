@@ -1,14 +1,5 @@
 package mapsaroundyou.gui;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import org.junit.jupiter.api.Test;
-
 import mapsaroundyou.logic.SearchLogic;
 import mapsaroundyou.model.CommuteEstimate;
 import mapsaroundyou.model.DatasetMetadata;
@@ -16,8 +7,19 @@ import mapsaroundyou.model.Destination;
 import mapsaroundyou.model.ListingDetails;
 import mapsaroundyou.model.RentalListing;
 import mapsaroundyou.model.SearchResult;
+import mapsaroundyou.model.SortMode;
 import mapsaroundyou.model.TransportMode;
 import mapsaroundyou.model.UserPreferences;
+
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class GuiSearchServiceTest {
     @Test
@@ -37,15 +39,21 @@ class GuiSearchServiceTest {
         RecordingSearchLogic searchLogic = new RecordingSearchLogic();
         GuiSearchService service = new GuiSearchService(searchLogic);
 
-        SearchRequest request = new SearchRequest("D01", 2200, 45, 1, true, TransportMode.PUBLIC_TRANSPORT);
+        SearchRequest request = new SearchRequest(
+                "D01",
+                2200,
+                45,
+                1,
+                10,
+                true,
+                TransportMode.PUBLIC_TRANSPORT,
+                5,
+                SortMode.BALANCED,
+                true
+        );
         SearchResponse response = service.search(request);
 
-        assertEquals("D01", searchLogic.destinationId);
-        assertEquals(2200, searchLogic.maxRent);
-        assertEquals(45, searchLogic.maxCommuteMinutes);
-        assertEquals(1, searchLogic.maxTransfers);
-        assertEquals(true, searchLogic.requireAircon);
-        assertEquals(TransportMode.PUBLIC_TRANSPORT, searchLogic.transportMode);
+        assertEquals(request.toUserPreferences(), searchLogic.updatedPreferences);
         assertEquals(searchLogic.searchResults, response.results());
         assertEquals(searchLogic.datasetMetadata, response.datasetMetadata());
     }
@@ -81,6 +89,14 @@ class GuiSearchServiceTest {
         assertEquals(searchLogic.listingDetails, details);
     }
 
+    @Test
+    void getCurrentPreferences_delegatesToSearchLogic() {
+        RecordingSearchLogic searchLogic = new RecordingSearchLogic();
+        GuiSearchService service = new GuiSearchService(searchLogic);
+
+        assertEquals(searchLogic.currentPreferences, service.getCurrentPreferences());
+    }
+
     private static final class RecordingSearchLogic implements SearchLogic {
         private final List<Destination> supportedDestinations =
                 List.of(new Destination("D01", "NUS", "University", "Kent Ridge", "117575"));
@@ -95,12 +111,8 @@ class GuiSearchServiceTest {
         private final ListingDetails listingDetails =
                 new ListingDetails(result.listing(), Optional.of(result.commute()));
 
-        private String destinationId;
-        private int maxRent;
-        private int maxCommuteMinutes;
-        private int maxTransfers;
-        private boolean requireAircon;
-        private TransportMode transportMode;
+        private UserPreferences currentPreferences = UserPreferences.defaults();
+        private UserPreferences updatedPreferences;
 
         @Override
         public List<Destination> getSupportedDestinations() {
@@ -113,17 +125,9 @@ class GuiSearchServiceTest {
         }
 
         @Override
-        public void setDestination(String destinationId) {
-            this.destinationId = destinationId;
-        }
-
-        @Override
-        public void setPreferences(UserPreferences preferences) {
-            this.maxRent = preferences.maxRent();
-            this.maxCommuteMinutes = preferences.maxCommuteMinutes();
-            this.maxTransfers = preferences.maxTransfers();
-            this.requireAircon = preferences.requireAircon();
-            this.transportMode = preferences.transportMode();
+        public void updatePreferences(UserPreferences preferences) {
+            updatedPreferences = preferences;
+            currentPreferences = preferences;
         }
 
         @Override
@@ -143,7 +147,7 @@ class GuiSearchServiceTest {
 
         @Override
         public UserPreferences getCurrentPreferences() {
-            throw new UnsupportedOperationException();
+            return currentPreferences;
         }
     }
 }

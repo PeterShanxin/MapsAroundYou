@@ -25,7 +25,7 @@ Interactive mode now stays open for repeated searches until the user types `exit
 Run the flag-driven search mode:
 
 ```powershell
-.\gradlew run --args="search --destination D01 --max-rent 2200 --max-commute 45 --max-transfers 1 --require-aircon"
+.\gradlew run --args="search --destination D01 --max-rent 2200 --max-commute 45 --max-transfers 1 --max-walk 10 --result-limit 5 --sort balanced --require-aircon --exclude-walk-dominant"
 ```
 
 Run the local quality gate:
@@ -40,6 +40,7 @@ Run the local quality gate:
 - GUI startup is available through the `runGui` Gradle task.
 - The codebase is organized into `storage`, `service`, `logic`, and `cli` layers so GUI work can plug in later.
 - Runtime data stays local under `src/main/resources/commute_data/`.
+- Last-used search preferences are stored locally under the current user's home directory.
 
 ## Contributing
 
@@ -63,6 +64,4 @@ See [docs/development/fork-workflow.md](docs/development/fork-workflow.md) for d
 
 ## Offline Data Generation
 
-Use the unified offline generator at `scripts/generate_merged_listings.py` to append data to `origin_nodes.csv`, `listings.csv`, and `transit_matrix.csv` in one run (no API token required, uses distance-based estimation instead of live routing APIs so commute times are approximate).
-
-See [docs/development/DATA_GENERATION_GUIDE.md](docs/development/DATA_GENERATION_GUIDE.md) for random/manual location modes and usage examples.
+The offline commute matrix generator uses a teammate-local OneMap token via `ONEMAP_TOKEN`. See [docs/ops/build-and-run.md](docs/ops/build-and-run.md) for token setup and regeneration steps.
