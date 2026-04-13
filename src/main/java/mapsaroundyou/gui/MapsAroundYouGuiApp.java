@@ -347,7 +347,15 @@ public final class MapsAroundYouGuiApp extends Application {
         matchColumn.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(cell.getValue().getScore()));
         matchColumn.setMinWidth(SCORE_COLUMN_MIN_WIDTH);
         matchColumn.prefWidthProperty().bind(resultsTable.widthProperty().multiply(SCORE_COLUMN_WIDTH_RATIO));
-        matchColumn.setCellFactory(createCenteredCellFactory(item -> String.format("%.3f", item.doubleValue())));
+        matchColumn.setCellFactory(createCenteredCellFactory(item -> formatMatchScore(item.doubleValue())));
+    }
+
+    private static String formatMatchScore(double score) {
+        if (!Double.isFinite(score)) {
+            return "-";
+        }
+        double percent = score * 100.0d;
+        return String.format("%.1f%%", percent);
     }
 
     private void configureInteractions() {
@@ -646,7 +654,7 @@ public final class MapsAroundYouGuiApp extends Application {
         detailsRoomType.setText(details.listing().roomType());
         detailsRent.setText("SGD " + details.listing().monthlyRent());
         detailsAircon.setText(details.listing().hasAircon() ? "Yes" : "No");
-        detailsScore.setText(String.format("%.3f", row.getScore()));
+        detailsScore.setText(formatMatchScore(row.getScore()));
         detailsSource.setText(details.listing().sourcePlatform());
         detailsNotes.setText(GuiTextFormatter.formatOptionalText(details.listing().notes()));
         detailsCommute.setText(GuiTextFormatter.formatCommute(row.commute()));
