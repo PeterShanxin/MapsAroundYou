@@ -50,9 +50,8 @@ public final class CliApplication {
      * @return {@code 0} on success, {@code 1} on user error or unexpected failure
      */
     public int run(String[] args) {
-        cliPrinter.printBanner(searchLogic.getDatasetMetadata());
-
         try {
+            cliPrinter.printBanner(searchLogic.getDatasetMetadata());
             ParsedCommand parsedCommand = commandParser.parse(args);
             return switch (parsedCommand.commandType()) {
             case HELP -> runHelp();
