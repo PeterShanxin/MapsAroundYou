@@ -12,13 +12,13 @@ This document specifies the operations exposed by the Logic layer for the UI. Al
 
 | Operation | Parameters | Description |
 |-----------|------------|-------------|
-| `updatePreferences(preferences)` | `preferences: UserPreferences` | Replaces the active search preferences, including destination, filters, result limit, sort mode, and walk-dominant toggle |
+| `updatePreferences(preferences)` | `preferences: UserPreferences` | Replaces the active search preferences, including destination, max rent, commute, transfers, walking cap, result limit, sort mode, and walk-dominant toggle |
 
 ### Search
 
 | Operation | Returns | Description |
 |-----------|---------|-------------|
-| `generateShortlist()` | `List<SearchResult>` | Executes full pipeline: load listings → filter by rent/aircon → estimate commute → reject over-max-commute, over-max-walk, and optionally walk-dominant routes → rank, sort, and truncate. Returns ranked results. |
+| `generateShortlist()` | `List<SearchResult>` | Executes full pipeline: load listings → filter by rent/aircon → estimate commute → reject over-max-commute, over-max-transfers, over-max-walk, and optionally walk-dominant routes → rank, sort, and truncate. Returns ranked results. |
 
 ### Details
 
@@ -70,7 +70,7 @@ These are used by Logic; not directly called by UI.
 | `ListingDetails` | Full `RentalListing` + optional commute breakdown |
 | `CommuteEstimate` | `totalMinutes`, `transitMinutes`, `walkMinutes`, `transfers`, `routeStations` |
 | `CommuteSummary` | Human-readable breakdown for UI |
-| `UserPreferences` | `destinationId`, `maxRent`, `maxCommuteMinutes`, `maxWalkMinutes`, `requireAircon`, `transportMode`, `resultLimit`, `sortMode`, `excludeWalkDominantRoutes` |
+| `UserPreferences` | `destinationId`, `maxRent`, `maxCommuteMinutes`, `maxTransfers`, `maxWalkMinutes`, `requireAircon`, `transportMode`, `resultLimit`, `sortMode`, `excludeWalkDominantRoutes` |
 
 ---
 
@@ -92,7 +92,7 @@ Logic centralizes all error handling. All exceptions are caught and converted to
 
 | Operation | Validation Rule |
 |-----------|----------------|
-| `updatePreferences(preferences)` | `destinationId` must be blank or present in the destination dataset; `maxRent` ≥ 0; `maxCommuteMinutes` ≥ 1; `maxWalkMinutes` ≥ 0; `transportMode` non-null; `resultLimit` ≥ 1; `sortMode` non-null |
+| `updatePreferences(preferences)` | `destinationId` must be blank or present in the destination dataset; `maxRent` ≥ 0; `maxCommuteMinutes` ≥ 1; `maxTransfers` ≥ 0; `maxWalkMinutes` ≥ 0; `transportMode` non-null; `resultLimit` ≥ 1; `sortMode` non-null |
 | `generateShortlist()` | Destination must be set; preferences must pass all rules above |
 | `getListingDetails(listingId)` | `listingId` must be non-null and present in the listings dataset |
 | `getCommuteDetails(listingId)` | `listingId` must be non-null; destination must be set |
@@ -106,7 +106,7 @@ Logic centralizes all error handling. All exceptions are caught and converted to
 | `DestinationNotFoundException` | "Unknown destination. Please select a supported place from the list." |
 | `ListingNotFoundException` | "Listing not found. It may have been removed from the dataset." |
 | `DataLoadException` | "Failed to load data. Please check the application files and restart." |
-| `NoResultsException` | "No listings match your filters. Try relaxing your rent, commute, or walking limits." |
+| `NoResultsException` | "No listings match your filters. Try relaxing your rent, commute, transfer, or walking limits." |
 
 ---
 

@@ -75,6 +75,9 @@ public class DefaultSearchLogic implements SearchLogic {
         if (preferences.maxCommuteMinutes() < 1) {
             throw new InvalidInputException("Maximum commute must be at least 1 minute.");
         }
+        if (preferences.maxTransfers() < 0) {
+            throw new InvalidInputException("Maximum transfers must be at least 0.");
+        }
         if (preferences.maxWalkMinutes() < 0) {
             throw new InvalidInputException("Maximum walk must be at least 0 minutes.");
         }
@@ -97,6 +100,7 @@ public class DefaultSearchLogic implements SearchLogic {
                 normalizedDestinationId,
                 preferences.maxRent(),
                 preferences.maxCommuteMinutes(),
+                preferences.maxTransfers(),
                 preferences.maxWalkMinutes(),
                 preferences.requireAircon(),
                 preferences.transportMode(),
@@ -125,6 +129,9 @@ public class DefaultSearchLogic implements SearchLogic {
             if (commute.totalMinutes() > currentPreferences.maxCommuteMinutes()) {
                 continue;
             }
+            if (commute.transfers() > currentPreferences.maxTransfers()) {
+                continue;
+            }
             if (commute.walkMinutes() > currentPreferences.maxWalkMinutes()) {
                 continue;
             }
@@ -145,7 +152,9 @@ public class DefaultSearchLogic implements SearchLogic {
                 .limit(currentPreferences.resultLimit())
                 .toList();
         if (rankedResults.isEmpty()) {
-            throw new NoResultsException("No listings match your filters. Try relaxing rent or commute limits.");
+            throw new NoResultsException(
+                    "No listings match your filters. Try relaxing your rent, commute, transfer, or walking limits."
+            );
         }
         return rankedResults;
     }

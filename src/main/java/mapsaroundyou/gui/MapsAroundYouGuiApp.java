@@ -64,6 +64,7 @@ public final class MapsAroundYouGuiApp extends Application {
     private final ComboBox<Destination> destinationComboBox = new ComboBox<>();
     private final TextField maxRentField = new TextField();
     private final TextField maxCommuteField = new TextField();
+    private final TextField maxTransfersField = new TextField();
     private final TextField maxWalkField = new TextField();
     private final CheckBox requireAirconCheckBox = new CheckBox("Require aircon");
     private final TextField resultLimitField = new TextField();
@@ -141,6 +142,8 @@ public final class MapsAroundYouGuiApp extends Application {
         maxRentField.setMaxWidth(Double.MAX_VALUE);
         maxCommuteField.setPromptText("e.g. 45");
         maxCommuteField.setMaxWidth(Double.MAX_VALUE);
+        maxTransfersField.setPromptText("e.g. 1");
+        maxTransfersField.setMaxWidth(Double.MAX_VALUE);
         maxWalkField.setPromptText("e.g. 10");
         maxWalkField.setMaxWidth(Double.MAX_VALUE);
         resultLimitField.setPromptText("e.g. 10");
@@ -158,6 +161,7 @@ public final class MapsAroundYouGuiApp extends Application {
                 createControlGroup("Destination", destinationComboBox),
                 createControlGroup("Max rent (SGD)", maxRentField),
                 createControlGroup("Max commute (minutes)", maxCommuteField),
+                createControlGroup("Max transfers", maxTransfersField),
                 createControlGroup("Aircon", requireAirconCheckBox),
                 createControlGroup("Result limit", resultLimitField),
                 createControlGroup("Walking preference", walkingPreferenceGroup)
@@ -407,6 +411,7 @@ public final class MapsAroundYouGuiApp extends Application {
                     destination,
                     maxRentField.getText(),
                     maxCommuteField.getText(),
+                    maxTransfersField.getText(),
                     maxWalkField.getText(),
                     requireAirconCheckBox.isSelected(),
                     resultLimitField.getText(),
@@ -488,6 +493,7 @@ public final class MapsAroundYouGuiApp extends Application {
         destinationComboBox.setDisable(busy);
         maxRentField.setDisable(busy);
         maxCommuteField.setDisable(busy);
+        maxTransfersField.setDisable(busy);
         maxWalkField.setDisable(busy);
         requireAirconCheckBox.setDisable(busy);
         resultLimitField.setDisable(busy);
@@ -524,6 +530,7 @@ public final class MapsAroundYouGuiApp extends Application {
         UserPreferences resolvedPreferences = preferences == null ? UserPreferences.defaults() : preferences;
         maxRentField.setText(Integer.toString(resolvedPreferences.maxRent()));
         maxCommuteField.setText(Integer.toString(Math.max(1, resolvedPreferences.maxCommuteMinutes())));
+        maxTransfersField.setText(Integer.toString(Math.max(0, resolvedPreferences.maxTransfers())));
         maxWalkField.setText(Integer.toString(resolvedPreferences.maxWalkMinutes()));
         requireAirconCheckBox.setSelected(resolvedPreferences.requireAircon());
         resultLimitField.setText(Integer.toString(resolvedPreferences.resultLimit()));

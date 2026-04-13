@@ -75,7 +75,7 @@ class CliApplicationTest {
 
         OutputCapture outputCapture = new OutputCapture();
         int exitCode = outputCapture.run(
-                "D01\n1800\n35\n10\ny\n10\ncommute\nn\nexit\n",
+                "D01\n1800\n35\n1\n10\ny\n10\ncommute\nn\nexit\n",
                 () -> cliApplication.run(new String[]{})
         );
 
@@ -92,6 +92,7 @@ class CliApplicationTest {
                 "D01",
                 1800,
                 35,
+                1,
                 10,
                 true,
                 TransportMode.PUBLIC_TRANSPORT,
@@ -103,7 +104,7 @@ class CliApplicationTest {
 
         OutputCapture outputCapture = new OutputCapture();
         int exitCode = outputCapture.run(
-                "\n\n\n\n\n\n\n\nexit\n",
+                "\n\n\n\n\n\n\n\n\nexit\n",
                 () -> cliApplication.run(new String[]{})
         );
 

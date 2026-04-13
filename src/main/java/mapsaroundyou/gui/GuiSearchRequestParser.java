@@ -1,9 +1,11 @@
 package mapsaroundyou.gui;
 
+import mapsaroundyou.common.AppConfig;
 import mapsaroundyou.common.InvalidInputException;
 import mapsaroundyou.model.Destination;
 import mapsaroundyou.model.SortMode;
 import mapsaroundyou.model.TransportMode;
+import mapsaroundyou.model.UserPreferences;
 
 import java.util.Objects;
 
@@ -24,6 +26,30 @@ public final class GuiSearchRequestParser {
             SortMode sortMode,
             boolean excludeWalkDominantRoutes
     ) {
+        return parse(
+                destination,
+                maxRentRaw,
+                maxCommuteRaw,
+                String.valueOf(AppConfig.DEFAULT_MAX_TRANSFERS),
+                maxWalkRaw,
+                requireAircon,
+                resultLimitRaw,
+                sortMode,
+                excludeWalkDominantRoutes
+        );
+    }
+
+    public static SearchRequest parse(
+            Destination destination,
+            String maxRentRaw,
+            String maxCommuteRaw,
+            String maxTransfersRaw,
+            String maxWalkRaw,
+            boolean requireAircon,
+            String resultLimitRaw,
+            SortMode sortMode,
+            boolean excludeWalkDominantRoutes
+    ) {
         Objects.requireNonNull(destination, "destination");
         if (sortMode == null) {
             throw new InvalidInputException("Sort mode is required.");
@@ -36,12 +62,33 @@ public final class GuiSearchRequestParser {
                 destination.destinationId(),
                 parseInt(maxRentRaw, "Max rent", 0),
                 maxCommuteMinutes,
+                parseInt(maxTransfersRaw, "Max transfers", 0),
                 maxWalkMinutes,
                 requireAircon,
                 TransportMode.PUBLIC_TRANSPORT,
                 parseInt(resultLimitRaw, "Result limit", 1),
                 sortMode,
                 excludeWalkDominantRoutes
+        );
+    }
+
+    public static SearchRequest parse(
+            Destination destination,
+            String maxRentRaw,
+            String maxCommuteRaw,
+            boolean requireAircon
+    ) {
+        UserPreferences defaults = UserPreferences.defaults();
+        return parse(
+                destination,
+                maxRentRaw,
+                maxCommuteRaw,
+                String.valueOf(defaults.maxTransfers()),
+                String.valueOf(defaults.maxWalkMinutes()),
+                requireAircon,
+                String.valueOf(defaults.resultLimit()),
+                defaults.sortMode(),
+                defaults.excludeWalkDominantRoutes()
         );
     }
 

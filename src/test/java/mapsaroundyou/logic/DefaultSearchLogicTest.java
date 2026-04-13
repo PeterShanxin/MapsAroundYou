@@ -96,6 +96,38 @@ class DefaultSearchLogicTest {
     }
 
     @Test
+    void generateShortlist_excludesRoutesAboveTransferCap() {
+        DefaultSearchLogic logic = createLogic(
+                List.of(
+                        new RentalListing("L001", "Listing A", 1500, true, "R01", "Addr 1", "HDB", "PG", "Note"),
+                        new RentalListing("L002", "Listing B", 1400, true, "R02", "Addr 2", "HDB", "PG", "Note")
+                ),
+                Map.of(
+                        "R01:D01", new CommuteEstimate("R01", "D01", 30, 20, 10, 1, 1.50d),
+                        "R02:D01", new CommuteEstimate("R02", "D01", 28, 22, 6, 3, 1.60d)
+                )
+        );
+
+        logic.updatePreferences(new UserPreferences(
+                "D01",
+                2000,
+                45,
+                1,
+                15,
+                false,
+                TransportMode.PUBLIC_TRANSPORT,
+                10,
+                SortMode.COMMUTE,
+                false
+        ));
+
+        List<SearchResult> results = logic.generateShortlist();
+
+        assertEquals(List.of("L001"),
+                results.stream().map(result -> result.listing().listingId()).toList());
+    }
+
+    @Test
     void generateShortlist_excludesWalkDominantRoutesOnlyWhenEnabled() {
         DefaultSearchLogic logic = createLogic(
                 List.of(

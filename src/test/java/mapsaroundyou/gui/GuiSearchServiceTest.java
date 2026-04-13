@@ -43,6 +43,7 @@ class GuiSearchServiceTest {
                 "D01",
                 2200,
                 45,
+                1,
                 10,
                 true,
                 TransportMode.PUBLIC_TRANSPORT,

@@ -18,6 +18,7 @@ class CliCommandParserTest {
                 "--destination", "D01",
                 "--max-rent", "2200",
                 "--max-commute", "45",
+                "--max-transfers", "1",
                 "--max-walk", "10",
                 "--require-aircon",
                 "--result-limit", "5",
@@ -29,6 +30,7 @@ class CliCommandParserTest {
         assertEquals("D01", arguments.destinationId());
         assertEquals(2200, arguments.maxRent());
         assertEquals(45, arguments.maxCommuteMinutes());
+        assertEquals(Integer.valueOf(1), arguments.maxTransfers());
         assertEquals(Integer.valueOf(10), arguments.maxWalkMinutes());
         assertEquals(true, arguments.requireAircon());
         assertEquals(Integer.valueOf(5), arguments.resultLimit());

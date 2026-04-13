@@ -20,6 +20,7 @@ public class PropertiesUserPrefsRepository implements UserPrefsRepository {
     private static final String DESTINATION_ID_KEY = "destinationId";
     private static final String MAX_RENT_KEY = "maxRent";
     private static final String MAX_COMMUTE_MINUTES_KEY = "maxCommuteMinutes";
+    private static final String MAX_TRANSFERS_KEY = "maxTransfers";
     private static final String MAX_WALK_MINUTES_KEY = "maxWalkMinutes";
     private static final String REQUIRE_AIRCON_KEY = "requireAircon";
     private static final String TRANSPORT_MODE_KEY = "transportMode";
@@ -51,6 +52,7 @@ public class PropertiesUserPrefsRepository implements UserPrefsRepository {
                 normalizeDestinationId(properties.getProperty(DESTINATION_ID_KEY)),
                 parseInt(properties.getProperty(MAX_RENT_KEY), defaults.maxRent(), 0),
                 parseInt(properties.getProperty(MAX_COMMUTE_MINUTES_KEY), defaults.maxCommuteMinutes(), 1),
+                parseInt(properties.getProperty(MAX_TRANSFERS_KEY), defaults.maxTransfers(), 0),
                 parseInt(properties.getProperty(MAX_WALK_MINUTES_KEY), defaults.maxWalkMinutes(), 0),
                 parseBoolean(properties.getProperty(REQUIRE_AIRCON_KEY), defaults.requireAircon()),
                 parseTransportMode(properties.getProperty(TRANSPORT_MODE_KEY), defaults.transportMode()),
@@ -71,6 +73,7 @@ public class PropertiesUserPrefsRepository implements UserPrefsRepository {
         }
         properties.setProperty(MAX_RENT_KEY, Integer.toString(preferences.maxRent()));
         properties.setProperty(MAX_COMMUTE_MINUTES_KEY, Integer.toString(preferences.maxCommuteMinutes()));
+        properties.setProperty(MAX_TRANSFERS_KEY, Integer.toString(preferences.maxTransfers()));
         properties.setProperty(MAX_WALK_MINUTES_KEY, Integer.toString(preferences.maxWalkMinutes()));
         properties.setProperty(REQUIRE_AIRCON_KEY, Boolean.toString(preferences.requireAircon()));
         properties.setProperty(TRANSPORT_MODE_KEY, preferences.transportMode().name());

@@ -6,6 +6,7 @@ record SearchCommandArguments(
         String destinationId,
         int maxRent,
         int maxCommuteMinutes,
+        Integer maxTransfers,
         Integer maxWalkMinutes,
         boolean requireAircon,
         Integer resultLimit,

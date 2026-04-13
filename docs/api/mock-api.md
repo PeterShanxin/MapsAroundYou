@@ -80,7 +80,7 @@ The application uses local CSV datasets instead of live APIs at runtime. This do
 | `title` | String | Yes | Descriptive title for the property |
 | `monthlyRent` | int | Yes | Monthly rent in SGD |
 | `hasAircon` | boolean | Yes | Whether the listing has air conditioning |
-| `originNodeId` | String | Yes | Origin node ID used to match this listing to the offline transit matrix (maps to `Flat_ID` in `origin_nodes.csv` and may be shared by multiple listings at the same covered origin) |
+| `originNodeId` | String | Yes | Origin node ID used to match this listing to the offline transit matrix (maps to the origin node dataset in `commute_data/origin_nodes.csv` and may be shared by multiple listings at the same covered origin) |
 | `address` | String | Yes | Real block and street name |
 | `roomType` | String | Yes | Category of room (e.g., "Condo room", "HDB room", "Singleroom") |
 | `sourcePlatform` | String | Yes | Source platform (e.g., `PropertyGuru`, `99.co`) |
@@ -133,7 +133,7 @@ L002,Quiet stay near Tiong Bahru,1800,true,R02,Blk 123 Tiong Bahru Road,Condo ro
 - Schema must be validated on load
 - Invalid or missing fields should produce clear load errors
 - Use a curated demo dataset for development and testing
-- Maintain a small but representative listings set, approximately 100 to 180 units across the supported destinations
+- Maintain a small but representative listings set, approximately 100 to 180 units across the supported destinations, which is sufficient for exercising destination coverage and commute-filter behavior without overwhelming test execution time
 - Track source provenance for travel-time records and listing entries where possible
 
 ---

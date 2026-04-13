@@ -19,6 +19,7 @@ class GuiSearchRequestParserTest {
                 DESTINATION,
                 "2200",
                 "45",
+                "1",
                 "10",
                 true,
                 "5",
@@ -29,6 +30,7 @@ class GuiSearchRequestParserTest {
         assertEquals("D01", request.destinationId());
         assertEquals(2200, request.maxRent());
         assertEquals(45, request.maxCommuteMinutes());
+        assertEquals(1, request.maxTransfers());
         assertEquals(10, request.maxWalkMinutes());
         assertEquals(true, request.requireAircon());
         assertEquals(5, request.resultLimit());
@@ -42,6 +44,7 @@ class GuiSearchRequestParserTest {
                 DESTINATION,
                 "2200",
                 "45",
+                "2",
                 "12",
                 false,
                 "5",
@@ -50,6 +53,7 @@ class GuiSearchRequestParserTest {
         );
 
         assertEquals(12, request.maxWalkMinutes());
+        assertEquals(2, request.maxTransfers());
         assertEquals(false, request.excludeWalkDominantRoutes());
     }
 
@@ -57,7 +61,7 @@ class GuiSearchRequestParserTest {
     void parse_negativeRent_throwsInvalidInputException() {
         InvalidInputException exception = assertThrows(
                 InvalidInputException.class,
-                () -> GuiSearchRequestParser.parse(DESTINATION, "-1", "45", "10", false, "5",
+                () -> GuiSearchRequestParser.parse(DESTINATION, "-1", "45", "1", "10", false, "5",
                         SortMode.COMMUTE, false)
         );
 
@@ -68,7 +72,7 @@ class GuiSearchRequestParserTest {
     void parse_zeroCommute_throwsInvalidInputException() {
         InvalidInputException exception = assertThrows(
                 InvalidInputException.class,
-                () -> GuiSearchRequestParser.parse(DESTINATION, "2000", "0", "10", false, "5",
+                () -> GuiSearchRequestParser.parse(DESTINATION, "2000", "0", "1", "10", false, "5",
                         SortMode.COMMUTE, false)
         );
 
@@ -79,10 +83,21 @@ class GuiSearchRequestParserTest {
     void parse_zeroResultLimit_throwsInvalidInputException() {
         InvalidInputException exception = assertThrows(
                 InvalidInputException.class,
-                () -> GuiSearchRequestParser.parse(DESTINATION, "2000", "45", "10", false, "0",
+                () -> GuiSearchRequestParser.parse(DESTINATION, "2000", "45", "1", "10", false, "0",
                         SortMode.COMMUTE, false)
         );
 
         assertEquals("Result limit must be at least 1.", exception.getMessage());
+    }
+
+    @Test
+    void parse_negativeTransfers_throwsInvalidInputException() {
+        InvalidInputException exception = assertThrows(
+                InvalidInputException.class,
+                () -> GuiSearchRequestParser.parse(DESTINATION, "2000", "45", "-1", "10", false, "5",
+                        SortMode.COMMUTE, false)
+        );
+
+        assertEquals("Max transfers must be at least 0.", exception.getMessage());
     }
 }

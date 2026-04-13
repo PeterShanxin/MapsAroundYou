@@ -21,22 +21,14 @@ The application maintains a two-layer CSV data model:
 3. **`transit_matrix.csv`** - Commute lookup matrix
    - Pre-computed travel times from each origin to destinations
    - Aligned with `origin_nodes.csv` via `flat_id` foreign key
-   - Columns: `flat_id`, `destination_id`, `pt_total`, `pt_walk`, `pt_bus`, ... (and other transit metrics)
+   - Columns: `flat_id`, `destination_id`, `pt_total`, `pt_walk`, `pt_bus`, `pt_rail`, `pt_transit`, `pt_transfers`, `pt_fare`, ... (and other transit metrics)
 
 ## Adding New Listings
 
 ### Prerequisites
 
 - Python 3 on `PATH`
-- `requests` installed locally:
-
-```bash
-pip install requests
-```
-
-- OneMap access if you want live address enrichment during generation
 - See [Build and Run Guide](../ops/build-and-run.md) for the broader local setup
-
 ### Step 1: Add Origins to `origin_nodes.csv`
 
 Open `src/main/resources/commute_data/origin_nodes.csv` and add new rows:
@@ -51,38 +43,39 @@ R06,200160,East,Bedok / Opposite Shopping Mall
 
 ### Step 2: Generate App-Facing Listings
 
-Run the data generation script from the workspace root:
+Run the unified data generation script from the workspace root:
 
 ```bash
-python scripts/generate_merged_listings.py
+python scripts/generate_merged_listings.py --location-mode manual
 ```
 
 This will:
-- Read your newly added rows from `origin_nodes.csv`
-- Fetch real addresses from OneMap API (based on postal codes)
-- Generate realistic rent prices based on room type
-- Create multiple listing rows per covered origin node
-- Produce a stronger demo dataset of 180 app-facing listings by default
+- Add new origin rows to `origin_nodes.csv`
+- Generate app-facing listing rows in `listings.csv`
+- Append matching transit rows in `transit_matrix.csv`
+- Keep all three datasets aligned by `Flat_ID` / `originNodeId`
 
 **Optional arguments:**
 
 ```bash
-# Custom input/output paths
-python scripts/generate_merged_listings.py --input path/to/custom_rental.csv --output path/to/custom_listings.csv
+# Randomly generate 6 new covered origins
+python scripts/generate_merged_listings.py --location-mode random --new-origin-count 6
 
-# Override the listing count or deterministic seed
-python scripts/generate_merged_listings.py --target-count 180 --seed 2103
+# Control how many listings each new origin gets
+python scripts/generate_merged_listings.py --listings-per-origin 4 --seed 2103
 ```
 
 ### Step 3: Expand `transit_matrix.csv`
 
-For each new `Flat_ID` added, you must add corresponding rows to `transit_matrix.csv`:
+The unified generator appends the matching `transit_matrix.csv` rows for every
+new `Flat_ID`. If you need to inspect or edit the expected format manually, it
+looks like this:
 
 ```csv
-flat_id,destination_id,pt_total,pt_walk,pt_bus,pt_rail,pt_transit,pt_fare,drive_total,cycle_total,walk_total
-R05,D01,35,8,20,0,20,1.80,15,50,75
-R05,D02,60,15,18,20,38,2.40,30,160,220
-R05,D03,30,5,10,8,18,1.75,13,60,70
+flat_id,destination_id,pt_total,pt_walk,pt_bus,pt_rail,pt_transit,pt_transfers,pt_fare,drive_total,cycle_total,walk_total
+R05,D01,35,8,20,0,20,1,1.80,15,50,75
+R05,D02,60,15,18,20,38,2,2.40,30,160,220
+R05,D03,30,5,10,8,18,1,1.75,13,60,70
 ...
 ```
 
@@ -118,22 +111,13 @@ R05,D03,30,5,10,8,18,1.75,13,60,70
 
 ## Troubleshooting
 
-### API Rate Limiting
-If you see timeout errors from OneMap API:
-- The script includes a polite 0.2s delay between requests
-- Consider running in batches (add 10-20 listings at a time)
-
-### Address Not Found
-Some postal codes may not be found in OneMap. The script falls back to:
-```
-Blk [random 1-200] [Area_Name] Road
-```
-
 ### CSV Encoding Issues
-The script handles UTF-8 BOM encoding automatically using `encoding='utf-8-sig'`.
+The script reads `origin_nodes.csv` with UTF-8 BOM support and writes append
+operations using UTF-8 output.
 
 ## Key Design Principles
 
+- **No Rental_List2.csv at runtime** - The intermediate file from data generation is not used by the app
 - **Two-layer decoupling** - `origin_nodes.csv` (identity) stays separate from `listings.csv` (presentation)
 - **Repo-portable** - All paths are relative to the repository root
 - **Flat_ID alignment** - All three CSVs reference listings by their origin `Flat_ID` (or `originNodeId`)

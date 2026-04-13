@@ -36,6 +36,7 @@ Each search will prompt for:
 - destination id
 - max rent
 - max commute minutes
+- max transfers
 - max walking minutes
 - aircon requirement
 - result limit
@@ -47,7 +48,7 @@ Blank interactive answers keep the value shown in brackets.
 ### Run the Flag-Driven CLI
 
 ```powershell
-.\gradlew run --args="search --destination D01 --max-rent 2200 --max-commute 45 --max-walk 10 --result-limit 5 --sort balanced --require-aircon --exclude-walk-dominant"
+.\gradlew run --args="search --destination D01 --max-rent 2200 --max-commute 45 --max-transfers 1 --max-walk 10 --result-limit 5 --sort balanced --require-aircon --exclude-walk-dominant"
 ```
 
 Supported flags:
@@ -55,6 +56,7 @@ Supported flags:
 - `--destination <ID>`
 - `--max-rent <SGD>`
 - `--max-commute <minutes>`
+- `--max-transfers <count>`
 - `--max-walk <minutes>`
 - `--result-limit <count>`
 - `--sort <commute|rent|balanced>`

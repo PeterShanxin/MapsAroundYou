@@ -23,6 +23,7 @@ class PropertiesUserPrefsRepositoryTest {
                 "D01",
                 2200,
                 45,
+                1,
                 10,
                 true,
                 TransportMode.PUBLIC_TRANSPORT,
@@ -51,6 +52,7 @@ class PropertiesUserPrefsRepositoryTest {
                 "destinationId=D99",
                 "maxRent=oops",
                 "maxCommuteMinutes=60",
+                "maxTransfers=bad",
                 "maxWalkMinutes=bad",
                 "requireAircon=true",
                 "transportMode=PUBLIC_TRANSPORT",
@@ -65,6 +67,7 @@ class PropertiesUserPrefsRepositoryTest {
         assertEquals("D99", loadedPreferences.destinationId());
         assertEquals(UserPreferences.defaults().maxRent(), loadedPreferences.maxRent());
         assertEquals(60, loadedPreferences.maxCommuteMinutes());
+        assertEquals(UserPreferences.defaults().maxTransfers(), loadedPreferences.maxTransfers());
         assertEquals(UserPreferences.defaults().maxWalkMinutes(), loadedPreferences.maxWalkMinutes());
         assertEquals(true, loadedPreferences.requireAircon());
         assertEquals(UserPreferences.defaults().resultLimit(), loadedPreferences.resultLimit());

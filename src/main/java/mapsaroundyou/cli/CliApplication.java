@@ -81,6 +81,12 @@ public final class CliApplication {
                             ),
                             promptIntegerWithDefault(
                                     scanner,
+                                    "Max transfers",
+                                    currentPreferences.maxTransfers(),
+                                    0
+                            ),
+                            promptIntegerWithDefault(
+                                    scanner,
                                     "Max walking time (minutes)",
                                     currentPreferences.maxWalkMinutes(),
                                     0
@@ -127,6 +133,9 @@ public final class CliApplication {
                 arguments.destinationId(),
                 arguments.maxRent(),
                 arguments.maxCommuteMinutes(),
+                arguments.maxTransfers() == null
+                        ? currentPreferences.maxTransfers()
+                        : arguments.maxTransfers(),
                 arguments.maxWalkMinutes() == null
                         ? currentPreferences.maxWalkMinutes()
                         : arguments.maxWalkMinutes(),
