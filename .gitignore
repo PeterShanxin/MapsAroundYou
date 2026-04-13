@@ -30,6 +30,7 @@ replay_pid*
 
 # Intellij
 .idea/
+*.iml
 
 # VS Code workspace settings
 .vscode/
@@ -48,3 +49,4 @@ __pycache__/
 # Local scratch directories
 bin/
 tmp/
+MapsAroundYou.code-workspace

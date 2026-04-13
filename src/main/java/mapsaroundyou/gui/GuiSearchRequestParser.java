@@ -32,6 +32,21 @@ public final class GuiSearchRequestParser {
         );
     }
 
+    public static SearchRequest parse(
+            Destination destination,
+            String maxRentRaw,
+            String maxCommuteRaw,
+            boolean requireAircon
+    ) {
+        return parse(
+                destination,
+                maxRentRaw,
+                maxCommuteRaw,
+                String.valueOf(Integer.MAX_VALUE),
+                requireAircon
+        );
+    }
+
     private static int parseInt(String raw, String label, int minimumValue) {
         if (raw == null || raw.isBlank()) {
             throw new InvalidInputException(label + " is required.");
