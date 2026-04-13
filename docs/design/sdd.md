@@ -52,8 +52,8 @@ See [Architecture Overview](./architecture.md) for details.
 
 - Destination selection UI (supported destination picker)
 - Filter inputs: max rent, max commute mins, max transfers, max walk mins, require aircon, result limit, sort mode, walk-dominant toggle
-- Results list/table: top matches + rent, total commute, walk time, transfers, aircon, and match score
-- Details panel/dialog: full listing + split commute breakdown (V1.4)
+- Results list/table: top matches + rent, total commute, walk time, transfers, and aircon
+- Details panel/dialog: full selected-listing details, including match score + split commute breakdown (V1.4)
 
 **Outputs**
 
