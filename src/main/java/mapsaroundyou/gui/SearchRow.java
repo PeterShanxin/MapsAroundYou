@@ -62,6 +62,20 @@ public final class SearchRow {
     }
 
     /**
+     * @return walking minutes for the active destination
+     */
+    public int getWalkMinutes() {
+        return commute().walkMinutes();
+    }
+
+    /**
+     * @return transfer count for the active destination
+     */
+    public int getTransfers() {
+        return commute().transfers();
+    }
+
+    /**
      * @return ranking score computed by {@link mapsaroundyou.service.ListingRanker}
      */
     public double getScore() {

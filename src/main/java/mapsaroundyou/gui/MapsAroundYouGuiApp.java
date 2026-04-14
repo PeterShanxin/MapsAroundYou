@@ -40,6 +40,7 @@ import mapsaroundyou.app.SearchRequest;
 import mapsaroundyou.app.SearchResponse;
 import mapsaroundyou.common.DataLoadException;
 import mapsaroundyou.common.InvalidInputException;
+import mapsaroundyou.model.CommuteEstimate;
 import mapsaroundyou.model.DatasetMetadata;
 import mapsaroundyou.model.Destination;
 import mapsaroundyou.model.ListingDetails;
@@ -62,19 +63,21 @@ public final class MapsAroundYouGuiApp extends Application {
     private static final int MIN_WIDTH = 1000;
     private static final int MIN_HEIGHT = 600;
     private static final int CONTROLS_PANEL_WIDTH = 340;
-    private static final int RESULTS_TABLE_MIN_WIDTH = 560;
-    private static final int LISTING_COLUMN_MIN_WIDTH = 210;
-    private static final int RENT_COLUMN_MIN_WIDTH = 90;
-    private static final int COMMUTE_COLUMN_MIN_WIDTH = 90;
-    private static final int AIRCON_COLUMN_MIN_WIDTH = 70;
-    private static final int SCORE_COLUMN_MIN_WIDTH = 80;
-    private static final double LISTING_COLUMN_WIDTH_RATIO = 0.42d;
-    private static final double RENT_COLUMN_WIDTH_RATIO = 0.15d;
-    private static final double COMMUTE_COLUMN_WIDTH_RATIO = 0.15d;
-    private static final double AIRCON_COLUMN_WIDTH_RATIO = 0.13d;
-    private static final double SCORE_COLUMN_WIDTH_RATIO = 0.15d;
-    private static final int DETAILS_PANEL_HEIGHT = 165;
-    private static final int DETAILS_LABEL_WIDTH = 72;
+    private static final int RESULTS_TABLE_MIN_WIDTH = 500;
+    private static final int LISTING_COLUMN_MIN_WIDTH = 180;
+    private static final int RENT_COLUMN_MIN_WIDTH = 80;
+    private static final int COMMUTE_COLUMN_MIN_WIDTH = 80;
+    private static final int WALK_COLUMN_MIN_WIDTH = 70;
+    private static final int TRANSFERS_COLUMN_MIN_WIDTH = 80;
+    private static final int AIRCON_COLUMN_MIN_WIDTH = 55;
+    private static final double LISTING_COLUMN_WIDTH_RATIO = 0.40d;
+    private static final double RENT_COLUMN_WIDTH_RATIO = 0.14d;
+    private static final double COMMUTE_COLUMN_WIDTH_RATIO = 0.14d;
+    private static final double WALK_COLUMN_WIDTH_RATIO = 0.12d;
+    private static final double TRANSFERS_COLUMN_WIDTH_RATIO = 0.13d;
+    private static final double AIRCON_COLUMN_WIDTH_RATIO = 0.07d;
+    private static final int DETAILS_PANEL_HEIGHT = 220;
+    private static final int DETAILS_LABEL_WIDTH = 92;
     private static final String ICON_RESOURCE = "/mapsaroundyou/gui/MapsAroundYou_Logo.png";
     private static final String DARK_THEME_CSS_RESOURCE = "/mapsaroundyou/gui/dark-theme.css";
 
@@ -103,8 +106,9 @@ public final class MapsAroundYouGuiApp extends Application {
     private final TableColumn<SearchRow, String> listingColumn = new TableColumn<>("Listing");
     private final TableColumn<SearchRow, Number> rentColumn = new TableColumn<>("Rent (SGD)");
     private final TableColumn<SearchRow, Number> commuteColumn = new TableColumn<>("Commute");
+    private final TableColumn<SearchRow, Number> walkColumn = new TableColumn<>("Walk");
+    private final TableColumn<SearchRow, Number> transfersColumn = new TableColumn<>("Transfers");
     private final TableColumn<SearchRow, Boolean> airconColumn = new TableColumn<>("A/C");
-    private final TableColumn<SearchRow, Number> matchColumn = new TableColumn<>("Match");
     private final Label statusLabel = new Label("App status: Ready.");
     private final ProgressIndicator loadingIndicator = new ProgressIndicator();
     private final Label datasetLabel = new Label();
@@ -114,7 +118,11 @@ public final class MapsAroundYouGuiApp extends Application {
     private final Label detailsRoomType = new Label("-");
     private final Label detailsRent = new Label("-");
     private final Label detailsAircon = new Label("-");
-    private final Label detailsCommute = new Label("-");
+    private final Label detailsCommuteTotal = new Label("-");
+    private final Label detailsCommuteTransit = new Label("-");
+    private final Label detailsCommuteWalk = new Label("-");
+    private final Label detailsCommuteTransfers = new Label("-");
+    private final Label detailsCommuteFare = new Label("-");
     private final Label detailsScore = new Label("-");
     private final Label detailsSource = new Label("-");
     private final Label detailsNotes = new Label("-");
@@ -241,13 +249,13 @@ public final class MapsAroundYouGuiApp extends Application {
                 listingColumn,
                 rentColumn,
                 commuteColumn,
-                airconColumn,
-                matchColumn
+                walkColumn,
+                transfersColumn,
+                airconColumn
         ));
 
         VBox box = new VBox(resultsTable);
         VBox.setVgrow(resultsTable, Priority.ALWAYS);
-        box.setPadding(new Insets(0, 12, 0, 0));
         return box;
     }
 
@@ -264,7 +272,6 @@ public final class MapsAroundYouGuiApp extends Application {
 
         detailsTitle.setWrapText(true);
         detailsAddress.setWrapText(true);
-        detailsCommute.setWrapText(true);
         detailsSource.setWrapText(true);
         detailsNotes.setWrapText(true);
 
@@ -282,7 +289,9 @@ public final class MapsAroundYouGuiApp extends Application {
         int row = 0;
         addDetailRow(grid, row++, "Address", detailsAddress, "Room type", detailsRoomType);
         addDetailRow(grid, row++, "Rent", detailsRent, "Aircon", detailsAircon);
-        addDetailRow(grid, row++, "Commute", detailsCommute, "Match", detailsScore);
+        addDetailRow(grid, row++, "Total commute", detailsCommuteTotal, "Transit", detailsCommuteTransit);
+        addDetailRow(grid, row++, "Walk", detailsCommuteWalk, "Transfers", detailsCommuteTransfers);
+        addDetailRow(grid, row++, "Fare", detailsCommuteFare, "Match", detailsScore);
         addDetailRow(grid, row++, "Source", detailsSource, "Notes", detailsNotes);
 
         VBox box = new VBox(6, header, detailsTitle, grid);
@@ -351,16 +360,27 @@ public final class MapsAroundYouGuiApp extends Application {
         commuteColumn.prefWidthProperty().bind(resultsTable.widthProperty().multiply(COMMUTE_COLUMN_WIDTH_RATIO));
         commuteColumn.setCellFactory(createCenteredCellFactory(value -> Integer.toString(value.intValue())));
 
+        walkColumn.setCellValueFactory(
+                cell -> new ReadOnlyObjectWrapper<>(cell.getValue().getWalkMinutes())
+        );
+        walkColumn.setMinWidth(WALK_COLUMN_MIN_WIDTH);
+        walkColumn.prefWidthProperty().bind(resultsTable.widthProperty().multiply(WALK_COLUMN_WIDTH_RATIO));
+        walkColumn.setCellFactory(createCenteredCellFactory(value -> Integer.toString(value.intValue())));
+        walkColumn.setSortable(false);
+
+        transfersColumn.setCellValueFactory(
+                cell -> new ReadOnlyObjectWrapper<>(cell.getValue().getTransfers())
+        );
+        transfersColumn.setMinWidth(TRANSFERS_COLUMN_MIN_WIDTH);
+        transfersColumn.prefWidthProperty().bind(resultsTable.widthProperty().multiply(TRANSFERS_COLUMN_WIDTH_RATIO));
+        transfersColumn.setCellFactory(createCenteredCellFactory(value -> Integer.toString(value.intValue())));
+        transfersColumn.setSortable(false);
+
         airconColumn.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(cell.getValue().hasAircon()));
         airconColumn.setMinWidth(AIRCON_COLUMN_MIN_WIDTH);
         airconColumn.prefWidthProperty().bind(resultsTable.widthProperty().multiply(AIRCON_COLUMN_WIDTH_RATIO));
         airconColumn.setSortable(false);
         airconColumn.setCellFactory(createCenteredCellFactory(item -> item ? "Yes" : "No"));
-
-        matchColumn.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(cell.getValue().getScore()));
-        matchColumn.setMinWidth(SCORE_COLUMN_MIN_WIDTH);
-        matchColumn.prefWidthProperty().bind(resultsTable.widthProperty().multiply(SCORE_COLUMN_WIDTH_RATIO));
-        matchColumn.setCellFactory(createCenteredCellFactory(item -> formatMatchScore(item.doubleValue())));
     }
 
     private static String formatMatchScore(double score) {
@@ -710,10 +730,15 @@ public final class MapsAroundYouGuiApp extends Application {
         detailsRoomType.setText(details.listing().roomType());
         detailsRent.setText("SGD " + details.listing().monthlyRent());
         detailsAircon.setText(details.listing().hasAircon() ? "Yes" : "No");
+        CommuteEstimate commuteEstimate = details.commuteEstimate().orElse(row.commute());
+        detailsCommuteTotal.setText(GuiTextFormatter.formatMinutes(commuteEstimate.totalMinutes()));
+        detailsCommuteTransit.setText(GuiTextFormatter.formatMinutes(commuteEstimate.transitMinutes()));
+        detailsCommuteWalk.setText(GuiTextFormatter.formatMinutes(commuteEstimate.walkMinutes()));
+        detailsCommuteTransfers.setText(GuiTextFormatter.formatTransfers(commuteEstimate.transfers()));
+        detailsCommuteFare.setText(GuiTextFormatter.formatFare(commuteEstimate.fare()));
         detailsScore.setText(formatMatchScore(row.getScore()));
         detailsSource.setText(details.listing().sourcePlatform());
         detailsNotes.setText(GuiTextFormatter.formatOptionalText(details.listing().notes()));
-        detailsCommute.setText(GuiTextFormatter.formatCommute(row.commute()));
     }
 
     private void clearDetails() {
@@ -722,7 +747,11 @@ public final class MapsAroundYouGuiApp extends Application {
         detailsRoomType.setText("-");
         detailsRent.setText("-");
         detailsAircon.setText("-");
-        detailsCommute.setText("-");
+        detailsCommuteTotal.setText("-");
+        detailsCommuteTransit.setText("-");
+        detailsCommuteWalk.setText("-");
+        detailsCommuteTransfers.setText("-");
+        detailsCommuteFare.setText("-");
         detailsScore.setText("-");
         detailsSource.setText("-");
         detailsNotes.setText("-");
@@ -803,10 +832,7 @@ public final class MapsAroundYouGuiApp extends Application {
             commuteColumn.setSortType(TableColumn.SortType.ASCENDING);
             resultsTable.getSortOrder().setAll(List.of(commuteColumn));
         }
-        case BALANCED -> {
-            matchColumn.setSortType(TableColumn.SortType.DESCENDING);
-            resultsTable.getSortOrder().setAll(List.of(matchColumn));
-        }
+        case BALANCED -> resultsTable.getSortOrder().clear();
         default -> throw new IllegalStateException("Unsupported sort mode: " + resolvedSortMode);
         }
     }
@@ -822,9 +848,6 @@ public final class MapsAroundYouGuiApp extends Application {
         }
         if (primaryColumn == commuteColumn) {
             return SortMode.COMMUTE;
-        }
-        if (primaryColumn == matchColumn) {
-            return SortMode.BALANCED;
         }
         applyTableSort(SortMode.BALANCED);
         return SortMode.BALANCED;

@@ -14,18 +14,24 @@ Run the JavaFX GUI entrypoint:
 
 On Windows ARM64, `\.\gradlew runGui` auto-switches to an installed x64 Java runtime when available.
 
-Run the CLI entrypoint:
+Run the default Gradle entrypoint (GUI):
 
 ```powershell
 .\gradlew run
 ```
 
-Interactive mode now stays open for repeated searches until the user types `exit`.
+This launches the packaged JavaFX app through the same launcher used by the runnable JAR.
 
-Run the flag-driven search mode:
+Build the runnable fat JAR:
 
 ```powershell
-.\gradlew run --args="search --destination D01 --max-rent 2200 --max-commute 45 --max-transfers 1 --max-walk 10 --result-limit 5 --sort balanced --require-aircon --exclude-walk-dominant"
+.\gradlew shadowJar
+```
+
+Run the CLI entrypoint from the built fat JAR:
+
+```powershell
+java -cp .\build\libs\MapsAroundYou-0.3-all.jar mapsaroundyou.cli.MapsAroundYouApp search --destination D01 --max-rent 2200 --max-commute 45 --max-transfers 1 --max-walk 10 --result-limit 5 --sort balanced --require-aircon --exclude-walk-dominant
 ```
 
 Run the local quality gate:
@@ -41,10 +47,11 @@ Run the local quality gate:
 ## Current Scope
 
 - The project currently supports both JavaFX GUI and CLI entrypoints.
-- GUI startup is available through the `runGui` Gradle task.
+- GUI startup is available through the `runGui` and default `run` Gradle tasks.
 - The codebase is organized into `storage`, `service`, `logic`, and `cli` layers so GUI work can plug in later.
 - Runtime data stays local under `src/main/resources/commute_data/`.
 - Last-used search preferences are stored locally under the current user's home directory.
+- Persona preset and dark-mode settings are persisted for returning users.
 
 ## Contributing
 

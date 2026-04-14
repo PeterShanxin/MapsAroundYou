@@ -65,13 +65,43 @@ public final class GuiTextFormatter {
      * @return human-friendly breakdown
      */
     public static String formatCommute(CommuteEstimate commute) {
-        return commute.totalMinutes()
-                + " min total ("
+        return formatMinutes(commute.totalMinutes())
+                + " total ("
                 + commute.transitMinutes() + " transit, "
                 + commute.walkMinutes() + " walk, "
                 + commute.transfers() + " transfer(s), "
-                + String.format("$%.2f", commute.fare())
+                + formatFare(commute.fare())
                 + ")";
+    }
+
+    /**
+     * Formats minutes for the split commute details panel.
+     *
+     * @param minutes minute count
+     * @return a compact minute label
+     */
+    public static String formatMinutes(int minutes) {
+        return minutes + " min";
+    }
+
+    /**
+     * Formats transfer counts for the split commute details panel.
+     *
+     * @param transfers number of transfers
+     * @return a compact transfer label
+     */
+    public static String formatTransfers(int transfers) {
+        return transfers + " transfer(s)";
+    }
+
+    /**
+     * Formats fare values for the split commute details panel.
+     *
+     * @param fare fare in SGD
+     * @return fare formatted to two decimal places
+     */
+    public static String formatFare(double fare) {
+        return String.format("$%.2f", fare);
     }
 
     /**
