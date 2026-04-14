@@ -80,6 +80,11 @@ public final class MapsAroundYouGuiApp extends Application {
     private final UiSettingsStore uiSettingsStore = new UiSettingsStore();
     private Scene mainScene;
     private PersonaPreset currentPersonaPreset = PersonaPreset.NEW_USER;
+    /**
+     * When {@code true}, first-run persona onboarding has filled rent/commute/aircon; loaded
+     * {@link UserPreferences} must not overwrite those fields.
+     */
+    private boolean preservePersonaFormFieldsWhenApplyingLoadedPreferences;
 
     private final ComboBox<Destination> destinationComboBox = new ComboBox<>();
     private final TextField maxRentField = new TextField();
@@ -396,6 +401,9 @@ public final class MapsAroundYouGuiApp extends Application {
             PersonaPreset selected = maybePromptForNewUserPersonaPreset();
             uiSettingsStore.savePersonaPreset(selected);
             loadedPreset = selected;
+            preservePersonaFormFieldsWhenApplyingLoadedPreferences = true;
+        } else {
+            preservePersonaFormFieldsWhenApplyingLoadedPreferences = false;
         }
 
         currentPersonaPreset = loadedPreset;
@@ -577,7 +585,12 @@ public final class MapsAroundYouGuiApp extends Application {
                         resolveInitialDestination(initialData.destinations(), initialData.preferences())
                 );
             }
-            applyInitialPreferences(initialData.preferences());
+            if (preservePersonaFormFieldsWhenApplyingLoadedPreferences) {
+                applyLoadedPreferencesExceptPersonaTouchingFields(initialData.preferences());
+                preservePersonaFormFieldsWhenApplyingLoadedPreferences = false;
+            } else {
+                applyInitialPreferences(initialData.preferences());
+            }
             datasetLabel.setText(GuiTextFormatter.formatDatasetMetadata(initialData.metadata()));
             setBusy(false, "Ready.");
         });
@@ -719,14 +732,27 @@ public final class MapsAroundYouGuiApp extends Application {
 
     private void applyInitialPreferences(UserPreferences preferences) {
         UserPreferences resolvedPreferences = preferences == null ? UserPreferences.defaults() : preferences;
-        maxRentField.setText(Integer.toString(resolvedPreferences.maxRent()));
-        maxCommuteField.setText(Integer.toString(Math.max(1, resolvedPreferences.maxCommuteMinutes())));
+        applyPersonaTouchingPreferenceFields(resolvedPreferences);
+        applyLoadedPreferencesExceptPersonaTouchingFields(resolvedPreferences);
+    }
+
+    /**
+     * Applies persisted/default preferences except max rent, max commute, and aircon, which first-run
+     * persona onboarding has already set from {@link PersonaPreset} defaults.
+     */
+    private void applyLoadedPreferencesExceptPersonaTouchingFields(UserPreferences preferences) {
+        UserPreferences resolvedPreferences = preferences == null ? UserPreferences.defaults() : preferences;
         maxTransfersField.setText(Integer.toString(Math.max(0, resolvedPreferences.maxTransfers())));
         maxWalkField.setText(Integer.toString(resolvedPreferences.maxWalkMinutes()));
-        requireAirconCheckBox.setSelected(resolvedPreferences.requireAircon());
         resultLimitField.setText(Integer.toString(resolvedPreferences.resultLimit()));
         excludeWalkDominantRoutesCheckBox.setSelected(resolvedPreferences.excludeWalkDominantRoutes());
         applyTableSort(resolvedPreferences.sortMode());
+    }
+
+    private void applyPersonaTouchingPreferenceFields(UserPreferences resolvedPreferences) {
+        maxRentField.setText(Integer.toString(resolvedPreferences.maxRent()));
+        maxCommuteField.setText(Integer.toString(Math.max(1, resolvedPreferences.maxCommuteMinutes())));
+        requireAirconCheckBox.setSelected(resolvedPreferences.requireAircon());
     }
 
     private void applyTableSort(SortMode sortMode) {

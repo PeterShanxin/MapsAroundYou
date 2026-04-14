@@ -34,11 +34,14 @@ Since we use local data, our app will be accurate only up to the last dataset up
 
 | Component | Description |
 |-----------|-------------|
-| **UI (GUI)** | Collects inputs from user, displays ranked results, displays listing details + commute breakdown |
-| **Logic** | Sets up the search pipeline and exposes UI-friendly operations |
+| **UI (GUI / CLI)** | Collects inputs, displays ranked results, listing details, and commute breakdown; entry points call into the layers below |
+| **Application (`mapsaroundyou.app`)** | Composition root and narrow facades: `ApplicationFactory` wires storage adapters and domain services; JavaFX uses `GuiSearchService` (search + metadata + preferences) so the GUI does not depend on `SearchLogic` directly |
+| **Logic** | Sets up the search pipeline and exposes workflow operations (`SearchLogic`) |
 | **Services** | CommuteEstimator, ListingFilter, ListingRanker, RouteAnalyzer |
 | **Model** | Entities (Listing, Destination, Preferences, Results) |
 | **Storage** | Loads local datasets (destinations/travel-times/listings) and persists last-used preferences for improved UX |
+
+**Dependency direction (summary):** `mapsaroundyou.gui` → `mapsaroundyou.app` (facades) → `mapsaroundyou.logic` → `mapsaroundyou.service` + `mapsaroundyou.storage` abstractions. The CLI entry point uses `ApplicationFactory.createSearchLogic()` and depends on `mapsaroundyou.logic` with the same composed stack. Concrete CSV/properties adapters in `mapsaroundyou.storage` are instantiated only from `ApplicationFactory`.
 
 See [Architecture Overview](./architecture.md) for details.
 
@@ -57,10 +60,19 @@ See [Architecture Overview](./architecture.md) for details.
 
 **Outputs**
 
-- User actions → Logic calls
-- Rendered `SearchResultViewModel[]`
+- User actions → application-layer search API (`GuiSearchService`)
+- Rendered result rows and details
 
-### 3.2 Logic
+### 3.2 Application (`mapsaroundyou.app`)
+
+**Responsibilities**
+
+- **Composition:** `ApplicationFactory` constructs repositories, validates bundled datasets, and wraps `DefaultSearchLogic` with `PersistentSearchLogic` and `PropertiesUserPrefsRepository`.
+- **GUI boundary:** `GuiSearchService` / `DefaultGuiSearchService` expose typed `SearchRequest` / `SearchResponse` flows and guard errors for the JavaFX layer, delegating to `SearchLogic`.
+
+**Dependency rule:** GUI code depends on types in `mapsaroundyou.app` and `mapsaroundyou.model`, not on concrete storage or the full `SearchLogic` surface area.
+
+### 3.3 Logic
 
 **Responsibilities**
 
@@ -77,7 +89,7 @@ See [Architecture Overview](./architecture.md) for details.
 - `getListingDetails(listingId)` → `ListingDetails`
 - `getCommuteDetails(listingId)` → `CommuteEstimate` (V1.4)
 
-### 3.3 Services
+### 3.4 Services
 
 | Service | Operations |
 |---------|------------|
@@ -86,11 +98,11 @@ See [Architecture Overview](./architecture.md) for details.
 | **ListingRanker** | Deterministic selectable sorting/scoring (see §5) |
 | **RouteAnalyzer** (V1.4) | `isWalkDominant(commuteEstimate)` → `bool`, `summarize(commuteEstimate)` → `CommuteSummary` |
 
-### 3.4 Model (Domain)
+### 3.5 Model (Domain)
 
 Immutable-ish entities; lightweight DTOs between layers.
 
-### 3.5 Storage (Local Data)
+### 3.6 Storage (Local Data)
 
 - `DestinationRepository` (destinations file)
 - `TravelTimeRepository` (travel-times file)
