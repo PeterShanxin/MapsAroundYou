@@ -21,13 +21,15 @@ public class CliPrinter {
 
     public void printHelp() {
         System.out.println("Usage:");
-        System.out.println("  ./gradlew run");
+        System.out.println("  ./gradlew run    (launches the GUI)");
+        System.out.println("  java -cp ./build/libs/MapsAroundYou-0.3-all.jar mapsaroundyou.cli.MapsAroundYouApp");
         System.out.println(
-                "  ./gradlew run --args=\"search --destination D01 --max-rent 2200 "
-                        + "--max-commute 45 --max-transfers 1 --max-walk 10 --result-limit 5 "
-                        + "--sort balanced --require-aircon --exclude-walk-dominant\""
+                "  java -cp ./build/libs/MapsAroundYou-0.3-all.jar mapsaroundyou.cli.MapsAroundYouApp "
+                        + "search --destination D01 --max-rent 2200 --max-commute 45 --max-transfers 1 "
+                        + "--max-walk 10 --result-limit 5 "
+                        + "--sort balanced --require-aircon --exclude-walk-dominant"
         );
-        System.out.println("  (On Windows, use '.\\\\gradlew' instead of './gradlew'.)");
+        System.out.println("  (On Windows, use '.\\\\gradlew' and '.\\\\build\\\\libs\\\\...' paths.)");
         System.out.println();
         System.out.println("Commands:");
         System.out.println(
@@ -42,10 +44,11 @@ public class CliPrinter {
         System.out.println("Examples:");
         System.out.println("  ./gradlew run");
         System.out.println(
-                "  ./gradlew run --args=\"search --destination D05 --max-rent 1800 --max-commute 35 "
-                        + "--max-transfers 1 --max-walk 10 --result-limit 10 --sort commute\""
+                "  java -cp ./build/libs/MapsAroundYou-0.3-all.jar mapsaroundyou.cli.MapsAroundYouApp "
+                        + "search --destination D05 --max-rent 1800 --max-commute 35 "
+                        + "--max-transfers 1 --max-walk 10 --result-limit 10 --sort commute"
         );
-        System.out.println("  (On Windows, use '.\\\\gradlew' instead of './gradlew'.)");
+        System.out.println("  (On Windows, use '.\\\\gradlew' and '.\\\\build\\\\libs\\\\...' paths.)");
         System.out.println();
     }
 

@@ -13,21 +13,22 @@
 ![Architecture Diagram](../assets/images/architecture-diagram.png)
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                         UI (GUI)                                 │
-│  • Destination selection (supported destination picker)          │
-│  • Filter inputs (max rent, max commute, max walk, aircon, sort) │
-│  • Results list/table                                            │
-│  • Details panel/dialog (V1.4: commute breakdown)                │
+│                         UI (GUI)                                │
+│  • Destination selection (supported destination picker)         │
+│  • Filter inputs (max rent, max commute, max transfers,        │
+│    max walk, aircon, result limit, sort, walk-dominant toggle) │
+│  • Results list/table                                           │
+│  • Settings + details panel/dialog with commute breakdown      │
 └────────────────────────────┬────────────────────────────────────┘
                              │ User actions → Logic calls
                              │ Rendered SearchResultViewModel[]
                              ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                          Logic                                   │
-│  • Validate inputs                                               │
-│  • Execute search pipeline (load → filter → estimate → rank)     │
-│  • Provide view models for UI                                    │
-│  • Centralize error handling                                     │
+│                          Logic                                  │
+│  • Validate inputs                                              │
+│  • Execute search pipeline (load → filter → estimate → rank)    │
+│  • Provide view models for UI                                   │
+│  • Centralize error handling                                    │
 └──────┬──────────────────┬──────────────────┬────────────────────┘
        │                  │                  │
        ▼                  ▼                  ▼
@@ -50,7 +51,8 @@
 - Collects inputs from user
 - Displays ranked results
 - Restores last-used preferences on startup
-- Displays listing details + commute breakdown (V1.4)
+- Persists persona preset and dark-mode settings
+- Displays listing details plus commute breakdown
 
 ### Logic
 
@@ -64,8 +66,8 @@
 |---------|----------------|
 | **CommuteEstimator** | Local travel-time lookup between listing origin nodes and selected destinations |
 | **ListingFilter** | Rent/time constraints, aircon filter |
-| **ListingRanker** | Scoring + selectable sorting |
-| **RouteAnalyzer** | Walk-dominant detection, commute breakdown (V1.4) |
+| **ListingRanker** | Scoring plus selectable sorting |
+| **RouteAnalyzer** | Walk-dominant detection and commute breakdown |
 
 ### Model
 
@@ -81,9 +83,9 @@
 
 ## Data Flow
 
-1. **User input** → UI captures destination, rent, commute, walking cap, aircon, result count, sort mode, and walk-dominant toggle
+1. **User input** → UI captures destination, rent, commute, transfer cap, walking cap, aircon, result count, sort mode, and walk-dominant toggle
 2. **Logic** loads data from Storage, invokes Services via pipeline
-3. **ListingFilter** → **CommuteEstimator** → **RouteAnalyzer** (V1.4) → **ListingRanker** → ranked results
+3. **ListingFilter** → **CommuteEstimator** → **RouteAnalyzer** → **ListingRanker** → ranked results
 4. **UI** renders `SearchResultViewModel[]`
 
 ---
