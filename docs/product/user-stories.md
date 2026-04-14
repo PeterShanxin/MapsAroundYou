@@ -5,7 +5,7 @@
 **Goal:** Commuting mainly between home and a specific destination (campus/office/place) while minimizing daily travel rather than securing a specific postal code.
 
 ## Legend
-- **Current shipped release:** `v0.3`
+- **Current shipped release:** `v0.4`
 - Each story includes **Acceptance Criteria (AC)** written to be testable.
 
 ---
@@ -55,3 +55,12 @@
   - **AC1:** Selecting `Student` sets `Max rent (SGD)` to `1400`, `Max commute (minutes)` to `50`, and turns `Require aircon` off; selecting `Worker` sets `Max rent (SGD)` to `2000`, `Max commute (minutes)` to `65`, and turns `Require aircon` off.
   - **AC2:** User can manually override these default values in the left input panel before searching.
   - **AC3:** On first app startup, the preset starts as `New User` and the app prompts the user to choose between `Student` and `Worker`; after that, users can change it via the `Settings` window, which also includes a `Dark mode` toggle.
+
+---
+
+## Polish And Hardening In v0.4
+
+- [x] Domain-specific error handling is surfaced more consistently across the CLI and GUI boundaries.
+- [x] Public APIs are documented and enforced through Javadoc-oriented Checkstyle rules.
+- [x] The GUI now depends on an application-layer search facade instead of directly on `SearchLogic`.
+- [x] The results table and listing details present walking time, transfers, and split commute facts more clearly.
