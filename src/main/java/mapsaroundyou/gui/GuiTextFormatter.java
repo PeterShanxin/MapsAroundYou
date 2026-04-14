@@ -47,13 +47,25 @@ public final class GuiTextFormatter {
     }
 
     public static String formatCommute(CommuteEstimate commute) {
-        return commute.totalMinutes()
-                + " min total ("
+        return formatMinutes(commute.totalMinutes())
+                + " total ("
                 + commute.transitMinutes() + " transit, "
                 + commute.walkMinutes() + " walk, "
                 + commute.transfers() + " transfer(s), "
-                + String.format("$%.2f", commute.fare())
+                + formatFare(commute.fare())
                 + ")";
+    }
+
+    public static String formatMinutes(int minutes) {
+        return minutes + " min";
+    }
+
+    public static String formatTransfers(int transfers) {
+        return transfers + " transfer(s)";
+    }
+
+    public static String formatFare(double fare) {
+        return String.format("$%.2f", fare);
     }
 
     public static String formatOptionalText(String value) {

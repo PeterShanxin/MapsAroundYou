@@ -17,8 +17,8 @@
 │  • Destination selection (supported destination picker)         │
 │  • Filter inputs (max rent, max commute, max transfers,        │
 │    max walk, aircon, result limit, sort, walk-dominant toggle) │
-│  • Results list/table                                           │
-│  • Settings + details panel/dialog with commute breakdown      │
+│  • Results list/table (rent, commute, walk, transfers, aircon) │
+│  • Settings + details panel/dialog with split commute breakdown│
 └────────────────────────────┬────────────────────────────────────┘
                              │ User actions → Logic calls
                              │ Rendered SearchResultViewModel[]
@@ -51,8 +51,8 @@
 - Collects inputs from user
 - Displays ranked results
 - Restores last-used preferences on startup
+- Displays listing details + split commute breakdown (total, transit, walk, transfers, fare)
 - Persists persona preset and dark-mode settings
-- Displays listing details plus commute breakdown
 
 ### Logic
 

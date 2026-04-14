@@ -26,7 +26,7 @@ International students and new working professionals arriving in Singapore face 
 - Help users filter rental listings by commute time from a chosen supported destination.
 - Surface only listings within the user's rent budget, commute cap, transfer cap, and walking cap.
 - Let users choose shortlist size and sort mode while preserving deterministic ordering.
-- Provide a breakdown of transit vs. walking time for each shortlisted listing.
+- Provide a breakdown of transit time, walking time, and transfers for each shortlisted listing (V1.4).
 - Restore last-used search preferences and settings for returning users.
 - Deliver the product as a runnable offline JAR with a GUI.
 
@@ -165,14 +165,14 @@ As a renter, I want to select a preset (Student vs. Worker) so that default time
 | ID | Requirement |
 |----|-------------|
 | FR-15 | Shortlisted listings are ranked deterministically according to the selected sort mode, with stable tie-breakers. |
-| FR-16 | Results panel displays the top N listings (default N=10) with rent, address, aircon status, and commute summary per row. |
-| FR-17 | User can click a listing to view full details including commute breakdown. |
+| FR-16 | Results panel displays the top N listings (default N=10) with rent, aircon status, total commute, walking time, and transfers per row. |
+| FR-17 | User can click a listing to view full details including a split commute breakdown for total time, transit, walk, transfers, and fare (V1.4). |
 
 ### 7.4 Persistence and Settings
 
 | ID | Requirement |
 |----|-------------|
-| FR-18 | System provides transit time, walking time, number of transfers, and route stations for each listing. |
+| FR-18 | System provides transit time, walking time, number of transfers, and fare for each listing. |
 | FR-19 | The application persists the last successful search preferences locally and restores them on startup when possible. |
 | FR-20 | The application stores and restores the persona preset and dark-mode choice for returning users. |
 

@@ -14,7 +14,7 @@ The Smart Rental Search Algorithm is a desktop Java application designed to reve
 
 ## 3. Graphical User Interface (GUI) Requirements
 - [ ] **Left Input Panel (Constraints):** Contains text fields, dropdowns, and toggle switches for all user inputs (Destination, Max Rent, Max Commute Time, Max Transfers, Walking Tolerance, Air-Conditioning, Result Limit, and Sort Mode).
-- [ ] **Right Display Panel (Results):** A scrollable list displaying the generated shortlist of rental units. Each result row will show the rent, address, aircon status, and a breakdown of the commute summary.
+- [ ] **Right Display Panel (Results):** A scrollable list displaying the generated shortlist of rental units. Each result row will show the rent, aircon status, and the key commute values users filter on, including total commute, walking time, and transfers.
 - [ ] **Settings Surface:** Lets users choose a persona preset and dark mode, and preserves those settings for later app launches.
 
 ## 4. Functional Requirements (v0.3 Scope)
@@ -28,11 +28,12 @@ The Smart Rental Search Algorithm is a desktop Java application designed to reve
 - [ ] **REQ-2B (Air-Conditioning):** The GUI must include a checkbox to require air-conditioning.
 - [ ] **REQ-2C (Transfer and Walking Caps):** The GUI must include inputs for maximum transfers and maximum walking time.
 
-### 4.3 Ranking, Filtering, and Persistence
-- [ ] **REQ-3A (Route Rejection):** The algorithm must implement a sanity rule to reject routes where the walking time ratio is disproportionately high (e.g., walking ratio >= 0.6 of total time), ensuring practical public transport suggestions.
-- [ ] **REQ-3B (Result Controls):** The user must be able to set the shortlist size and choose a supported sort mode.
-- [ ] **REQ-3C (Preference Persistence):** The application should restore the last successful search preferences locally on startup.
-- [ ] **REQ-3D (Settings Persistence):** The application should restore the selected persona preset and dark-mode choice on startup.
+### 4.3 Anti-Walk-Dominant Routing Logic
+- [ ] **REQ-3A (Walking Cap):** The user must be able to set an acceptable walking time per trip segment (defaulting to 10 minutes).
+- [ ] **REQ-3B (Route Rejection):** The algorithm must implement a sanity rule to reject routes where the walking time ratio is disproportionately high (e.g., walking ratio >= 0.6 of total time), ensuring practical public transport suggestions.
+- [ ] **REQ-3C (Result Controls):** The user must be able to set the shortlist size and choose a supported sort mode.
+- [ ] **REQ-3D (Preference Persistence):** The application should restore the last successful search preferences locally on startup.
+- [ ] **REQ-3E (Settings Persistence):** The application should restore the selected persona preset and dark-mode choice on startup.
 
 ### 4.4 Output and Display
 - [ ] **REQ-4A (Shortlist Generation):** The system must deterministically output a shortlist of the top N listings (default N=10) that pass all filters.
