@@ -11,14 +11,15 @@
 - [x] US2: Rent filter against curated housing listings dataset
 - [x] GUI started
 
-## Week 10 — v0.3 (MVP)
+## Week 10 — v0.3 (Current Release Scope)
 - [x] US3: Commute time cap via local travel-time matrix lookup
-- [x] US4 + US5: Air-con toggle + results display panel (top 10 listings)
-- [x] Tag and release `v0.2` artifacts
-- [x] GUI finishing
+- [x] US4 + US5: Air-con toggle + ranked results display with commute summary
+- [x] US6 + US7: Walk-dominant route filter + transit/walking breakdown in output
+- [x] US8: Persona presets + dark mode settings
+- [x] Persist last-used search preferences locally
+- [x] Write and run test cases
+- [x] Tag and release `v0.3` artifacts
 
-## Week 11 — v0.4 (Alpha)
-- [ ] US6 + US7: Walk-dominant route filter + transit/walking breakdown in output (Features in 'GitHub Issues')
-- [ ] UX Issues as flagged on GitHub
-- [ ] Write and run test cases
-- [ ] Tag and release `v0.3` artifacts
+## Post-v0.3 Follow-ups
+- [ ] Review new UX issues as flagged on GitHub
+- [ ] Expand tests alongside future feature work

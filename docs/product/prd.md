@@ -2,7 +2,7 @@
 
 **Product:** MapsAroundYou — Smart Rental Search
 **Version:** 1.0
-**Last Updated:** March 6, 2026
+**Last Updated:** April 14, 2026
 **Status:** Active
 
 ---
@@ -24,9 +24,10 @@ International students and new working professionals arriving in Singapore face 
 ## 3. Goals
 
 - Help users filter rental listings by commute time from a chosen supported destination.
-- Surface only listings within the user's rent budget, commute cap, and walking cap.
+- Surface only listings within the user's rent budget, commute cap, transfer cap, and walking cap.
 - Let users choose shortlist size and sort mode while preserving deterministic ordering.
 - Provide a breakdown of transit time, walking time, and transfers for each shortlisted listing (V1.4).
+- Restore last-used search preferences and settings for returning users.
 - Deliver the product as a runnable offline JAR with a GUI.
 
 ### Non-Goals
@@ -56,15 +57,15 @@ International students and new working professionals arriving in Singapore face 
 
 | Release | Milestone | Target |
 |---------|-----------|--------|
-| **V1.2** | First Feature Increment — destination + rent filter | Week 9 |
-| **V1.3** | MVP — commute time cap + shortlist output | Week 10 |
-| **V1.4** | Alpha — anti-walk filter + commute breakdown | Week 11 |
+| **v0.1** | Project setup, CI baseline, and initial runnable artifacts | Week 8 |
+| **v0.2** | First increment — destination + rent filter with GUI baseline | Week 9 |
+| **v0.3** | Current release — richer filters, route breakdown, settings, and persistence | Week 10 |
 
 ---
 
 ## 6. Features and User Stories
 
-### V1.2 — First Feature Increment
+### Implemented Before v0.3
 
 #### US1 — Set Primary Destination
 As a renter, I want to set a primary destination (e.g., NUS, NTU, SMU, NUH, Orchard) so that listings can be evaluated by commute distance.
@@ -82,15 +83,15 @@ As a renter, I want to set a maximum rent limit so that I only see affordable op
 
 ---
 
-### V1.3 — MVP
+### Included In v0.3
 
 #### US3 — Set Commute Time Cap
 As a renter, I want to filter listings by a maximum travel time limit so that I can manage my daily travel.
 
 **Acceptance Criteria:**
 - User can input a maximum travel time in minutes via the GUI.
-- System looks up basic commute time using the bundled local travel-time matrix and excludes listings exceeding the cap.
-- User can also input a maximum walking time in minutes.
+- System looks up commute time using the bundled local travel-time matrix and excludes listings exceeding the cap.
+- User can also input maximum walking time and maximum transfers.
 
 #### US4 — Require Air-Conditioning
 As a renter, I want to require air-conditioning so that unsuitable listings are removed.
@@ -104,12 +105,8 @@ As a renter, I want to see a clean output of the best matching listings in a dis
 
 **Acceptance Criteria:**
 - System outputs the top N listings (default N=10) that pass all filters to the right display panel.
-- Each listing card displays the rent, aircon status, and commute summary, including total commute, walking time, and transfers.
+- Each listing row displays rent, aircon status, and commute summary, including total commute, walking time, and transfers.
 - User can choose whether results are sorted by commute, rent, or a balanced score.
-
----
-
-### V1.4 — Alpha
 
 #### US6 — Anti-Walk-Dominant Route Filter
 As a renter, I want the system to reject routes that are primarily walking so that I receive realistic public transport suggestions.
@@ -124,7 +121,7 @@ As a renter, I want to see the commute details split by transit and walking so t
 **Acceptance Criteria:**
 - The output for each shortlisted item specifies "Transit Time", "Walking Time", and "Transfers".
 
-#### US8 — Set Persona Preset *(Stretch)*
+#### US8 — Set Persona Preset
 As a renter, I want to select a preset (Student vs. Worker) so that default time caps and budgets are automatically applied.
 
 **Acceptance Criteria:**
@@ -132,7 +129,7 @@ As a renter, I want to select a preset (Student vs. Worker) so that default time
 - Selecting `Worker` sets `Max rent (SGD)` to `2000`, `Max commute (minutes)` to `65`, and turns `Require aircon` off.
 - User can manually override these default values in the left input panel before searching.
 - On first app startup, the persona preset starts as `New User`, and the app prompts the user to choose between `Student` and `Worker`.
-- After that, users can change the persona preset via the `Settings` window (and the updated defaults remain editable).
+- After that, users can change the persona preset via the `Settings` window, and the updated defaults remain editable.
 - The `Settings` window also includes a `Dark mode` toggle.
 
 ---
@@ -146,7 +143,7 @@ As a renter, I want to select a preset (Student vs. Worker) so that default time
 | FR-01 | User can select a supported destination from a predefined list via a dropdown or text field. |
 | FR-02 | User can set a maximum monthly rent (SGD integer). |
 | FR-03 | User can set a maximum commute time in minutes. |
-| FR-04 | User can set a maximum walking time in minutes. |
+| FR-04 | User can set a maximum transfer count and maximum walking time in minutes. |
 | FR-05 | User can toggle an "Air-Con Required" filter. |
 | FR-06 | User can choose a result limit and sort mode for the shortlist. |
 | FR-07 | System validates all inputs before executing a search. Invalid destination IDs return a user-friendly error. |
@@ -160,29 +157,30 @@ As a renter, I want to select a preset (Student vs. Worker) so that default time
 | FR-10 | System excludes listings without air-con when the aircon filter is enabled. |
 | FR-11 | System computes commute time from each listing's `originNodeId` to the selected destination using the local travel-time dataset. |
 | FR-12 | System excludes listings where computed `totalMinutes > maxCommuteMinutes`. |
-| FR-13 | System excludes listings where computed `walkMinutes > maxWalkMinutes`. |
+| FR-13 | System excludes listings where computed `transfers > maxTransfers` or `walkMinutes > maxWalkMinutes`. |
+| FR-14 | System can reject listings where the walking ratio (`walkMinutes / totalMinutes`) is greater than or equal to the configured walk-dominant threshold when the user enables the filter. |
 
 ### 7.3 Ranking and Results Display
 
 | ID | Requirement |
 |----|-------------|
-| FR-14 | Shortlisted listings are ranked deterministically according to the selected sort mode, with stable tie-breakers. |
-| FR-15 | Results panel displays the top N listings (default N=10) with rent, aircon status, total commute, walking time, and transfers per row. |
-| FR-16 | User can click a listing to view full details including a split commute breakdown for total time, transit, walk, transfers, and fare (V1.4). |
+| FR-15 | Shortlisted listings are ranked deterministically according to the selected sort mode, with stable tie-breakers. |
+| FR-16 | Results panel displays the top N listings (default N=10) with rent, aircon status, total commute, walking time, and transfers per row. |
+| FR-17 | User can click a listing to view full details including a split commute breakdown for total time, transit, walk, transfers, and fare (V1.4). |
 
-### 7.4 Commute Breakdown (V1.4)
+### 7.4 Persistence and Settings
 
 | ID | Requirement |
 |----|-------------|
-| FR-17 | System provides transit time, walking time, number of transfers, and fare for each listing. |
-| FR-18 | System can reject listings where the walking ratio (`walkMinutes / totalMinutes`) is greater than or equal to the configured walk-dominant threshold when the user enables the filter. |
+| FR-18 | System provides transit time, walking time, number of transfers, and fare for each listing. |
+| FR-19 | The application persists the last successful search preferences locally and restores them on startup when possible. |
+| FR-20 | The application stores and restores the persona preset and dark-mode choice for returning users. |
 
 ### 7.5 Data Freshness Notice
 
 | ID | Requirement |
 |----|-------------|
-| FR-19 | The UI displays a notice such as "Data accurate as of \<last-updated date\>" based on dataset metadata. |
-| FR-20 | The application persists the last successful search preferences locally and restores them on startup when possible. |
+| FR-21 | The UI displays a notice such as "Data accurate as of \<last-updated date\>" based on dataset metadata. |
 
 ---
 
@@ -208,11 +206,11 @@ As a renter, I want to select a preset (Student vs. Worker) so that default time
 | **TravelTimeRecord** | `originNodeId`, `destinationId`, `totalMinutes`, `transitMinutes`, `walkMinutes`, `transfers`, `source` |
 | **TravelTimeMatrix** | keyed lookup: `Map<originNodeId, Map<destinationId, TravelTimeRecord>>` |
 | **RentalListing** | `listingId`, `title`, `monthlyRent`, `hasAircon`, `originNodeId`, `address`, `roomType`, `sourcePlatform`, `destinationTags`, `notes` |
-| **UserPreferences** | `destinationId`, `maxRent`, `maxCommuteMinutes`, `maxWalkMinutes`, `requireAircon`, `transportMode`, `resultLimit`, `sortMode`, `excludeWalkDominantRoutes` |
+| **UserPreferences** | `destinationId`, `maxRent`, `maxCommuteMinutes`, `maxTransfers`, `maxWalkMinutes`, `requireAircon`, `transportMode`, `resultLimit`, `sortMode`, `excludeWalkDominantRoutes` |
 | **CommuteEstimate** | `totalMinutes`, `transitMinutes`, `walkMinutes`, `transfers`, `routeStations` |
 | **SearchResult** | `listing`, `commute`, `score` |
 
-All data is loaded from local files. The MVP transport mode defaults to public transport; walking is modelled minimally (V1.4).
+All data is loaded from local files. The current release defaults to public transport and includes walking/transfers in the shipped commute output.
 
 ---
 
