@@ -44,6 +44,15 @@
     -fx-background-color: #262626;
 }
 
+.table-view .table-cell {
+    -fx-text-fill: #e6e6e6;
+}
+
+/* TableCell text is typically a Text node; ensure it doesn't fall back to black when focus changes. */
+.table-view .table-cell .text {
+    -fx-fill: #e6e6e6;
+}
+
 .table-row-cell {
     -fx-background-color: #262626;
 }
@@ -52,3 +61,53 @@
     -fx-background-color: #242424;
 }
 
+/* Table selection: Modena's default accent can read as thin blue cell dividers on dark rows.
+   Use a full-row muted fill (similar intent to light mode's blue bar, tuned for dark UI). */
+.table-view:focused .table-row-cell:filled:selected,
+.table-view:focused .table-row-cell:filled:selected:focused {
+    -fx-background-color: #2a4f6e;
+    -fx-background-insets: 0;
+}
+
+.table-view:focused .table-row-cell:filled:odd:selected,
+.table-view:focused .table-row-cell:filled:odd:selected:focused {
+    -fx-background-color: #2a4f6e;
+}
+
+.table-view:focused .table-row-cell:filled:selected .table-cell,
+.table-view:focused .table-row-cell:filled:selected:focused .table-cell {
+    -fx-background-color: #2a4f6e;
+    -fx-border-color: #2a4f6e;
+    -fx-text-fill: #f5f9fc;
+}
+
+.table-view .table-row-cell:filled:selected,
+.table-view .table-row-cell:filled:selected:focused {
+    -fx-background-color: #254560;
+    -fx-background-insets: 0;
+}
+
+.table-view .table-row-cell:filled:odd:selected,
+.table-view .table-row-cell:filled:odd:selected:focused {
+    -fx-background-color: #254560;
+}
+
+.table-view .table-row-cell:filled:selected .table-cell,
+.table-view .table-row-cell:filled:selected:focused .table-cell {
+    -fx-background-color: #254560;
+    -fx-border-color: #254560;
+    -fx-text-fill: #eef3f7;
+}
+
+.table-view .table-row-cell:filled:selected .text,
+.table-view:focused .table-row-cell:filled:selected .text {
+    -fx-fill: #f5f9fc;
+}
+
+.table-view:focused .table-row-cell:filled:selected .table-cell .label {
+    -fx-text-fill: #f5f9fc;
+}
+
+.table-view .table-row-cell:filled:selected .table-cell .label {
+    -fx-text-fill: #eef3f7;
+}
