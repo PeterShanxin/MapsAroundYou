@@ -10,7 +10,7 @@
 
 ---
 
-## Implemented Before v0.4
+## Implemented Before v0.3
 
 - [x] **US1 - Set Primary Destination**
   - **As a** renter, **I want** to set a primary destination (e.g., NUS, NTU, SMU, NUH, Orchard) **so that** listings can be evaluated by commute distance.

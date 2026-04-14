@@ -66,7 +66,7 @@ International students and new working professionals arriving in Singapore face 
 
 ## 6. Features and User Stories
 
-### Implemented Before v0.4
+### Implemented Before v0.3 (v0.1-v0.2)
 
 #### US1 — Set Primary Destination
 As a renter, I want to set a primary destination (e.g., NUS, NTU, SMU, NUH, Orchard) so that listings can be evaluated by commute distance.
