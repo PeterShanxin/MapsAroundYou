@@ -1,5 +1,6 @@
 package mapsaroundyou.gui;
 
+import mapsaroundyou.app.SearchRequest;
 import mapsaroundyou.common.AppConfig;
 import mapsaroundyou.common.InvalidInputException;
 import mapsaroundyou.model.Destination;
@@ -16,6 +17,19 @@ public final class GuiSearchRequestParser {
     private GuiSearchRequestParser() {
     }
 
+    /**
+     * Parses UI fields into a validated {@link SearchRequest}, using the default transfer cap.
+     *
+     * @param destination selected destination
+     * @param maxRentRaw max rent field value
+     * @param maxCommuteRaw max commute field value
+     * @param maxWalkRaw max walk field value
+     * @param requireAircon whether air-conditioning is required
+     * @param resultLimitRaw result limit field value
+     * @param sortMode chosen sort mode
+     * @param excludeWalkDominantRoutes whether walk-dominant routes are rejected
+     * @return validated request snapshot
+     */
     public static SearchRequest parse(
             Destination destination,
             String maxRentRaw,
@@ -39,6 +53,20 @@ public final class GuiSearchRequestParser {
         );
     }
 
+    /**
+     * Parses UI fields into a validated {@link SearchRequest}.
+     *
+     * @param destination selected destination
+     * @param maxRentRaw max rent field value
+     * @param maxCommuteRaw max commute field value
+     * @param maxTransfersRaw max transfers field value
+     * @param maxWalkRaw max walk field value
+     * @param requireAircon whether air-conditioning is required
+     * @param resultLimitRaw result limit field value
+     * @param sortMode chosen sort mode
+     * @param excludeWalkDominantRoutes whether walk-dominant routes are rejected
+     * @return validated request snapshot
+     */
     public static SearchRequest parse(
             Destination destination,
             String maxRentRaw,
@@ -72,6 +100,16 @@ public final class GuiSearchRequestParser {
         );
     }
 
+    /**
+     * Parses a minimal set of UI inputs into a request, using deterministic defaults for
+     * unspecified fields.
+     *
+     * @param destination selected destination
+     * @param maxRentRaw max rent field value
+     * @param maxCommuteRaw max commute field value
+     * @param requireAircon whether air-conditioning is required
+     * @return validated request snapshot
+     */
     public static SearchRequest parse(
             Destination destination,
             String maxRentRaw,

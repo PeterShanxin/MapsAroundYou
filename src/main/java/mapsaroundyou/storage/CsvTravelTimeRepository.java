@@ -11,9 +11,13 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import mapsaroundyou.common.DataLoadException;
+import mapsaroundyou.common.DatasetIntegrityException;
+import mapsaroundyou.common.DatasetIOException;
 import mapsaroundyou.model.CommuteEstimate;
 
+/**
+ * {@link TravelTimeRepository} backed by a UTF-8 CSV matrix with a header row.
+ */
 public final class CsvTravelTimeRepository implements TravelTimeRepository {
     private static final String[] REQUIRED_HEADERS = {
             "flat_id",
@@ -30,10 +34,24 @@ public final class CsvTravelTimeRepository implements TravelTimeRepository {
     private final Set<String> knownDestinations;
     private final Map<String, Set<String>> knownDestinationsByOrigin;
 
+    /**
+     * Loads travel times from a classpath resource.
+     *
+     * @param resourcePath resource path relative to the class loader
+     * @throws DatasetIOException if the file cannot be read or closed
+     * @throws DatasetIntegrityException if the CSV is empty, duplicated, or malformed
+     */
     public CsvTravelTimeRepository(String resourcePath) {
         this(CsvSupport.classpathReader(resourcePath), resourcePath);
     }
 
+    /**
+     * Loads travel times from an absolute filesystem path.
+     *
+     * @param filePath CSV location on disk
+     * @throws DatasetIOException if the file cannot be read or closed
+     * @throws DatasetIntegrityException if the CSV is empty, duplicated, or malformed
+     */
     public CsvTravelTimeRepository(Path filePath) {
         this(CsvSupport.fileReader(filePath), filePath.toString());
     }
@@ -47,6 +65,9 @@ public final class CsvTravelTimeRepository implements TravelTimeRepository {
         this.knownDestinationsByOrigin = buildKnownDestinationsByOrigin(commuteByOriginThenDestination);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Optional<CommuteEstimate> findByOriginAndDestination(String originNodeId, String destinationId) {
         return Optional.ofNullable(commuteByOriginThenDestination
@@ -54,11 +75,17 @@ public final class CsvTravelTimeRepository implements TravelTimeRepository {
                 .get(destinationId));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Set<String> findKnownOrigins() {
         return knownOrigins;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @SuppressFBWarnings(
             value = "EI_EXPOSE_REP",
@@ -68,6 +95,9 @@ public final class CsvTravelTimeRepository implements TravelTimeRepository {
         return knownDestinations;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @SuppressFBWarnings(
             value = "EI_EXPOSE_REP",
@@ -87,13 +117,13 @@ public final class CsvTravelTimeRepository implements TravelTimeRepository {
                 Map<String, CommuteEstimate> byDestination =
                         commutes.computeIfAbsent(originNodeId, ignored -> new LinkedHashMap<>());
                 if (byDestination.containsKey(destinationId)) {
-                    throw new DataLoadException("Duplicate travel-time pair in " + sourceName + ": "
+                    throw new DatasetIntegrityException("Duplicate travel-time pair in " + sourceName + ": "
                             + originNodeId + " -> " + destinationId);
                 }
 
                 int ptTransfers = CsvSupport.parseRequiredInt(record, "pt_transfers", sourceName);
                 if (ptTransfers < 0) {
-                    throw new DataLoadException("Invalid pt_transfers value (must be non-negative) in "
+                    throw new DatasetIntegrityException("Invalid pt_transfers value (must be non-negative) in "
                             + sourceName + " for " + originNodeId + " -> " + destinationId + ": " + ptTransfers);
                 }
 
@@ -109,10 +139,10 @@ public final class CsvTravelTimeRepository implements TravelTimeRepository {
                 byDestination.put(destinationId, commuteEstimate);
             }
         } catch (java.io.IOException exception) {
-            throw new DataLoadException("Failed to close dataset: " + sourceName, exception);
+            throw new DatasetIOException("Failed to close dataset: " + sourceName, exception);
         }
         if (commutes.isEmpty()) {
-            throw new DataLoadException("No travel-time records found in " + sourceName);
+            throw new DatasetIntegrityException("No travel-time records found in " + sourceName);
         }
         return commutes;
     }

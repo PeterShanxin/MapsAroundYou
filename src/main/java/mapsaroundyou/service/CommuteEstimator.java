@@ -1,6 +1,7 @@
 package mapsaroundyou.service;
 
-import mapsaroundyou.common.DataLoadException;
+import mapsaroundyou.common.DatasetIntegrityException;
+import mapsaroundyou.common.InvalidInputException;
 import mapsaroundyou.model.CommuteEstimate;
 import mapsaroundyou.model.TransportMode;
 import mapsaroundyou.storage.TravelTimeRepository;
@@ -11,16 +12,29 @@ import mapsaroundyou.storage.TravelTimeRepository;
 public class CommuteEstimator {
     private final TravelTimeRepository travelTimeRepository;
 
+    /**
+     * @param travelTimeRepository matrix lookup backend
+     */
     public CommuteEstimator(TravelTimeRepository travelTimeRepository) {
         this.travelTimeRepository = travelTimeRepository;
     }
 
+    /**
+     * Looks up a public-transit commute between an origin node and destination.
+     *
+     * @param originNodeId matrix row key
+     * @param destinationId matrix column key
+     * @param transportMode currently only {@link TransportMode#PUBLIC_TRANSPORT} is supported
+     * @return commute breakdown
+     * @throws InvalidInputException if the mode is unsupported
+     * @throws DatasetIntegrityException if the matrix lacks the requested pair
+     */
     public CommuteEstimate estimate(String originNodeId, String destinationId, TransportMode transportMode) {
         if (transportMode != TransportMode.PUBLIC_TRANSPORT) {
-            throw new DataLoadException("Unsupported transport mode: " + transportMode);
+            throw new InvalidInputException("Unsupported transport mode: " + transportMode);
         }
         return travelTimeRepository.findByOriginAndDestination(originNodeId, destinationId)
-                .orElseThrow(() -> new DataLoadException(
+                .orElseThrow(() -> new DatasetIntegrityException(
                         "No commute record for origin " + originNodeId + " and destination " + destinationId));
     }
 }

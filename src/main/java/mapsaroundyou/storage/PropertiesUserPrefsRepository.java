@@ -1,6 +1,6 @@
 package mapsaroundyou.storage;
 
-import mapsaroundyou.common.DataLoadException;
+import mapsaroundyou.common.DatasetIOException;
 import mapsaroundyou.model.SortMode;
 import mapsaroundyou.model.TransportMode;
 import mapsaroundyou.model.UserPreferences;
@@ -30,6 +30,9 @@ public class PropertiesUserPrefsRepository implements UserPrefsRepository {
 
     private final Path preferencesPath;
 
+    /**
+     * @param preferencesPath filesystem path used for persistence
+     */
     public PropertiesUserPrefsRepository(Path preferencesPath) {
         this.preferencesPath = preferencesPath;
     }
@@ -90,7 +93,7 @@ public class PropertiesUserPrefsRepository implements UserPrefsRepository {
                 properties.store(outputStream, "MapsAroundYou user preferences");
             }
         } catch (IOException exception) {
-            throw new DataLoadException("Failed to save user preferences.", exception);
+            throw new DatasetIOException("Failed to save user preferences.", exception);
         }
     }
 

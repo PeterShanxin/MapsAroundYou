@@ -11,6 +11,12 @@ public final class GuiTaskRunner {
     private GuiTaskRunner() {
     }
 
+    /**
+     * Runs the supplied JavaFX {@link Task} on a daemon thread.
+     *
+     * @param task task to execute
+     * @param threadName name used for the spawned background thread
+     */
     public static void run(Task<?> task, String threadName) {
         Objects.requireNonNull(task, "task");
         Objects.requireNonNull(threadName, "threadName");

@@ -1,5 +1,6 @@
 package mapsaroundyou.cli;
 import mapsaroundyou.common.InvalidInputException;
+import mapsaroundyou.common.MapsAroundYouException;
 import mapsaroundyou.common.NoResultsException;
 import mapsaroundyou.logic.SearchLogic;
 import mapsaroundyou.model.Destination;
@@ -11,25 +12,42 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Orchestrates CLI execution for interactive and flag-driven modes.
  */
 public final class CliApplication {
+    private static final Logger LOGGER = Logger.getLogger(CliApplication.class.getName());
+
     private final SearchLogic searchLogic;
     private final CliCommandParser commandParser;
     private final CliPrinter cliPrinter;
 
+    /**
+     * Creates a CLI runner with injected collaborators (used by tests and {@link MapsAroundYouApp}).
+     *
+     * @param searchLogic domain workflow
+     * @param commandParser argv parser
+     * @param cliPrinter stdout/stderr writer
+     */
     public CliApplication(SearchLogic searchLogic, CliCommandParser commandParser, CliPrinter cliPrinter) {
         this.searchLogic = searchLogic;
         this.commandParser = commandParser;
         this.cliPrinter = cliPrinter;
     }
 
+    /**
+     * Parses arguments, dispatches to help/interactive/search flows, and returns a process exit
+     * code.
+     *
+     * @param args raw CLI arguments
+     * @return {@code 0} on success, {@code 1} on user error or unexpected failure
+     */
     public int run(String[] args) {
-        cliPrinter.printBanner(searchLogic.getDatasetMetadata());
-
         try {
+            cliPrinter.printBanner(searchLogic.getDatasetMetadata());
             ParsedCommand parsedCommand = commandParser.parse(args);
             return switch (parsedCommand.commandType()) {
             case HELP -> runHelp();
@@ -43,18 +61,31 @@ public final class CliApplication {
             cliPrinter.printError("Interactive mode ended before all inputs were provided.");
             cliPrinter.printHelp();
             return 1;
-        } catch (RuntimeException exception) {
+        } catch (MapsAroundYouException exception) {
             cliPrinter.printError(exception.getMessage());
+            cliPrinter.printHelp();
+            return 1;
+        } catch (Exception exception) {
+            LOGGER.log(Level.SEVERE, "Unexpected error in CLI", exception);
+            cliPrinter.printError("Unexpected error: " + exception.getMessage());
             cliPrinter.printHelp();
             return 1;
         }
     }
 
+    /**
+     * Prints usage information and returns success.
+     */
     private int runHelp() {
         cliPrinter.printHelp();
         return 0;
     }
 
+    /**
+     * Prompts for destination and filters in a loop until the user exits.
+     *
+     * @return process exit code ({@code 0} on orderly exit)
+     */
     private int runInteractive() {
         List<Destination> destinations = searchLogic.getSupportedDestinations();
         cliPrinter.printDestinations(destinations);
@@ -113,8 +144,11 @@ public final class CliApplication {
                     runSearch(preferences);
                 } catch (NoResultsException exception) {
                     cliPrinter.printNoResults(exception.getMessage());
-                } catch (RuntimeException exception) {
+                } catch (MapsAroundYouException exception) {
                     cliPrinter.printError(exception.getMessage());
+                } catch (Exception exception) {
+                    LOGGER.log(Level.SEVERE, "Unexpected error in interactive search", exception);
+                    cliPrinter.printError("Unexpected error: " + exception.getMessage());
                 }
 
                 String nextAction = prompt(scanner, "Press Enter to search again or type exit");
@@ -163,7 +197,7 @@ public final class CliApplication {
         try {
             return Integer.parseInt(rawValue);
         } catch (NumberFormatException exception) {
-            throw new InvalidInputException(label + " must be a valid integer.");
+            throw new InvalidInputException(label + " must be a valid integer.", exception);
         }
     }
 

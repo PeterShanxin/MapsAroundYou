@@ -19,6 +19,13 @@ public class PersistentSearchLogic implements SearchLogic {
     private final SearchLogic delegate;
     private final UserPrefsRepository userPrefsRepository;
 
+    /**
+     * Creates a decorator that loads persisted preferences on startup and saves preferences after
+     * successful searches.
+     *
+     * @param delegate underlying search logic implementation
+     * @param userPrefsRepository persistence adapter for last-used preferences
+     */
     public PersistentSearchLogic(SearchLogic delegate, UserPrefsRepository userPrefsRepository) {
         this.delegate = Objects.requireNonNull(delegate, "delegate");
         this.userPrefsRepository = Objects.requireNonNull(userPrefsRepository, "userPrefsRepository");

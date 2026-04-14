@@ -1,6 +1,7 @@
 package mapsaroundyou.storage;
 
-import mapsaroundyou.common.DataLoadException;
+import mapsaroundyou.common.DatasetIntegrityException;
+import mapsaroundyou.common.DatasetIOException;
 import mapsaroundyou.model.RentalListing;
 
 import org.apache.commons.csv.CSVParser;
@@ -12,6 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * {@link ListingRepository} backed by a UTF-8 CSV with a header row.
+ */
 public final class CsvListingRepository implements ListingRepository {
     private static final String[] REQUIRED_HEADERS = {
             "listingId",
@@ -27,10 +31,24 @@ public final class CsvListingRepository implements ListingRepository {
 
     private final Map<String, RentalListing> listingsById;
 
+    /**
+     * Loads listings from a classpath resource.
+     *
+     * @param resourcePath resource path relative to the class loader
+     * @throws DatasetIOException if the file cannot be read or closed
+     * @throws DatasetIntegrityException if the CSV is empty, duplicated, or malformed
+     */
     public CsvListingRepository(String resourcePath) {
         this(CsvSupport.classpathReader(resourcePath), resourcePath);
     }
 
+    /**
+     * Loads listings from an absolute filesystem path.
+     *
+     * @param filePath CSV location on disk
+     * @throws DatasetIOException if the file cannot be read or closed
+     * @throws DatasetIntegrityException if the CSV is empty, duplicated, or malformed
+     */
     public CsvListingRepository(Path filePath) {
         this(CsvSupport.fileReader(filePath), filePath.toString());
     }
@@ -39,11 +57,17 @@ public final class CsvListingRepository implements ListingRepository {
         this.listingsById = load(readerSupplier, sourceName);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<RentalListing> findAll() {
         return List.copyOf(listingsById.values());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Optional<RentalListing> findById(String listingId) {
         return Optional.ofNullable(listingsById.get(listingId));
@@ -55,7 +79,7 @@ public final class CsvListingRepository implements ListingRepository {
             for (CSVRecord record : parser) {
                 String listingId = CsvSupport.requireValue(record, "listingId", sourceName);
                 if (listings.containsKey(listingId)) {
-                    throw new DataLoadException("Duplicate listing id in " + sourceName + ": " + listingId);
+                    throw new DatasetIntegrityException("Duplicate listing id in " + sourceName + ": " + listingId);
                 }
 
                 RentalListing listing = new RentalListing(
@@ -72,10 +96,10 @@ public final class CsvListingRepository implements ListingRepository {
                 listings.put(listingId, listing);
             }
         } catch (java.io.IOException exception) {
-            throw new DataLoadException("Failed to close dataset: " + sourceName, exception);
+            throw new DatasetIOException("Failed to close dataset: " + sourceName, exception);
         }
         if (listings.isEmpty()) {
-            throw new DataLoadException("No listings found in " + sourceName);
+            throw new DatasetIntegrityException("No listings found in " + sourceName);
         }
         return listings;
     }

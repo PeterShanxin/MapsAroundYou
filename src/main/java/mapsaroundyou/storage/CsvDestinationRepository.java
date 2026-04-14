@@ -1,6 +1,7 @@
 package mapsaroundyou.storage;
 
-import mapsaroundyou.common.DataLoadException;
+import mapsaroundyou.common.DatasetIntegrityException;
+import mapsaroundyou.common.DatasetIOException;
 import mapsaroundyou.model.Destination;
 
 import org.apache.commons.csv.CSVParser;
@@ -12,15 +13,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * {@link DestinationRepository} backed by a UTF-8 CSV with a header row.
+ */
 public final class CsvDestinationRepository implements DestinationRepository {
     private static final String[] REQUIRED_HEADERS = {"ID", "Category", "Location Name", "Postal Code"};
 
     private final Map<String, Destination> destinationsById;
 
+    /**
+     * Loads destinations from a classpath resource.
+     *
+     * @param resourcePath resource path relative to the class loader
+     * @throws DatasetIOException if the file cannot be read or closed
+     * @throws DatasetIntegrityException if the CSV is empty, duplicated, or malformed
+     */
     public CsvDestinationRepository(String resourcePath) {
         this(CsvSupport.classpathReader(resourcePath), resourcePath);
     }
 
+    /**
+     * Loads destinations from an absolute filesystem path.
+     *
+     * @param filePath CSV location on disk
+     * @throws DatasetIOException if the file cannot be read or closed
+     * @throws DatasetIntegrityException if the CSV is empty, duplicated, or malformed
+     */
     public CsvDestinationRepository(Path filePath) {
         this(CsvSupport.fileReader(filePath), filePath.toString());
     }
@@ -29,11 +47,17 @@ public final class CsvDestinationRepository implements DestinationRepository {
         this.destinationsById = load(readerSupplier, sourceName);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<Destination> findAll() {
         return List.copyOf(destinationsById.values());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Optional<Destination> findById(String destinationId) {
         return Optional.ofNullable(destinationsById.get(destinationId));
@@ -45,7 +69,8 @@ public final class CsvDestinationRepository implements DestinationRepository {
             for (CSVRecord record : parser) {
                 String destinationId = CsvSupport.requireValue(record, "ID", sourceName);
                 if (destinations.containsKey(destinationId)) {
-                    throw new DataLoadException("Duplicate destination id in " + sourceName + ": " + destinationId);
+                    throw new DatasetIntegrityException(
+                            "Duplicate destination id in " + sourceName + ": " + destinationId);
                 }
 
                 Destination destination = new Destination(
@@ -58,10 +83,10 @@ public final class CsvDestinationRepository implements DestinationRepository {
                 destinations.put(destinationId, destination);
             }
         } catch (java.io.IOException exception) {
-            throw new DataLoadException("Failed to close dataset: " + sourceName, exception);
+            throw new DatasetIOException("Failed to close dataset: " + sourceName, exception);
         }
         if (destinations.isEmpty()) {
-            throw new DataLoadException("No destinations found in " + sourceName);
+            throw new DatasetIntegrityException("No destinations found in " + sourceName);
         }
         return destinations;
     }

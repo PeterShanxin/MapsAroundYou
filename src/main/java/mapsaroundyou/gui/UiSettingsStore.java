@@ -20,6 +20,9 @@ public final class UiSettingsStore {
 
     private final Preferences preferences;
 
+    /**
+     * Creates a settings store backed by the current user's preference node.
+     */
     public UiSettingsStore() {
         this(Preferences.userNodeForPackage(UiSettingsStore.class));
     }
@@ -28,6 +31,11 @@ public final class UiSettingsStore {
         this.preferences = Objects.requireNonNull(preferences, "preferences");
     }
 
+    /**
+     * Loads the last-selected persona preset.
+     *
+     * @return stored preset, or {@link PersonaPreset#NEW_USER} when unset/invalid
+     */
     public PersonaPreset loadPersonaPreset() {
         String stored;
         try {
@@ -46,6 +54,11 @@ public final class UiSettingsStore {
         }
     }
 
+    /**
+     * Persists the selected persona preset.
+     *
+     * @param preset preset to store
+     */
     public void savePersonaPreset(PersonaPreset preset) {
         Objects.requireNonNull(preset, "preset");
         try {
@@ -55,6 +68,11 @@ public final class UiSettingsStore {
         }
     }
 
+    /**
+     * Returns whether dark mode is enabled.
+     *
+     * @return {@code true} if enabled
+     */
     public boolean isDarkModeEnabled() {
         try {
             return preferences.getBoolean(KEY_DARK_MODE_ENABLED, false);
@@ -63,11 +81,31 @@ public final class UiSettingsStore {
         }
     }
 
+    /**
+     * Persists the dark mode toggle value.
+     *
+     * @param enabled whether dark mode is enabled
+     */
     public void setDarkModeEnabled(boolean enabled) {
         try {
             preferences.putBoolean(KEY_DARK_MODE_ENABLED, enabled);
         } catch (RuntimeException unused) {
             // Best-effort persistence only.
+        }
+    }
+
+    /**
+     * Resets UI settings back to defaults.
+     *
+     * <p>On next launch, persona preset will be treated as unset and therefore
+     * {@link PersonaPreset#NEW_USER}, triggering onboarding again.</p>
+     */
+    public void resetToDefaults() {
+        try {
+            preferences.remove(KEY_PERSONA_PRESET);
+            preferences.remove(KEY_DARK_MODE_ENABLED);
+        } catch (RuntimeException unused) {
+            // Best-effort reset only.
         }
     }
 }

@@ -39,10 +39,20 @@ public enum PersonaPreset {
         this.defaultValues = defaultValues;
     }
 
+    /**
+     * Returns the human-friendly preset label.
+     *
+     * @return display name
+     */
     public String displayName() {
         return displayName;
     }
 
+    /**
+     * Returns deterministic defaults for this preset when available.
+     *
+     * @return default values, or empty for presets that do not prefill fields
+     */
     public Optional<PersonaPresetAppliedValues> defaultValues() {
         return Optional.ofNullable(defaultValues);
     }

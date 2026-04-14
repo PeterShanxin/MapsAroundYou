@@ -18,10 +18,22 @@ public enum SortMode {
         this.cliValue = cliValue;
     }
 
+    /**
+     * Returns the CLI token for this sort mode.
+     *
+     * @return CLI value (lowercase)
+     */
     public String cliValue() {
         return cliValue;
     }
 
+    /**
+     * Parses a CLI token into a {@link SortMode}.
+     *
+     * @param rawValue user-supplied token
+     * @return matching sort mode
+     * @throws IllegalArgumentException when unknown
+     */
     public static SortMode fromCliValue(String rawValue) {
         String normalized = rawValue == null ? "" : rawValue.trim().toLowerCase(Locale.ROOT);
         for (SortMode sortMode : values()) {

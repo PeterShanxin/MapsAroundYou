@@ -1,5 +1,8 @@
 package mapsaroundyou.gui;
 
+import mapsaroundyou.app.DefaultGuiSearchService;
+import mapsaroundyou.app.SearchRequest;
+import mapsaroundyou.app.SearchResponse;
 import mapsaroundyou.logic.SearchLogic;
 import mapsaroundyou.model.CommuteEstimate;
 import mapsaroundyou.model.DatasetMetadata;
@@ -24,12 +27,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class GuiSearchServiceTest {
     @Test
     void constructor_nullSearchLogic_throwsNullPointerException() {
-        assertThrows(NullPointerException.class, () -> new GuiSearchService(null));
+        assertThrows(NullPointerException.class, () -> new DefaultGuiSearchService(null));
     }
 
     @Test
     void search_nullRequest_throwsNullPointerException() {
-        GuiSearchService service = new GuiSearchService(new RecordingSearchLogic());
+        DefaultGuiSearchService service = new DefaultGuiSearchService(new RecordingSearchLogic());
 
         assertThrows(NullPointerException.class, () -> service.search(null));
     }
@@ -37,7 +40,7 @@ class GuiSearchServiceTest {
     @Test
     void search_validRequest_setsSearchLogicStateAndReturnsResponse() {
         RecordingSearchLogic searchLogic = new RecordingSearchLogic();
-        GuiSearchService service = new GuiSearchService(searchLogic);
+        DefaultGuiSearchService service = new DefaultGuiSearchService(searchLogic);
 
         SearchRequest request = new SearchRequest(
                 "D01",
@@ -61,7 +64,7 @@ class GuiSearchServiceTest {
     @Test
     void getSupportedDestinations_delegatesToSearchLogic() {
         RecordingSearchLogic searchLogic = new RecordingSearchLogic();
-        GuiSearchService service = new GuiSearchService(searchLogic);
+        DefaultGuiSearchService service = new DefaultGuiSearchService(searchLogic);
 
         List<Destination> destinations = service.getSupportedDestinations();
 
@@ -71,7 +74,7 @@ class GuiSearchServiceTest {
     @Test
     void getDatasetMetadata_delegatesToSearchLogic() {
         RecordingSearchLogic searchLogic = new RecordingSearchLogic();
-        GuiSearchService service = new GuiSearchService(searchLogic);
+        DefaultGuiSearchService service = new DefaultGuiSearchService(searchLogic);
 
         DatasetMetadata metadata = service.getDatasetMetadata();
 
@@ -81,7 +84,7 @@ class GuiSearchServiceTest {
     @Test
     void getListingDetails_delegatesToSearchLogic() {
         RecordingSearchLogic searchLogic = new RecordingSearchLogic();
-        GuiSearchService service = new GuiSearchService(searchLogic);
+        DefaultGuiSearchService service = new DefaultGuiSearchService(searchLogic);
 
         ListingDetails details = service.getListingDetails("L001");
 
@@ -92,7 +95,7 @@ class GuiSearchServiceTest {
     @Test
     void getCurrentPreferences_delegatesToSearchLogic() {
         RecordingSearchLogic searchLogic = new RecordingSearchLogic();
-        GuiSearchService service = new GuiSearchService(searchLogic);
+        DefaultGuiSearchService service = new DefaultGuiSearchService(searchLogic);
 
         assertEquals(searchLogic.currentPreferences, service.getCurrentPreferences());
     }

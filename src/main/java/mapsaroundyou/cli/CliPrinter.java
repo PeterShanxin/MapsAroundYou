@@ -11,6 +11,11 @@ import java.util.List;
  * Handles terminal output formatting.
  */
 public class CliPrinter {
+    /**
+     * Prints the CLI banner including dataset provenance metadata.
+     *
+     * @param datasetMetadata freshness and source description
+     */
     public void printBanner(DatasetMetadata datasetMetadata) {
         System.out.println("MapsAroundYou CLI");
         System.out.println("Offline smart rental search scaffold");
@@ -19,6 +24,9 @@ public class CliPrinter {
         System.out.println();
     }
 
+    /**
+     * Prints command usage, Gradle invocation hints, and examples.
+     */
     public void printHelp() {
         String jarPlaceholder = "<path-to-MapsAroundYou-<version>-all.jar>";
 
@@ -52,6 +60,11 @@ public class CliPrinter {
         System.out.println();
     }
 
+    /**
+     * Prints the supported destination table for interactive mode.
+     *
+     * @param destinations dataset-backed destinations
+     */
     public void printDestinations(List<Destination> destinations) {
         System.out.println("Supported destinations:");
         for (Destination destination : destinations) {
@@ -63,6 +76,9 @@ public class CliPrinter {
         System.out.println();
     }
 
+    /**
+     * Prints short instructions specific to interactive prompts.
+     */
     public void printInteractiveInstructions() {
         System.out.println("Interactive mode");
         System.out.println("Type 'exit' at the destination prompt to quit.");
@@ -71,6 +87,11 @@ public class CliPrinter {
         System.out.println();
     }
 
+    /**
+     * Prints a ranked listing table with rent, commute, and score details.
+     *
+     * @param results ranked shortlist from the logic layer
+     */
     public void printResults(List<SearchResult> results) {
         System.out.println("Top matches:");
         int rank = 1;
@@ -100,15 +121,28 @@ public class CliPrinter {
         System.out.println();
     }
 
+    /**
+     * Prints a user-facing explanation when a search yields no matches.
+     *
+     * @param message domain-specific guidance
+     */
     public void printNoResults(String message) {
         System.out.println(message);
         System.out.println();
     }
 
+    /**
+     * Prints an error line to standard error.
+     *
+     * @param message user-visible error text
+     */
     public void printError(String message) {
         System.err.println("Error: " + message);
     }
 
+    /**
+     * Prints the farewell line when exiting interactive mode.
+     */
     public void printGoodbye() {
         System.out.println("Exiting MapsAroundYou CLI.");
     }

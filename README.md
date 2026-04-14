@@ -40,6 +40,10 @@ Run the local quality gate:
 .\gradlew clean check
 ```
 
+## Documentation
+
+- **User Guide (end users)**: [`docs/UserGuide.md`](docs/UserGuide.md)
+
 ## Current Scope
 
 - The project currently supports both JavaFX GUI and CLI entrypoints.
