@@ -93,5 +93,20 @@ public final class UiSettingsStore {
             // Best-effort persistence only.
         }
     }
+
+    /**
+     * Resets UI settings back to defaults.
+     *
+     * <p>On next launch, persona preset will be treated as unset and therefore
+     * {@link PersonaPreset#NEW_USER}, triggering onboarding again.</p>
+     */
+    public void resetToDefaults() {
+        try {
+            preferences.remove(KEY_PERSONA_PRESET);
+            preferences.remove(KEY_DARK_MODE_ENABLED);
+        } catch (RuntimeException unused) {
+            // Best-effort reset only.
+        }
+    }
 }
 

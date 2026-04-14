@@ -13,6 +13,8 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Separator;
 import javafx.scene.control.SelectionMode;
@@ -459,6 +461,39 @@ public final class MapsAroundYouGuiApp extends Application {
             applyDarkMode(enabled);
         });
 
+        Button resetButton = new Button("Reset to defaults");
+        resetButton.setOnAction(event -> {
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, null, ButtonType.OK, ButtonType.CANCEL);
+            confirm.setTitle("Reset settings");
+            confirm.setHeaderText("Confirm reset");
+            Label content = new Label(
+                    "Reset settings back to defaults?\n\n"
+                            + "This will turn off dark mode and you will be prompted to choose a persona on next launch."
+            );
+            content.setWrapText(true);
+            confirm.getDialogPane().setContent(content);
+            confirm.getDialogPane().setPrefWidth(520);
+            confirm.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+            maybeAddStylesheet(confirm.getDialogPane().getScene());
+
+            ButtonType result = confirm.showAndWait().orElse(ButtonType.CANCEL);
+            if (result != ButtonType.OK) {
+                return;
+            }
+
+            uiSettingsStore.resetToDefaults();
+
+            // Apply defaults immediately for this session.
+            darkModeToggle.setSelected(false);
+            applyDarkMode(false);
+
+            currentPersonaPreset = PersonaPreset.STUDENT;
+            personaPresetSelector.setValue(PersonaPreset.STUDENT);
+            applyPersonaPreset(PersonaPreset.STUDENT);
+
+            setStatus("Settings reset. Persona will be asked on next launch.");
+        });
+
         Button closeButton = new Button("Close");
         closeButton.setOnAction(event -> settingsStage.close());
 
@@ -471,12 +506,13 @@ public final class MapsAroundYouGuiApp extends Application {
         form.add(personaPresetSelector, 1, row++);
         form.add(new Separator(), 0, row++, 2, 1);
         form.add(darkModeToggle, 0, row, 2, 1);
-        form.add(closeButton, 0, row + 1, 2, 1);
+        form.add(resetButton, 0, row + 1, 2, 1);
+        form.add(closeButton, 0, row + 2, 2, 1);
 
         VBox content = new VBox(10, form);
         content.setPadding(new Insets(12));
 
-        Scene settingsScene = new Scene(content, 320, 210);
+        Scene settingsScene = new Scene(content, 320, 250);
         if (uiSettingsStore.isDarkModeEnabled()) {
             maybeAddStylesheet(settingsScene);
         }
