@@ -468,7 +468,8 @@ public final class MapsAroundYouGuiApp extends Application {
             confirm.setHeaderText("Confirm reset");
             Label content = new Label(
                     "Reset settings back to defaults?\n\n"
-                            + "This will turn off dark mode and you will be prompted to choose a persona on next launch."
+                            + "This will turn off dark mode and you will be prompted to choose a persona "
+                            + "on next launch."
             );
             content.setWrapText(true);
             confirm.getDialogPane().setContent(content);
