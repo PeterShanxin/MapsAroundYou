@@ -4,9 +4,12 @@ MapsAroundYou is an **offline smart rental search** app that helps you shortlist
 
 ![MapsAroundYou logo](../src/main/resources/mapsaroundyou/gui/MapsAroundYou_Logo.png)
 
+This document is the **canonical end-user User Guide** for MapsAroundYou. It focuses on how to run and use the app (GUI + CLI), not on developer internals or data generation.
+
 ## Table of Contents
 
 - [Quick Start](#quick-start)
+- [CLI command reference](#cli-command-reference)
 - [Features](#features)
   - [Notes about usage formats (GUI & CLI)](#notes-about-usage-formats-gui--cli)
   - [GUI: Run a search and view results](#gui-run-a-search-and-view-results)
@@ -15,6 +18,9 @@ MapsAroundYou is an **offline smart rental search** app that helps you shortlist
   - [CLI: Interactive mode](#cli-interactive-mode)
   - [CLI: Flag-driven search](#cli-flag-driven-search)
   - [CLI: Help](#cli-help)
+- [End-to-end usage scenario](#end-to-end-usage-scenario)
+- [Troubleshooting](#troubleshooting)
+- [Maintenance note](#maintenance-note)
 - [FAQ](#faq)
 - [Known Issues](#known-issues)
 - [Summary / Cheat Sheet](#summary--cheat-sheet)
@@ -87,6 +93,65 @@ Clone or download the repository, then open a terminal in the repository root.
   2. Enter a destination id such as `D01` when prompted.
   3. Press **Enter** to accept defaults in brackets for the other prompts.
   4. Type `exit` at the destination prompt to quit.
+
+## CLI command reference
+
+MapsAroundYou’s CLI supports **three** entry flows:
+
+- **Interactive mode**: run with **no arguments**.
+- **Flag-driven search**: run `search` with required flags.
+- **Help**: run `--help` / `-h` / `help` (or `search --help`).
+
+### Commands
+
+#### Interactive mode (default)
+
+- **Windows**: `.\gradlew run`
+- **macOS/Linux**: `./gradlew run`
+
+Interactive mode prints:
+
+- **Supported destinations** list
+- `Interactive mode` instructions
+- A sequence of prompts (see [CLI: Interactive mode](#cli-interactive-mode))
+
+Exit by typing `exit` or `quit` at:
+
+- the **Destination ID** prompt, or
+- the **“Press Enter to search again or type exit”** prompt
+
+#### `search` (one-off search)
+
+Run one search and print results, then exit.
+
+**Required flags**
+
+- `--destination <ID>`
+- `--max-rent <SGD>` (integer, \( \ge 0 \))
+- `--max-commute <minutes>` (integer, \( \ge 1 \))
+
+**Optional flags**
+
+- `--max-transfers <count>` (integer, \( \ge 0 \); if omitted, uses your saved/default preference)
+- `--max-walk <minutes>` (integer, \( \ge 0 \); if omitted, uses your saved/default preference)
+- `--result-limit <count>` (integer, \( \ge 1 \); if omitted, uses your saved/default preference)
+- `--sort <commute|rent|balanced>` (if omitted, uses your saved/default preference)
+- `--require-aircon` (switch; if present, requires aircon)
+- `--exclude-walk-dominant` (switch; if present, excludes walk-dominant routes)
+
+**Exit codes**
+
+- `0`: success (including “no results”)
+- `1`: user error (unknown command/flag, missing required flag, invalid values, unknown destination) or unexpected failure
+
+#### Help
+
+All of these print usage text:
+
+- `.\gradlew run --args="--help"`
+- `.\gradlew run --args="-h"`
+- `.\gradlew run --args="help"`
+- `.\gradlew run --args="search --help"`
 
 ## Features
 
@@ -235,6 +300,8 @@ Interactive mode prompts you for search preferences and allows repeated searches
 
 - The CLI prints a “Supported destinations” list first.
 - Pressing **Enter** accepts the value in brackets.
+- The destination prompt is shown as `Destination ID [<default>]:`.
+- The sort prompt is shown as `Sort mode (commute/rent/balanced) [<default>]:`.
 - A successful search prints a ranked list including rent, commute breakdown (transit/walk), address, room type, and score.
 - If a search yields no matches, the CLI prints a “no results” message and continues.
 
@@ -279,7 +346,8 @@ Runs a single search using a structured command.
 **Expected behavior**
 
 - If you omit an optional flag, the CLI reuses your current stored preference for that field.
-- Unknown commands or flags print an error message plus help text.
+- Unknown commands or flags print an error message to stderr (prefixed with `Error:`) plus help text.
+- If you pass `search --help`, the CLI prints help (same as `help`).
 
 **Examples**
 
@@ -306,6 +374,107 @@ or
 ```powershell
 .\gradlew run --args="help"
 ```
+
+## End-to-end usage scenario
+
+This scenario shows a realistic “shortlist apartments for commute + rent” flow end-to-end, using the CLI (works the same way conceptually in the GUI).
+
+### Scenario: shortlist close-to-commute rentals (CLI)
+
+1. Launch interactive CLI:
+
+   ```powershell
+   .\gradlew run
+   ```
+
+2. Pick a destination ID from the printed “Supported destinations” list, then enter your constraints:
+   - Destination ID: `D01`
+   - Max rent: `1800`
+   - Max commute: `35`
+   - Max transfers: `1`
+   - Max walking time: `10`
+   - Require aircon: `y`
+   - Result limit: `10`
+   - Sort mode: `commute`
+   - Exclude walk-dominant routes: `n`
+
+3. Expected output shape (example):
+
+```text
+MapsAroundYou CLI
+Offline smart rental search scaffold
+Data accurate as of 2026-03-08 | Fixture dataset
+
+Supported destinations:
+  D01  NUS                                                    (University)
+
+Interactive mode
+Type 'exit' at the destination prompt to quit.
+Press Enter to keep the value shown in brackets.
+You can leave max transfers high to avoid filtering by interchange count.
+
+Top matches:
+1. Fixture Listing [L001]
+   Rent: SGD 1500 | Commute: 30 min (20 transit / 10 walk) | Aircon: Yes
+   Address: 123 Demo Street | Type: HDB room | Score: 0.50
+```
+
+4. If the results look too restrictive, loosen a constraint (e.g., increase max rent or max commute) and search again.
+
+## Troubleshooting
+
+### The CLI prints an error and shows help
+
+If the CLI can’t parse your command, it prints a single-line error to stderr prefixed with `Error:` and then prints help.
+
+Common fixes:
+
+- **Unknown command** (`Error: Unknown command: ...`): use `help` or `search`.
+- **Unknown flag** (`Error: Unknown flag: ...`): check spelling (e.g., `--max-rent`, not `--max-rentt`).
+- **Missing required flag** (`Error: Missing required flag: --destination`): ensure you passed all required flags for `search`.
+- **Missing value for a flag** (`Error: Missing value for flag: --max-rent`): every value-flag must be followed by a value.
+- **Invalid integer** (`Error: --max-commute must be a valid integer.`): only whole numbers are accepted.
+- **Out-of-range values**:
+  - `--max-commute` must be at least 1
+  - `--max-rent`, `--max-transfers`, `--max-walk` must be at least 0
+  - `--result-limit` must be at least 1
+
+### Interactive mode ended early (piped input / missing lines)
+
+If you see:
+
+- `Error: Interactive mode ended before all inputs were provided.`
+
+Run again and provide a full set of inputs, or avoid piping incomplete stdin.
+
+### Startup error (dataset failed to load)
+
+If you see:
+
+- `Startup error: ...`
+
+Try:
+
+1. Run the quality gate to surface build/runtime issues:
+
+   ```powershell
+   .\gradlew clean check
+   ```
+
+2. Ensure you didn’t delete or move the bundled dataset under `src/main/resources/commute_data/`.
+
+### The GUI won’t start
+
+First confirm Java 21+ and then try `.\gradlew runGui`. If you are on Windows ARM64, see [Known Issues](#known-issues).
+
+## Maintenance note
+
+If the CLI flags, prompts, or GUI controls change, update this User Guide by cross-checking:
+
+- CLI usage text printed by the app (`help`)
+- The CLI parser (`src/main/java/mapsaroundyou/cli/CliCommandParser.java`)
+- The interactive prompt flow (`src/main/java/mapsaroundyou/cli/CliApplication.java`)
+- The GUI labels/controls (`src/main/java/mapsaroundyou/gui/MapsAroundYouGuiApp.java`)
 
 ## FAQ
 
