@@ -8,11 +8,12 @@
 
 A desktop GUI application that helps newcomers to Singapore find rental listings based on a primary destination (e.g., campus, office, hospital, or landmark) and commute constraints, delivered as a runnable JAR.
 
-### In-scope (by the roadmap)
+### In-scope for the current `v0.3` release
 
-- **V1.2**: Set primary destination + filter by monthly rent
-- **V1.3 (MVP)**: Commute time cap + generate shortlist output
-- **V1.4 (Alpha)**: Anti-walk-dominant route filter + commute summary breakdown
+- Primary destination selection plus monthly rent filtering
+- Commute, transfer, and walking caps with ranked shortlist output
+- Walk-dominant route rejection and commute summary breakdown
+- Persona presets, dark mode, and local preference persistence
 
 ### Out-of-scope (SDD-level assumptions)
 
@@ -34,7 +35,7 @@ Since we use local data, our app will be accurate only up to the last dataset up
 
 | Component | Description |
 |-----------|-------------|
-| **UI (GUI)** | Collects inputs from user, displays ranked results, displays listing details + commute breakdown |
+| **UI (GUI)** | Collects inputs from user, displays ranked results, manages settings, and shows listing details plus commute breakdown |
 | **Logic** | Sets up the search pipeline and exposes UI-friendly operations |
 | **Services** | CommuteEstimator, ListingFilter, ListingRanker, RouteAnalyzer |
 | **Model** | Entities (Listing, Destination, Preferences, Results) |
@@ -51,9 +52,10 @@ See [Architecture Overview](./architecture.md) for details.
 **Responsibilities**
 
 - Destination selection UI (supported destination picker)
-- Filter inputs: max rent, max commute mins, max walk mins, require aircon, result limit, sort mode, walk-dominant toggle
-- Results list/table: top matches + basic fields
-- Details panel/dialog: full listing + commute breakdown (V1.4)
+- Filter inputs: max rent, max commute mins, max transfers, max walk mins, require aircon, result limit, sort mode, walk-dominant toggle
+- Results list/table: top matches plus rent, aircon status, total commute, walking time, and transfers
+- Settings surface: persona preset and dark-mode toggle
+- Details panel/dialog: full listing plus commute breakdown
 
 **Outputs**
 
@@ -75,7 +77,7 @@ See [Architecture Overview](./architecture.md) for details.
 - `updatePreferences(preferences)`
 - `generateShortlist()` → `List<SearchResult>`
 - `getListingDetails(listingId)` → `ListingDetails`
-- `getCommuteDetails(listingId)` → `CommuteEstimate` (V1.4)
+- `getCommuteDetails(listingId)` → `CommuteEstimate`
 
 ### 3.3 Services
 
@@ -84,7 +86,7 @@ See [Architecture Overview](./architecture.md) for details.
 | **ListingFilter** | `filterByRent(listings, maxRent)`, `filterByAircon(listings, requireAircon)` |
 | **CommuteEstimator** | `estimate(originNodeId, destinationId, mode)` → `CommuteEstimate` — Implementation: local travel-time matrix lookup |
 | **ListingRanker** | Deterministic selectable sorting/scoring (see §5) |
-| **RouteAnalyzer** (V1.4) | `isWalkDominant(commuteEstimate)` → `bool`, `summarize(commuteEstimate)` → `CommuteSummary` |
+| **RouteAnalyzer** | `isWalkDominant(commuteEstimate)` → `bool`, `summarize(commuteEstimate)` → `CommuteSummary` |
 
 ### 3.4 Model (Domain)
 
@@ -109,8 +111,8 @@ Immutable-ish entities; lightweight DTOs between layers.
 | **TravelTimeRecord** | `originNodeId: String`, `destinationId: String`, `totalMinutes: int`, optional: `transitMinutes`, `walkMinutes`, `transfers`, `source` |
 | **TravelTimeMatrix** | `lookup: Map<String, Map<String, TravelTimeRecord>>` |
 | **RentalListing** | `listingId: String`, `title: String`, `monthlyRent: int`, `hasAircon: boolean`, `originNodeId: String`, optional: `address`, `roomType`, `sourcePlatform`, `destinationTags`, `notes` |
-| **UserPreferences** | `destinationId: String`, `maxRent: int`, `maxCommuteMinutes: int`, `maxWalkMinutes: int`, `requireAircon: boolean`, `transportMode: enum`, `resultLimit: int`, `sortMode: enum`, `excludeWalkDominantRoutes: boolean` |
-| **CommuteEstimate** | `totalMinutes: int`, `transitMinutes: int`, `walkMinutes: int` (0 for MVP), `transfers: int`, `routeStations: List<String>` |
+| **UserPreferences** | `destinationId: String`, `maxRent: int`, `maxCommuteMinutes: int`, `maxTransfers: int`, `maxWalkMinutes: int`, `requireAircon: boolean`, `transportMode: enum`, `resultLimit: int`, `sortMode: enum`, `excludeWalkDominantRoutes: boolean` |
+| **CommuteEstimate** | `totalMinutes: int`, `transitMinutes: int`, `walkMinutes: int`, `transfers: int`, `routeStations: List<String>` |
 | **SearchResult** | `listing: RentalListing`, `commute: CommuteEstimate`, `score: double` |
 
 ### 4.2 Relationships
@@ -124,25 +126,26 @@ Immutable-ish entities; lightweight DTOs between layers.
 
 ## 5. Core Workflows
 
-### Workflow A — Set Primary Destination (V1.2)
+### Workflow A — Set Primary Destination
 
 1. User selects a supported destination and other search preferences in the GUI or CLI.
 2. UI or CLI calls `Logic.updatePreferences(preferences)`.
 3. Logic stores the complete `UserPreferences`.
 4. Storage persists preferences after a successful search.
 
-### Workflow B — Generate Shortlist (MVP V1.3)
+### Workflow B — Generate Shortlist
 
-1. User sets destination, maxRent, maxCommuteMinutes, maxWalkMinutes, requireAircon, resultLimit, sortMode, and optional walk-dominant rejection, then clicks Search.
+1. User sets destination, maxRent, maxCommuteMinutes, maxTransfers, maxWalkMinutes, requireAircon, resultLimit, sortMode, and optional walk-dominant rejection, then clicks Search.
 2. UI calls `Logic.generateShortlist()`.
 3. Logic loads listings (Storage).
-4. ListingFilter applies rent + aircon filters.
+4. ListingFilter applies rent plus aircon filters.
 5. For each remaining listing: `CommuteEstimator.estimate(listing.originNodeId, destinationId, 'PUBLIC_TRANSPORT')` — discard if `totalMinutes > maxCommuteMinutes`.
-6. Discard listings where `walkMinutes > maxWalkMinutes`.
-7. If enabled, `RouteAnalyzer.isWalkDominant()` discards routes where `walkMinutes / totalMinutes` is greater than or equal to the configured threshold.
-8. ListingRanker computes score and sorts results according to `sortMode`.
-9. Logic truncates the ranked results to `resultLimit`.
-10. UI displays ranked results.
+6. Discard listings where `transfers > maxTransfers`.
+7. Discard listings where `walkMinutes > maxWalkMinutes`.
+8. If enabled, `RouteAnalyzer.isWalkDominant()` discards routes where `walkMinutes / totalMinutes` is greater than or equal to the configured threshold.
+9. ListingRanker computes score and sorts results according to `sortMode`.
+10. Logic truncates the ranked results to `resultLimit`.
+11. UI displays ranked results.
 
 ```mermaid
 flowchart TD
@@ -157,25 +160,28 @@ flowchart TD
     H -- Yes --> J[For each listing: CommuteEstimator.estimate via travel-time lookup]
     J --> K{totalMinutes > maxCommuteMinutes?}
     K -- Yes --> L[Discard listing]
-    K -- No --> M[RouteAnalyzer.isWalkDominant]
-    M --> N{walkMinutes / totalMinutes >= threshold?}
-    N -- Yes --> O[Discard listing]
-    N -- No --> P[Keep listing]
-    L --> Q{More listings?}
-    O --> Q
-    P --> Q
-    Q -- Yes --> J
-    Q -- No --> R{Results non-empty?}
-    R -- None --> I
-    R -- Yes --> S[ListingRanker: sort by commute → rent → listingId]
-    S --> T[Return SearchResultViewModel list]
-    T --> U([UI renders ranked results panel])
+    K -- No --> M{transfers > maxTransfers?}
+    M -- Yes --> L
+    M -- No --> N{walkMinutes > maxWalkMinutes?}
+    N -- Yes --> L
+    N -- No --> O[RouteAnalyzer.isWalkDominant]
+    O --> P{walkMinutes / totalMinutes >= threshold?}
+    P -- Yes --> L
+    P -- No --> Q[Keep listing]
+    L --> R{More listings?}
+    Q --> R
+    R -- Yes --> J
+    R -- No --> S{Results non-empty?}
+    S -- None --> I
+    S -- Yes --> T[ListingRanker: apply selected sort mode]
+    T --> U[Return SearchResultViewModel list]
+    U --> V([UI renders ranked results panel])
 ```
 
-### Workflow C — Commute Breakdown (V1.4)
+### Workflow C — Commute Breakdown
 
 1. User opens listing details (click result).
-2. Logic returns CommuteEstimate + route summary.
+2. Logic returns CommuteEstimate plus route summary.
 3. `RouteAnalyzer.summarize()` formats the transit, walking, transfer, and total-time breakdown.
 4. UI displays breakdown: transit vs walking, transfers, total time.
 
@@ -189,6 +195,7 @@ flowchart TD
     F --> G[Return CommuteSummary: transitMinutes, walkMinutes, transfers, total]
     G --> H([UI renders commute breakdown panel])
 ```
+
 ---
 
 ## 6. Ranking and Scoring (Deterministic)
@@ -213,7 +220,7 @@ score = w1 * (normalizedCommute) + w2 * (normalizedRent)
 
 ### Constraints
 
-- MVP runs offline
+- Current release runs offline
 - GUI required for all core user flows
 - Deliverable must be runnable as a JAR
 - Data loaded from local files (JSON/CSV); schema must be validated on load
@@ -221,9 +228,9 @@ score = w1 * (normalizedCommute) + w2 * (normalizedRent)
 ### Assumptions
 
 - Destination is represented as a supported campus, office, hospital, or place from a finite list
-- Each listing provides `originNodeId` for travel-time lookup (no geocoding in MVP)
+- Each listing provides `originNodeId` for travel-time lookup (no geocoding in the shipped release)
 - Commute times are approximations derived from precomputed local travel-time records
-- MVP transport mode defaults to public transport; walking modeled minimally (V1.4)
+- Transport mode defaults to public transport; walking and transfers are included in shipped commute output
 
 ---
 

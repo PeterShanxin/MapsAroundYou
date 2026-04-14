@@ -24,14 +24,30 @@ From the repository root:
 
 Use this entrypoint for the current desktop user flow.
 
-### Run the Interactive CLI
+### Run the Default Gradle Entry Point
 
 ```powershell
 .\gradlew run
 ```
 
-The default mode is interactive and stays open for repeated searches until the user types `exit`.
-Each search will prompt for:
+This launches the packaged JavaFX application through the same launcher used by the runnable JAR.
+
+### Run the CLI from the Runnable Fat JAR
+
+First build the fat JAR:
+
+```powershell
+.\gradlew shadowJar
+```
+
+Then run the CLI entrypoint directly:
+
+```powershell
+java -cp .\build\libs\MapsAroundYou-0.3-all.jar mapsaroundyou.cli.MapsAroundYouApp
+```
+
+Interactive mode stays open for repeated searches until the user types `exit`.
+Each search prompt covers:
 
 - destination id
 - max rent
@@ -48,7 +64,7 @@ Blank interactive answers keep the value shown in brackets.
 ### Run the Flag-Driven CLI
 
 ```powershell
-.\gradlew run --args="search --destination D01 --max-rent 2200 --max-commute 45 --max-transfers 1 --max-walk 10 --result-limit 5 --sort balanced --require-aircon --exclude-walk-dominant"
+java -cp .\build\libs\MapsAroundYou-0.3-all.jar mapsaroundyou.cli.MapsAroundYouApp search --destination D01 --max-rent 2200 --max-commute 45 --max-transfers 1 --max-walk 10 --result-limit 5 --sort balanced --require-aircon --exclude-walk-dominant
 ```
 
 Supported flags:
@@ -66,7 +82,7 @@ Supported flags:
 ### Help Output
 
 ```powershell
-.\gradlew run --args="--help"
+java -cp .\build\libs\MapsAroundYou-0.3-all.jar mapsaroundyou.cli.MapsAroundYouApp --help
 ```
 
 ### Local Preferences
