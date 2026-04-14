@@ -11,7 +11,7 @@
 - [x] US2: Rent filter against curated housing listings dataset
 - [x] GUI started
 
-## Week 10 — v0.3 (Current Release Scope)
+## Week 10 — v0.3 (Released)
 - [x] US3: Commute time cap via local travel-time matrix lookup
 - [x] US4 + US5: Air-con toggle + ranked results display with commute summary
 - [x] US6 + US7: Walk-dominant route filter + transit/walking breakdown in output
@@ -20,6 +20,13 @@
 - [x] Write and run test cases
 - [x] Tag and release `v0.3` artifacts
 
-## Post-v0.3 Follow-ups
+## Week 11 — v0.4 (Current Release Scope)
+- [x] Fold professor-feedback hardening into the shipped app surface
+- [x] Enforce Javadoc coverage for public APIs
+- [x] Keep the GUI behind the application-layer search facade
+- [x] Surface walk and transfer constraint values more clearly in results
+- [x] Tag and release `v0.4` artifacts
+
+## Post-v0.4 Follow-ups
 - [ ] Review new UX issues as flagged on GitHub
 - [ ] Expand tests alongside future feature work

@@ -8,12 +8,16 @@
 
 A desktop GUI application that helps newcomers to Singapore find rental listings based on a primary destination (e.g., campus, office, hospital, or landmark) and commute constraints, delivered as a runnable JAR.
 
-### In-scope for the current `v0.3` release
+### In-scope for the current `v0.4` release
 
 - Primary destination selection plus monthly rent filtering
 - Commute, transfer, and walking caps with ranked shortlist output
 - Walk-dominant route rejection and commute summary breakdown
 - Persona presets, dark mode, and local preference persistence
+- Domain-specific error handling at CLI and GUI boundaries
+- Public API documentation enforced through Javadoc-oriented quality checks
+- JavaFX access routed through the application-layer `GuiSearchService` facade
+- Results and details surfaces tuned to show walking time, transfers, and split commute facts more clearly
 
 ### Out-of-scope (SDD-level assumptions)
 

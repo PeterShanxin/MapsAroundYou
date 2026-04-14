@@ -59,13 +59,14 @@ International students and new working professionals arriving in Singapore face 
 |---------|-----------|--------|
 | **v0.1** | Project setup, CI baseline, and initial runnable artifacts | Week 8 |
 | **v0.2** | First increment — destination + rent filter with GUI baseline | Week 9 |
-| **v0.3** | Current release — richer filters, route breakdown, settings, and persistence | Week 10 |
+| **v0.3** | Previous release — richer filters, route breakdown, settings, and persistence | Week 10 |
+| **v0.4** | Current release — professor-feedback hardening, GUI application boundary cleanup, and clearer results UX | Week 11 |
 
 ---
 
 ## 6. Features and User Stories
 
-### Implemented Before v0.3
+### Implemented Before v0.4
 
 #### US1 — Set Primary Destination
 As a renter, I want to set a primary destination (e.g., NUS, NTU, SMU, NUH, Orchard) so that listings can be evaluated by commute distance.
@@ -131,6 +132,13 @@ As a renter, I want to select a preset (Student vs. Worker) so that default time
 - On first app startup, the persona preset starts as `New User`, and the app prompts the user to choose between `Student` and `Worker`.
 - After that, users can change the persona preset via the `Settings` window, and the updated defaults remain editable.
 - The `Settings` window also includes a `Dark mode` toggle.
+
+### Polish And Hardening In v0.4
+
+- Strengthened domain-specific error handling so CLI and GUI surfaces can distinguish load, validation, and lookup failures more clearly.
+- Enforced Javadoc coverage for public APIs to keep the codebase reviewable as the architecture matures.
+- Preserved the intended dependency direction by routing JavaFX through an application-layer `GuiSearchService` facade instead of exposing `SearchLogic` directly.
+- Made the results UX easier to scan by surfacing walking time and transfer counts in the results table and splitting commute facts more clearly in the selected-listing details area.
 
 ---
 

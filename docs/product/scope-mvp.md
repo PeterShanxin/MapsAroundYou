@@ -2,7 +2,7 @@
 
 **Project Name:** Smart Rental Search Algorithm
 **Module:** CS2103DE Team Project (tP)
-**Target Release:** v0.3
+**Target Release:** v0.4
 **Format:** Standalone Desktop Application (Java/GUI)
 
 ## 1. Product Overview
@@ -17,7 +17,7 @@ The Smart Rental Search Algorithm is a desktop Java application designed to reve
 - [ ] **Right Display Panel (Results):** A scrollable list displaying the generated shortlist of rental units. Each result row will show the rent, aircon status, and the key commute values users filter on, including total commute, walking time, and transfers.
 - [ ] **Settings Surface:** Lets users choose a persona preset and dark mode, and preserves those settings for later app launches.
 
-## 4. Functional Requirements (v0.3 Scope)
+## 4. Functional Requirements (v0.4 Scope)
 
 ### 4.1 Destination and Commute Filtering
 - [ ] **REQ-1A (Destination Input):** The GUI must provide a dropdown or text field for the user to select their primary destination address (e.g., specific MRT stations or campuses).
@@ -46,4 +46,4 @@ The Smart Rental Search Algorithm is a desktop Java application designed to reve
 ## 6. Non-Functional Requirements
 - [ ] **Performance:** The filtering algorithm and GUI update must complete the search and display results within 2 seconds of the user clicking "Search."
 - [ ] **Portability:** The final product must be fully self-contained within a `.jar` executable, requiring only a standard Java Runtime Environment (JRE) to run on Windows, macOS, or Linux.
-- [ ] **Offline Capability:** The core v0.3 functionality must operate entirely without an active internet connection.
+- [ ] **Offline Capability:** The core v0.4 functionality must operate entirely without an active internet connection.
