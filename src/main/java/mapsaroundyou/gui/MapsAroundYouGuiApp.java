@@ -1,6 +1,7 @@
 package mapsaroundyou.gui;
 
 import javafx.application.Application;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
@@ -30,6 +31,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Modality;
@@ -62,6 +64,7 @@ import java.util.function.Function;
 public final class MapsAroundYouGuiApp extends Application {
     private static final int MIN_WIDTH = 1000;
     private static final int MIN_HEIGHT = 600;
+    private static final int MAX_CONTENT_WIDTH = 1300;
     private static final int CONTROLS_PANEL_WIDTH = 340;
     private static final int RESULTS_TABLE_MIN_WIDTH = 500;
     private static final int LISTING_COLUMN_MIN_WIDTH = 180;
@@ -136,11 +139,16 @@ public final class MapsAroundYouGuiApp extends Application {
             return;
         }
 
-        BorderPane root = new BorderPane();
-        root.setPadding(new Insets(12));
-        root.setTop(buildHeader());
-        root.setLeft(buildControls());
-        root.setCenter(buildContentArea());
+        BorderPane contentRoot = new BorderPane();
+        contentRoot.setPadding(new Insets(12));
+        contentRoot.setTop(buildHeader());
+        contentRoot.setLeft(buildControls());
+        contentRoot.setCenter(buildContentArea());
+
+        StackPane root = new StackPane(contentRoot);
+        StackPane.setAlignment(contentRoot, Pos.TOP_CENTER);
+        contentRoot.prefWidthProperty().bind(Bindings.min(root.widthProperty(), MAX_CONTENT_WIDTH));
+        contentRoot.maxWidthProperty().bind(contentRoot.prefWidthProperty());
 
         Scene scene = new Scene(root, MIN_WIDTH, MIN_HEIGHT);
         this.mainScene = scene;
