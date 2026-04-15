@@ -20,7 +20,6 @@ This document is the **canonical end-user User Guide** for MapsAroundYou. It foc
   - [CLI: Help](#cli-help)
 - [End-to-end usage scenario](#end-to-end-usage-scenario)
 - [Troubleshooting](#troubleshooting)
-- [Maintenance note](#maintenance-note)
 - [FAQ](#faq)
 - [Known Issues](#known-issues)
 - [Summary / Cheat Sheet](#summary--cheat-sheet)
@@ -163,9 +162,12 @@ All of these print usage text:
   - Destination must be selected before searching.
   - Other fields are validated; invalid input shows an error in the status bar.
 - **Where results appear**:
-  - Results show in a table with columns including **Listing**, **Rent (SGD)**, **Commute**, **A/C**, and **Match**.
+  - Results show in a table with columns **Listing**, **Rent (SGD)**, **Commute**, **Walk**, **Transfers**, and **A/C**.
+  - When you click a row, the **Selected Listing** panel shows the full details including **Match**.
 - **What “Match” means**:
-  - The GUI displays a match score as a percentage (e.g., `82.5%`). Higher is better.
+  - **Match** is a **fit indicator** for your current filters. It is computed from the listing’s **rent** and **commute time**, relative to the maximum values you entered.
+  - A high Match usually means the listing is **comfortably under** your max rent and max commute (more “headroom”), not just barely passing.
+  - Use it to **compare** similar listings at a glance, but still check the actual numbers (rent, commute, walking, transfers) before deciding.
 
 #### CLI conventions
 
@@ -221,7 +223,7 @@ Runs an offline search using your selected destination and filters, then shows r
 **Tips / warnings**
 
 - **Max transfers**: set a high value if you don’t want to filter by interchange count (the CLI help explicitly suggests this).
-- **No walk-dominant routes**: excludes commutes where walking dominates the total time (the app uses an internal “walk dominant” threshold).
+- **No walk-dominant routes**: filters out results where **walking makes up most of the commute** (specifically, walking is **60% or more** of the total commute time). Enable this if you want routes that are primarily public transport rather than long walks.
 
 ---
 
@@ -262,7 +264,9 @@ The GUI includes lightweight settings for onboarding and appearance.
 
 **Expected behavior**
 
-- **Persona preset** pre-fills some defaults (for example max rent, max commute, and aircon preference).
+- **Persona preset** pre-fills **Max rent**, **Max commute**, and **Require aircon** with typical defaults for that persona. You can always override the fields after the preset is applied.
+  - **Student**: max rent `1400`, max commute `50`, require aircon `off`
+  - **Worker**: max rent `2000`, max commute `65`, require aircon `off`
 - **Dark mode** applies a dark theme stylesheet to the UI.
 - These settings are saved best-effort using Java’s `Preferences` store (OS-specific).
 
@@ -377,7 +381,65 @@ or
 
 ## End-to-end usage scenario
 
-This scenario shows a realistic “shortlist apartments for commute + rent” flow end-to-end, using the CLI (works the same way conceptually in the GUI).
+This section shows realistic “shortlist apartments for commute + rent” flows end-to-end.
+
+### Scenario: shortlist rentals using the GUI
+
+This walkthrough is written for a first-time user who wants to quickly narrow down rentals, then widen/tighten constraints based on the results.
+
+1. Launch the GUI:
+
+   ```powershell
+   .\gradlew runGui
+   ```
+
+   **Expected behavior**: A window titled **“MapsAroundYou”** opens, with a left-side filter panel, a results table (initially empty), and a **Selected Listing** details panel.
+
+2. Choose a destination in **Destination** (dropdown).
+
+   **Expected behavior**: The destination selection becomes active (you can search once a destination is selected).
+
+3. Enter a practical first-pass set of constraints in the left panel. For example:
+
+   - Max rent (SGD): `1800`
+   - Max commute (minutes): `45`
+   - Max transfers: `1`
+   - Max walking time (minutes): `10`
+   - Require aircon: checked
+   - Result limit: `10`
+   - No walk-dominant routes: checked
+
+   **Why this helps**: This combination finds places that fit your budget and a reasonable daily commute, while excluding routes that are mostly walking.
+
+4. Click **Search**.
+
+   **Expected behavior**:
+   - The app status changes to **“Searching…”** and the inputs are temporarily disabled.
+   - When finished, the status shows **“Found N result(s).”** and the results table fills with matching listings.
+
+5. Review the results table to spot promising options.
+
+   - Use the **Commute**, **Walk**, and **Transfers** columns to quickly rule out impractical routes.
+   - Use **Rent (SGD)** and **A/C** to confirm the listing meets your “must-haves”.
+
+   **Expected behavior**: If there are results, the first row is auto-selected and the details panel updates.
+
+6. Click a specific row to inspect it.
+
+   **Expected behavior**: The **Selected Listing** panel shows:
+   - Address, room type, rent, aircon
+   - Commute breakdown (total / transit / walk / transfers / fare)
+   - **Match** (shown as a percentage)
+   - Source platform and notes (if available)
+
+7. Refine or broaden your shortlist by adjusting one constraint and searching again.
+
+   Pick the change that matches what you learned from the first run:
+
+   - If you got **too few results**: increase **Max rent** (e.g., `1800` → `2000`) or **Max commute** (e.g., `45` → `55`), then click **Search** again.
+   - If you got **too many results**: lower **Result limit** (e.g., `10` → `5`), reduce **Max walking time**, or require fewer **Max transfers**, then click **Search** again.
+
+   **Expected behavior**: The results table refreshes to reflect the new constraints, and the details panel updates to the newly selected result.
 
 ### Scenario: shortlist close-to-commute rentals (CLI)
 
@@ -466,15 +528,6 @@ Try:
 ### The GUI won’t start
 
 First confirm Java 21+ and then try `.\gradlew runGui`. If you are on Windows ARM64, see [Known Issues](#known-issues).
-
-## Maintenance note
-
-If the CLI flags, prompts, or GUI controls change, update this User Guide by cross-checking:
-
-- CLI usage text printed by the app (`help`)
-- The CLI parser (`src/main/java/mapsaroundyou/cli/CliCommandParser.java`)
-- The interactive prompt flow (`src/main/java/mapsaroundyou/cli/CliApplication.java`)
-- The GUI labels/controls (`src/main/java/mapsaroundyou/gui/MapsAroundYouGuiApp.java`)
 
 ## FAQ
 
