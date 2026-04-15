@@ -1,0 +1,71 @@
+@startuml
+!include _style.iuml
+title Activity — Generate Shortlist
+
+|User|
+start
+:Click Search;
+|GUI|
+:Build SearchRequest;
+|Application|
+:GuiSearchService.search();
+|Logic|
+:SearchLogic.updatePreferences();
+:SearchLogic.generateShortlist();
+|Storage|
+:Load listings dataset;
+if (Schema valid?) then [no]
+  note right: throws DataLoadException
+  stop
+else [yes]
+endif
+|Service|
+:ListingFilter.filterByRent();
+:ListingFilter.filterByAircon();
+if (Listings remaining?) then [no]
+  note right: throws NoResultsException
+  stop
+else [yes]
+endif
+|Logic|
+repeat
+|Service|
+  :CommuteEstimator.estimate() via TravelTimeRepository;
+  if (totalMinutes > maxCommuteMinutes?) then [yes]
+    :Discard listing;
+  else [no]
+    if (transfers > maxTransfers?) then [yes]
+      :Discard listing;
+    else [no]
+      if (walkMinutes > maxWalkMinutes?) then [yes]
+        :Discard listing;
+      else [no]
+        if (excludeWalkDominantRoutes?) then [yes]
+          :RouteAnalyzer.isWalkDominant();
+          if (Walk dominant?) then [yes]
+            :Discard listing;
+          else [no]
+            :Keep listing;
+          endif
+        else [no]
+          :Keep listing;
+        endif
+      endif
+    endif
+  endif
+|Logic|
+repeat while (More listings?) is [yes]
+->  [no];
+if (Results empty?) then [yes]
+  note right: throws NoResultsException
+  stop
+else [no]
+endif
+|Service|
+:ListingRanker.rank(sortMode);
+|Logic|
+:Truncate to resultLimit;
+|GUI|
+:Render ranked results panel;
+stop
+@enduml

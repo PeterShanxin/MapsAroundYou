@@ -1,0 +1,31 @@
+@startuml
+!include _style.iuml
+title Architecture — Component Overview
+
+actor "User" as User
+component "GUI (JavaFX)" as GUI
+component "CLI" as CLI
+component "Application" as Application <<facade>>
+component "Logic" as Logic <<orchestrator>>
+component "Service" as Service
+component "Storage" as Storage
+component "Model" as Model
+component "Common" as Common
+
+User --> GUI
+User --> CLI
+GUI --> Application
+CLI --> Logic
+Application --> Logic
+Logic --> Service
+Logic --> Storage
+GUI ..> Model
+CLI ..> Model
+Application ..> Model
+Logic ..> Model
+Service ..> Model
+Storage ..> Model
+Logic ..> Common
+Service ..> Common
+Storage ..> Common
+@enduml

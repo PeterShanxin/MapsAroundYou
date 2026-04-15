@@ -1,0 +1,10 @@
+' Shared PlantUML styling — !include this file from other diagrams.
+' No @startuml/@enduml wrappers so it composes cleanly when included.
+skinparam shadowing false
+skinparam defaultFontName SansSerif
+skinparam ArrowColor #444444
+skinparam ComponentBorderColor #444444
+skinparam ActivityBorderColor #444444
+skinparam NoteBackgroundColor #FFFFEE
+skinparam NoteBorderColor #999999
+skinparam componentStyle uml2
