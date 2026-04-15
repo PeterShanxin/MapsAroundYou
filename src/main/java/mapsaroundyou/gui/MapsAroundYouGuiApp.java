@@ -83,6 +83,7 @@ public final class MapsAroundYouGuiApp extends Application {
     private static final int DETAILS_LABEL_WIDTH = 92;
     private static final String ICON_RESOURCE = "/mapsaroundyou/gui/MapsAroundYou_Logo.png";
     private static final String DARK_THEME_CSS_RESOURCE = "/mapsaroundyou/gui/dark-theme.css";
+    private static final String UNLIMITED_PROMPT_TEXT = "No limit";
 
     private GuiSearchService searchService;
     private final UiSettingsStore uiSettingsStore = new UiSettingsStore();
@@ -198,7 +199,7 @@ public final class MapsAroundYouGuiApp extends Application {
         maxRentField.setMaxWidth(Double.MAX_VALUE);
         maxCommuteField.setPromptText("e.g. 45");
         maxCommuteField.setMaxWidth(Double.MAX_VALUE);
-        maxTransfersField.setPromptText("e.g. 1");
+        maxTransfersField.setPromptText("e.g. 1 (" + UNLIMITED_PROMPT_TEXT + ": leave blank)");
         maxTransfersField.setMaxWidth(Double.MAX_VALUE);
         maxWalkField.setPromptText("e.g. 10");
         maxWalkField.setMaxWidth(Double.MAX_VALUE);
@@ -816,7 +817,12 @@ public final class MapsAroundYouGuiApp extends Application {
      */
     private void applyLoadedPreferencesExceptPersonaTouchingFields(UserPreferences preferences) {
         UserPreferences resolvedPreferences = preferences == null ? UserPreferences.defaults() : preferences;
-        maxTransfersField.setText(Integer.toString(Math.max(0, resolvedPreferences.maxTransfers())));
+        int transfers = Math.max(0, resolvedPreferences.maxTransfers());
+        if (transfers >= Integer.MAX_VALUE) {
+            maxTransfersField.setText("");
+        } else {
+            maxTransfersField.setText(Integer.toString(transfers));
+        }
         maxWalkField.setText(Integer.toString(resolvedPreferences.maxWalkMinutes()));
         resultLimitField.setText(Integer.toString(resolvedPreferences.resultLimit()));
         excludeWalkDominantRoutesCheckBox.setSelected(resolvedPreferences.excludeWalkDominantRoutes());
