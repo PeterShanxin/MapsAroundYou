@@ -1,0 +1,88 @@
+@startuml
+!include _style.iuml
+title Sequence — Generate Shortlist
+actor User
+participant ":MapsAroundYouGuiApp" as GuiApp
+participant ":DefaultGuiSearchService" as GuiSvc
+participant ":PersistentSearchLogic" as PersistLogic
+participant ":DefaultSearchLogic" as Logic
+participant ":ListingRepository" as ListingRepo
+participant ":ListingFilter" as Filter
+participant ":CommuteEstimator" as Commute
+participant ":TravelTimeRepository" as TravelRepo
+participant ":RouteAnalyzer" as Route
+participant ":ListingRanker" as Ranker
+participant ":UserPrefsRepository" as PrefsRepo
+User -> GuiApp : click Search
+activate GuiApp
+GuiApp -> GuiSvc : search(request)
+activate GuiSvc
+GuiSvc -> PersistLogic : updatePreferences(request.toUserPreferences())
+activate PersistLogic
+PersistLogic -> Logic : updatePreferences(prefs)
+activate Logic
+Logic --> PersistLogic : preferences accepted
+deactivate Logic
+PersistLogic --> GuiSvc : updated
+deactivate PersistLogic
+GuiSvc -> PersistLogic : generateShortlist()
+activate PersistLogic
+PersistLogic -> Logic : generateShortlist()
+activate Logic
+Logic -> ListingRepo : findAll()
+activate ListingRepo
+ListingRepo --> Logic : listings
+deactivate ListingRepo
+Logic -> Filter : filterByRent(listings, maxRent)
+activate Filter
+Filter --> Logic : filtered
+deactivate Filter
+Logic -> Filter : filterByAircon(filtered, requireAircon)
+activate Filter
+Filter --> Logic : filtered2
+deactivate Filter
+loop each listing in filtered2
+  Logic -> Commute : estimate(originNodeId, destinationId, mode)
+  activate Commute
+  Commute -> TravelRepo : findByOriginAndDestination(originNodeId, destinationId)
+  activate TravelRepo
+  TravelRepo --> Commute : Optional<CommuteEstimate>
+  deactivate TravelRepo
+  Commute --> Logic : commuteEstimate
+  deactivate Commute
+  alt excludeWalkDominantRoutes enabled
+    Logic -> Route : isWalkDominant(commuteEstimate)
+    activate Route
+    Route --> Logic : boolean
+    deactivate Route
+  end
+  note over Logic : discard if commute, transfer, walk, or walk-dominance constraints fail
+end
+note over Logic : computeScore(result, maxRent, maxCommuteMinutes) for kept listings
+Logic -> Ranker : rank(results, sortMode)
+activate Ranker
+Ranker --> Logic : ranked
+deactivate Ranker
+Logic --> PersistLogic : ranked
+deactivate Logic
+opt on success
+  PersistLogic -> PrefsRepo : save(delegate.getCurrentPreferences())
+  activate PrefsRepo
+  PrefsRepo --> PersistLogic : saved
+  deactivate PrefsRepo
+end
+PersistLogic --> GuiSvc : ranked
+deactivate PersistLogic
+GuiSvc -> PersistLogic : getDatasetMetadata()
+activate PersistLogic
+PersistLogic -> Logic : getDatasetMetadata()
+activate Logic
+Logic --> PersistLogic : metadata
+deactivate Logic
+PersistLogic --> GuiSvc : metadata
+deactivate PersistLogic
+GuiSvc --> GuiApp : SearchResponse(metadata, ranked)
+deactivate GuiSvc
+GuiApp --> User : render results
+deactivate GuiApp
+@enduml

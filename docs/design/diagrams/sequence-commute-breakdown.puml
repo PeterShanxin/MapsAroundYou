@@ -1,0 +1,56 @@
+@startuml
+!include _style.iuml
+title Sequence — Commute Breakdown
+
+actor User
+participant ":MapsAroundYouGuiApp" as GuiApp
+participant ":DefaultGuiSearchService" as GuiSvc
+participant ":SearchLogic" as Logic
+participant ":ListingRepository" as ListingRepo
+participant ":CommuteEstimator" as Commute
+participant ":TravelTimeRepository" as TravelRepo
+participant ":RouteAnalyzer" as Route
+
+User -> GuiApp : click listing row
+activate GuiApp
+GuiApp -> GuiSvc : getListingDetails(listingId)
+activate GuiSvc
+GuiSvc -> Logic : getListingDetails(listingId)
+activate Logic
+Logic -> ListingRepo : findById(listingId)
+activate ListingRepo
+ListingRepo --> Logic : Optional<RentalListing>
+deactivate ListingRepo
+
+alt listing absent
+  Logic --> GuiSvc : throw ListingNotFoundException
+  deactivate Logic
+  GuiSvc --> GuiApp : error result
+  deactivate GuiSvc
+  GuiApp --> User : error message
+  deactivate GuiApp
+else listing present
+  alt destinationId not set
+    Logic --> GuiSvc : ListingDetails(listing, Optional.empty())
+  else destinationId set
+    Logic -> Commute : estimate(originNodeId, destinationId, mode)
+    activate Commute
+    Commute -> TravelRepo : findByOriginAndDestination(originNodeId, destinationId)
+    activate TravelRepo
+    TravelRepo --> Commute : Optional<CommuteEstimate>
+    deactivate TravelRepo
+    Commute --> Logic : commuteEstimate
+    deactivate Commute
+    note over Logic, Route
+      Current getListingDetails() does not call summarize();
+      ListingDetails stores only listing and Optional<CommuteEstimate>.
+    end note
+    Logic --> GuiSvc : ListingDetails(listing, Optional.of(estimate))
+  end
+  deactivate Logic
+  GuiSvc --> GuiApp : response
+  deactivate GuiSvc
+  GuiApp --> User : render details
+  deactivate GuiApp
+end
+@enduml
