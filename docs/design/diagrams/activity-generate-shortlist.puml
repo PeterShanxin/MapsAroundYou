@@ -14,11 +14,11 @@ start
 :SearchLogic.generateShortlist();
 |Storage|
 :Load listings dataset;
-if (Schema valid?) then [no]
-  note right: throws DataLoadException
-  stop
-else [yes]
-endif
+note right
+  Cross-dataset validation runs once at
+  startup inside ApplicationFactory, not
+  per request.
+end note
 |Service|
 :ListingFilter.filterByRent();
 :ListingFilter.filterByAircon();
@@ -62,6 +62,7 @@ if (Results empty?) then [yes]
 else [no]
 endif
 |Service|
+:ListingRanker.computeScore() for each kept listing;
 :ListingRanker.rank(sortMode);
 |Logic|
 :Truncate to resultLimit;

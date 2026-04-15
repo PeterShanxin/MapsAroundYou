@@ -25,8 +25,9 @@ deactivate ListingRepo
 alt listing absent
   Logic --> GuiSvc : throw ListingNotFoundException
   deactivate Logic
-  GuiSvc --> GuiApp : error result
+  GuiSvc --> GuiApp : rethrow ListingNotFoundException
   deactivate GuiSvc
+  GuiApp -> GuiApp : GuiErrorTranslator.toUserMessage(exception)
   GuiApp --> User : error message
   deactivate GuiApp
 else listing present

@@ -180,6 +180,8 @@ package "model" #FDFDFD {
   enum TransportMode {
     PUBLIC_TRANSPORT
   }
+
+  note "Additional records omitted for clarity:\nDatasetMetadata, OriginNode,\nPersonaPreset, PersonaPresetAppliedValues." as ModelOmissionNote
 }
 
 DefaultSearchLogic ..|> SearchLogic
@@ -187,6 +189,7 @@ PersistentSearchLogic ..|> SearchLogic
 DefaultGuiSearchService ..|> GuiSearchService
 
 PersistentSearchLogic "1" o-- "1" SearchLogic : wraps
+PersistentSearchLogic "1" --> "1" UserPrefsRepository
 note right of PersistentSearchLogic
   decorator
 end note
@@ -224,8 +227,8 @@ SearchResult "1" o-- "1" RentalListing : listing
 SearchResult "1" o-- "1" CommuteEstimate : commute
 ListingDetails "1" o-- "1" RentalListing : listing
 ListingDetails "1" o-- "0..1" CommuteEstimate : commuteEstimate
-UserPreferences --> SortMode : sortMode
-UserPreferences --> TransportMode : transportMode
-SearchRequest --> SortMode : sortMode
-SearchRequest --> TransportMode : transportMode
+UserPreferences "1" --> "1" SortMode : sortMode
+UserPreferences "1" --> "1" TransportMode : transportMode
+SearchRequest "1" --> "1" SortMode : sortMode
+SearchRequest "1" --> "1" TransportMode : transportMode
 @enduml

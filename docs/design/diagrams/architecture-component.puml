@@ -16,6 +16,7 @@ User --> GUI
 User --> CLI
 GUI --> Application
 CLI --> Logic
+CLI ..> Application : wires via ApplicationFactory
 Application --> Logic
 Logic --> Service
 Logic --> Storage

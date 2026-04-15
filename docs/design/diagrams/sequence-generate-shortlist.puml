@@ -12,6 +12,8 @@ participant ":CommuteEstimator" as Commute
 participant ":TravelTimeRepository" as TravelRepo
 participant ":RouteAnalyzer" as Route
 participant ":ListingRanker" as Ranker
+participant ":DestinationRepository" as DestRepo
+participant ":DatasetMetadataRepository" as MetaRepo
 participant ":UserPrefsRepository" as PrefsRepo
 User -> GuiApp : click Search
 activate GuiApp
@@ -21,6 +23,10 @@ GuiSvc -> PersistLogic : updatePreferences(request.toUserPreferences())
 activate PersistLogic
 PersistLogic -> Logic : updatePreferences(prefs)
 activate Logic
+Logic -> DestRepo : findById(destinationId)
+activate DestRepo
+DestRepo --> Logic : Optional<Destination>
+deactivate DestRepo
 Logic --> PersistLogic : preferences accepted
 deactivate Logic
 PersistLogic --> GuiSvc : updated
@@ -50,15 +56,20 @@ loop each listing in filtered2
   deactivate TravelRepo
   Commute --> Logic : commuteEstimate
   deactivate Commute
-  alt excludeWalkDominantRoutes enabled
+  opt excludeWalkDominantRoutes enabled
     Logic -> Route : isWalkDominant(commuteEstimate)
     activate Route
     Route --> Logic : boolean
     deactivate Route
   end
   note over Logic : discard if commute, transfer, walk, or walk-dominance constraints fail
+  opt listing kept
+    Logic -> Ranker : computeScore(result, maxRent, maxCommuteMinutes)
+    activate Ranker
+    Ranker --> Logic : score
+    deactivate Ranker
+  end
 end
-note over Logic : computeScore(result, maxRent, maxCommuteMinutes) for kept listings
 Logic -> Ranker : rank(results, sortMode)
 activate Ranker
 Ranker --> Logic : ranked
@@ -77,6 +88,10 @@ GuiSvc -> PersistLogic : getDatasetMetadata()
 activate PersistLogic
 PersistLogic -> Logic : getDatasetMetadata()
 activate Logic
+Logic -> MetaRepo : load()
+activate MetaRepo
+MetaRepo --> Logic : DatasetMetadata
+deactivate MetaRepo
 Logic --> PersistLogic : metadata
 deactivate Logic
 PersistLogic --> GuiSvc : metadata
