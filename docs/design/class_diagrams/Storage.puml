@@ -3,34 +3,34 @@ hide empty members
 skinparam linetype ortho
 
 interface DestinationRepository {
-    + List<Destination> findAll()
-    + Optional<Destination> findById(destinationId : String)
+    + findAll() : List<Destination>
+    + findById(destinationId : String) : Optional<Destination>
 }
 
 interface ListingRepository {
-    + List<RentalListing> findAll()
-    + Optional<RentalListing> findById(listingId : String)
+    + findAll() : List<RentalListing> 
+    + findById(listingId : String) : Optional<RentalListing> 
 }
 
 interface DatasetMetadataRepository {
-    + DatasetMetadata load()
+    + load() : DatasetMetadata
 }
 
 interface UserPrefsRepository {
-    + UserPreferences load()
-    + void save(preferences : UserPreferences)
+    + load() : UserPreferences
+    + save(preferences : UserPreferences) : void
 }
 
 interface OriginNodeRepository {
-    + List<OriginNode> findAll()
+    + findAll() : List<OriginNode>
     + Optional<OriginNode> findById(originNodeId : String)
 }
 
 interface TravelTimeRepository {
-    + Optional<CommuteEstimate> findByOriginAndDestination(originNodeId : String, destinationId : String)
-    + Set<String> findKnownOrigins()
-    + Set<String> findKnownDestinations()
-    + Map<String, Set<String>> findKnownDestinationsByOrigin()
+    + findByOriginAndDestination(originNodeId : String, destinationId : String) : Optional<CommuteEstimate>
+    + findKnownOrigins() : Set<String>
+    + findKnownDestinations() : Set<String>
+    + findKnownDestinationsByOrigin() : Map<String, Set<String>>
 }
 
 class CsvDestinationRepository
@@ -47,10 +47,4 @@ CsvTravelTimeRepository ..|> TravelTimeRepository
 PropertiesDatasetMetadataRepository ..|> DatasetMetadataRepository
 PropertiesUserPrefsRepository ..|> UserPrefsRepository
 
-DestinationRepository --> Destination : returns >
-ListingRepository --> RentalListing : returns >
-DatasetMetadataRepository --> DatasetMetadata : returns >
-UserPrefsRepository --> UserPreferences : returns >
-OriginNodeRepository --> OriginNode : returns >
-TravelTimeRepository --> CommuteEstimate : returns >
 @enduml

@@ -40,14 +40,14 @@ class UserPreferences
 class SearchResult
 class ListingDetails
 class CommuteEstimate
-class DestinationRepository
-class ListingRepository
-class DatasetMetadataRepository
-class ListingFilter
-class CommuteEstimator
-class ListingRanker
-class RouteAnalyzer
-class UserPrefsRepository
+interface DestinationRepository  
+interface ListingRepository  
+interface DatasetMetadataRepository  
+class ListingFilter  
+class CommuteEstimator  
+class ListingRanker  
+class RouteAnalyzer  
+interface UserPrefsRepository  
 
 ' Implementation relationships
 DefaultSearchLogic ..|> SearchLogic
