@@ -1,0 +1,74 @@
+@startuml Logic
+hide empty members
+skinparam linetype ortho
+
+' Public logic API
+interface SearchLogic {
+    + getSupportedDestinations() : List<Destination>
+    + getDatasetMetadata() : DatasetMetadata
+    + updatePreferences(preferences : UserPreferences) : void
+    + generateShortlist() : List<SearchResult>
+    + getListingDetails(listingId : String) : ListingDetails
+    + getCommuteDetails(listingId : String) : CommuteEstimate
+    + getCurrentPreferences() : UserPreferences
+}
+
+' Main implementation
+class DefaultSearchLogic {
+    - currentPreferences : UserPreferences
+    + DefaultSearchLogic(
+        destinationRepository : DestinationRepository,
+        listingRepository : ListingRepository,
+        datasetMetadataRepository : DatasetMetadataRepository,
+        listingFilter : ListingFilter,
+        commuteEstimator : CommuteEstimator,
+        listingRanker : ListingRanker,
+        routeAnalyzer : RouteAnalyzer
+      )
+}
+
+' Decorator adding persistence
+class PersistentSearchLogic {
+    - delegate : SearchLogic
+    - userPrefsRepository : UserPrefsRepository
+    + PersistentSearchLogic(delegate : SearchLogic, userPrefsRepository : UserPrefsRepository)
+}
+
+class Destination
+class DatasetMetadata
+class UserPreferences
+class SearchResult
+class ListingDetails
+class CommuteEstimate
+class DestinationRepository
+class ListingRepository
+class DatasetMetadataRepository
+class ListingFilter
+class CommuteEstimator
+class ListingRanker
+class RouteAnalyzer
+class UserPrefsRepository
+
+' Implementation relationships
+DefaultSearchLogic ..|> SearchLogic
+PersistentSearchLogic ..|> SearchLogic
+
+' High-level collaborations
+DefaultSearchLogic --> DestinationRepository
+DefaultSearchLogic --> ListingRepository
+DefaultSearchLogic --> DatasetMetadataRepository
+DefaultSearchLogic --> ListingFilter
+DefaultSearchLogic --> CommuteEstimator
+DefaultSearchLogic --> ListingRanker
+DefaultSearchLogic --> RouteAnalyzer
+
+SearchLogic --> Destination
+SearchLogic --> DatasetMetadata
+SearchLogic --> UserPreferences
+SearchLogic --> SearchResult
+SearchLogic --> ListingDetails
+SearchLogic --> CommuteEstimate
+
+PersistentSearchLogic --> SearchLogic : delegates >
+PersistentSearchLogic --> UserPrefsRepository : persists >
+@enduml

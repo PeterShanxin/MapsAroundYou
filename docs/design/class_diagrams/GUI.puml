@@ -1,0 +1,64 @@
+@startuml GUI
+hide empty members
+
+class Launcher {
+    + main(args : String[]) : void
+}
+
+class MapsAroundYouGuiApp {
+    + start(stage : Stage) : void
+}
+
+class ApplicationFactory {
+    + createGuiSearchService() : GuiSearchService
+}
+
+class DefaultGuiSearchService {
+    + getSupportedDestinations() : List
+    + getDatasetMetadata() : DatasetMetadata
+    + search(request : SearchRequest) : SearchResponse
+    + getListingDetails(listingId : String) : ListingDetails
+    + getCurrentPreferences() : UserPreferences
+}
+
+class UiSettingsStore
+class GuiTaskRunner
+class GuiErrorTranslator
+class GuiSearchRequestParser
+class GuiTextFormatter
+class SearchRow
+
+' App-layer collaborators
+interface GuiSearchService
+class SearchRequest
+class SearchResponse
+class ListingDetails
+class DatasetMetadata
+class UserPreferences
+class Destination
+
+' Entry and primary app class
+Launcher --> MapsAroundYouGuiApp : launches >
+MapsAroundYouGuiApp --> ApplicationFactory : creates service >
+ApplicationFactory --> DefaultGuiSearchService : wires >
+DefaultGuiSearchService ..|> GuiSearchService
+
+' GUI ↔ app-layer interactions
+MapsAroundYouGuiApp --> GuiSearchService : uses >
+MapsAroundYouGuiApp --> SearchRequest : builds >
+MapsAroundYouGuiApp --> SearchResponse : consumes >
+MapsAroundYouGuiApp --> UiSettingsStore : persists UI prefs >
+MapsAroundYouGuiApp --> GuiTaskRunner : runs background tasks >
+MapsAroundYouGuiApp --> GuiErrorTranslator : maps errors >
+MapsAroundYouGuiApp --> GuiSearchRequestParser : parses search input >
+MapsAroundYouGuiApp --> GuiTextFormatter : formats labels >
+MapsAroundYouGuiApp --> SearchRow : wraps domain results >
+
+GuiSearchService --> SearchRequest
+GuiSearchService --> SearchResponse
+GuiSearchService --> Destination
+GuiSearchService --> DatasetMetadata
+GuiSearchService --> ListingDetails
+GuiSearchService --> UserPreferences
+
+@enduml
