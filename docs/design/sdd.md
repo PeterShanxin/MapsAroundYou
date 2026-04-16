@@ -163,36 +163,9 @@ Immutable-ish entities; lightweight DTOs between layers.
 10. Logic truncates the ranked results to `resultLimit`.
 11. UI displays ranked results.
 
-```mermaid
-flowchart TD
-    A([User sets filters & clicks Search]) --> B[UI calls Logic.generateShortlist]
-    B --> C[Storage: load listings dataset]
-    C --> D{Schema valid?}
-    D -- No --> E[/DataLoadException → UI error message/]
-    D -- Yes --> F[ListingFilter.filterByRent]
-    F --> G[ListingFilter.filterByAircon]
-    G --> H{Any listings remaining?}
-    H -- None --> I[/NoResultsException → UI empty-state message/]
-    H -- Yes --> J[For each listing: CommuteEstimator.estimate via travel-time lookup]
-    J --> K{totalMinutes > maxCommuteMinutes?}
-    K -- Yes --> L[Discard listing]
-    K -- No --> M{transfers > maxTransfers?}
-    M -- Yes --> L
-    M -- No --> N{walkMinutes > maxWalkMinutes?}
-    N -- Yes --> L
-    N -- No --> O[RouteAnalyzer.isWalkDominant]
-    O --> P{walkMinutes / totalMinutes >= threshold?}
-    P -- Yes --> L
-    P -- No --> Q[Keep listing]
-    L --> R{More listings?}
-    Q --> R
-    R -- Yes --> J
-    R -- No --> S{Results non-empty?}
-    S -- None --> I
-    S -- Yes --> T[ListingRanker: apply selected sort mode]
-    T --> U[Return SearchResultViewModel list]
-    U --> V([UI renders ranked results panel])
-```
+![Generate Shortlist — Activity](diagrams/activity-generate-shortlist.svg)
+
+*Figure: Generate Shortlist activity diagram (swimlanes: User → GUI → Application → Logic → Storage → Service).*
 
 ### Workflow C — Commute Breakdown
 
@@ -201,16 +174,9 @@ flowchart TD
 3. `RouteAnalyzer.summarize()` formats the transit, walking, transfer, and total-time breakdown.
 4. UI displays breakdown: total time, transit, walking, transfers, and fare.
 
-```mermaid
-flowchart TD
-    A([User clicks a listing result]) --> B[UI calls Logic.getCommuteDetails listingId]
-    B --> C[Storage: retrieve listing + CommuteEstimate]
-    C --> D{listingId valid?}
-    D -- No --> E[/ListingNotFoundException → UI error message/]
-    D -- Yes --> F[RouteAnalyzer.summarize commuteEstimate]
-    F --> G[Return CommuteSummary: transitMinutes, walkMinutes, transfers, total]
-    G --> H([UI renders commute breakdown panel])
-```
+![Commute Breakdown — Sequence](diagrams/sequence-commute-breakdown.svg)
+
+*Figure: Commute Breakdown sequence diagram covering listing-absent and destination-unset branches.*
 
 ---
 

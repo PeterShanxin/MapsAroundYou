@@ -10,37 +10,9 @@
 
 ## Component View
 
-![Architecture Diagram](../assets/images/architecture-diagram.png)
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                         UI (GUI)                                │
-│  • Destination selection (supported destination picker)         │
-│  • Filter inputs (max rent, max commute, max transfers,        │
-│    max walk, aircon, result limit, sort, walk-dominant toggle) │
-│  • Results list/table (rent, commute, walk, transfers, aircon) │
-│  • Settings + details panel/dialog with split commute breakdown│
-└────────────────────────────┬────────────────────────────────────┘
-                             │ User actions → Logic calls
-                             │ Rendered SearchResultViewModel[]
-                             ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                          Logic                                  │
-│  • Validate inputs                                              │
-│  • Execute search pipeline (load → filter → estimate → rank)    │
-│  • Provide view models for UI                                   │
-│  • Centralize error handling                                    │
-└──────┬──────────────────┬──────────────────┬────────────────────┘
-       │                  │                  │
-       ▼                  ▼                  ▼
-┌──────────────┐  ┌──────────────┐  ┌──────────────────┐
-│   Services   │  │    Model     │  │     Storage      │
-│              │  │              │  │                  │
-│ CommuteEst.  │  │ Listing      │  │ DestinationRepo  │
-│ ListingFilter│  │ Destination  │  │ TravelTimeRepo   │
-│ ListingRanker│  │ Preferences  │  │ ListingRepo      │
-│ RouteAnalyzer│  │ Results      │  │ UserPrefsRepo    │
-└──────────────┘  └──────────────┘  └──────────────────┘
-```
+![Architecture — Component Overview](diagrams/architecture-component.svg)
+
+*Figure: Layer and dependency overview. See the Developer Guide's "Architecture & Coupling" section for the full narrative.*
 
 ---
 

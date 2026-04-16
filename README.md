@@ -43,6 +43,7 @@ Run the local quality gate:
 ## Documentation
 
 - **User Guide (end users)**: [`docs/UserGuide.md`](docs/UserGuide.md)
+- **Developer Guide (contributors)**: [`docs/developer-guide.md`](docs/developer-guide.md)
 
 ## Current Scope
 
