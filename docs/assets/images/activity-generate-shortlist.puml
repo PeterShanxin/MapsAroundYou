@@ -16,10 +16,10 @@ endif
 "Look up commute time" --> if "Commute, transfer\nor walk limit exceeded?" then
   -->[yes] "Discard listing"
 else
-  -right->[no] if "Walk-dominant\nroute excluded?" then
-    -->[yes] "Discard listing"
+  -->[no] if "Walk-dominant\nroute excluded?" then
+    -->[no] "Score and keep listing"
   else
-    -right->[no] "Score and keep listing"
+    -->[yes] "Discard listing"
   endif
 endif
 
