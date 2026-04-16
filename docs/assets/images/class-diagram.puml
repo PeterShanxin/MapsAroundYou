@@ -16,6 +16,8 @@ package "logic" #FDFDFD {
   }
 
   class DefaultSearchLogic {
+    +getSupportedDestinations(): List<Destination>
+    +getDatasetMetadata(): DatasetMetadata
     +updatePreferences(preferences: UserPreferences): void
     +generateShortlist(): List<SearchResult>
     +getListingDetails(listingId: String): ListingDetails
@@ -25,9 +27,12 @@ package "logic" #FDFDFD {
 
   class PersistentSearchLogic {
     +PersistentSearchLogic(delegate: SearchLogic, userPrefsRepository: UserPrefsRepository)
+    +getSupportedDestinations(): List<Destination>
+    +getDatasetMetadata(): DatasetMetadata
     +updatePreferences(preferences: UserPreferences): void
     +generateShortlist(): List<SearchResult>
     +getListingDetails(listingId: String): ListingDetails
+    +getCommuteDetails(listingId: String): CommuteEstimate
     +getCurrentPreferences(): UserPreferences
   }
 }
@@ -58,6 +63,8 @@ package "app" #FDFDFD {
     +maxRent, maxCommuteMinutes: int
     +maxTransfers, maxWalkMinutes: int
     +requireAircon, excludeWalkDominantRoutes: boolean
+    +sortMode: SortMode
+    +transportMode: TransportMode
     +resultLimit: int
     +toUserPreferences(): UserPreferences
   }
@@ -148,6 +155,8 @@ package "model" #FDFDFD {
     +maxRent, maxCommuteMinutes: int
     +maxTransfers, maxWalkMinutes: int
     +requireAircon, excludeWalkDominantRoutes: boolean
+    +sortMode: SortMode
+    +transportMode: TransportMode
     +resultLimit: int
     +{static} defaults(): UserPreferences
     +withDestination(updatedDestinationId: String): UserPreferences
@@ -227,8 +236,4 @@ SearchResult "1" o-- "1" RentalListing : listing
 SearchResult "1" o-- "1" CommuteEstimate : commute
 ListingDetails "1" o-- "1" RentalListing : listing
 ListingDetails "1" o-- "0..1" CommuteEstimate : commuteEstimate
-UserPreferences "1" --> "1" SortMode : sortMode
-UserPreferences "1" --> "1" TransportMode : transportMode
-SearchRequest "1" --> "1" SortMode : sortMode
-SearchRequest "1" --> "1" TransportMode : transportMode
 @enduml

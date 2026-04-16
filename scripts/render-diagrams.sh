@@ -9,7 +9,7 @@ if [ ! -f "$PLANTUML_JAR_PATH" ]; then
     if command -v curl >/dev/null 2>&1; then
         mkdir -p tools
         echo "Downloading PlantUML $PLANTUML_VERSION..."
-        curl -L -o "$PLANTUML_JAR_PATH" "$PLANTUML_JAR_URL"
+        curl -fL -o "$PLANTUML_JAR_PATH" "$PLANTUML_JAR_URL"
         echo "Downloaded PlantUML to $PLANTUML_JAR_PATH"
     else
         echo "Error: tools/plantuml.jar is missing and curl was not found."

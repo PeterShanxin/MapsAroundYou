@@ -12,7 +12,7 @@ if not exist "%PLANTUML_JAR_PATH%" (
     if not errorlevel 1 (
         if not exist "%REPO_ROOT%\tools" mkdir "%REPO_ROOT%\tools"
         echo Downloading PlantUML %PLANTUML_VERSION%...
-        curl -L -o "%PLANTUML_JAR_PATH%" "%PLANTUML_JAR_URL%"
+        curl -fL -o "%PLANTUML_JAR_PATH%" "%PLANTUML_JAR_URL%"
         if errorlevel 1 exit /b 1
         echo Downloaded PlantUML to %PLANTUML_JAR_PATH%
     ) else (

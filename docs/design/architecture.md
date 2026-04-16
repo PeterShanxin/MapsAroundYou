@@ -62,7 +62,7 @@
 2. **Application layer** → GUI goes through `GuiSearchService`; CLI calls `SearchLogic` directly. Both paths are wired by `ApplicationFactory`
 3. **Logic** loads data from Storage, invokes Services via pipeline
 4. **ListingFilter** → **CommuteEstimator** → **RouteAnalyzer** → **ListingRanker** → ranked results
-5. **UI** renders `SearchResultViewModel[]`
+5. **UI** renders `SearchRow` items built from `SearchResponse.results()` (`SearchResult`)
 
 ---
 

@@ -65,7 +65,7 @@ Regenerate UML diagrams after editing `docs/assets/images/*.puml`:
 
 ![Architecture — Component Overview](assets/images/architecture-component.svg)
 
-The app is a 4-layer JavaFX application. User input flows down the layers through interfaces only:
+The app is a layered JavaFX application. User input flows down the layers through interfaces only:
 
 - **GUI / CLI** — entrypoints. GUI talks to the `app.GuiSearchService` facade; CLI talks to `logic.SearchLogic` directly.
 - **Application (`mapsaroundyou.app`)** — thin facades and the `ApplicationFactory` composition root. GUI never sees `SearchLogic`.
