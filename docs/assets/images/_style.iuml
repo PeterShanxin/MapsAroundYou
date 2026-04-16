@@ -8,4 +8,3 @@ skinparam ActivityBorderColor #444444
 skinparam NoteBackgroundColor #FFFFEE
 skinparam NoteBorderColor #999999
 skinparam componentStyle uml2
-skinparam conditionStyle diamond

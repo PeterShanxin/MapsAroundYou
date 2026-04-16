@@ -2,51 +2,46 @@
 !include _style.iuml
 title Activity — Generate Shortlist
 
-start
-:User clicks Search;
-:GuiSearchService.search()\n[updatePreferences + generateShortlist];
-:ListingRepository.findAll();
-:ListingFilter.filterByRent();
-:ListingFilter.filterByAircon();
-if (Listings remaining?) then [no]
-  note right: throws NoResultsException
-  stop
-else [yes]
+(*) --> "Click Search"
+--> "Load listings"
+--> "Filter by rent and aircon"
+
+if "Any listings remain?" then
+  -->[no] "Show empty-state message"
+  --> (*)
+else
+  -->[yes] "Look up commute time"
 endif
-repeat
-  :CommuteEstimator.estimate()\nvia TravelTimeRepository;
-  if (totalMinutes > maxCommuteMinutes?) then [yes]
-    :Discard listing;
-  else [no]
-    if (transfers > maxTransfers?) then [yes]
-      :Discard listing;
-    else [no]
-      if (walkMinutes > maxWalkMinutes?) then [yes]
-        :Discard listing;
-      else [no]
-        if (excludeWalkDominantRoutes?) then [yes]
-          :RouteAnalyzer.isWalkDominant();
-          if (Walk dominant?) then [yes]
-            :Discard listing;
-          else [no]
-            :Keep listing;
-          endif
-        else [no]
-          :Keep listing;
-        endif
-      endif
-    endif
+
+"Look up commute time" --> if "Commute, transfer\nor walk limit exceeded?" then
+  -->[yes] "Discard listing"
+else
+  -right->[no] if "Walk-dominant\nroute excluded?" then
+    -->[yes] "Discard listing"
+  else
+    -right->[no] "Score and keep listing"
   endif
-repeat while (more listings?) is [yes]
--> [no];
-if (Results empty?) then [yes]
-  note right: throws NoResultsException
-  stop
-else [no]
 endif
-:ListingRanker.computeScore() per kept listing;
-:ListingRanker.rank(sortMode);
-:Truncate to resultLimit;
-:Render ranked results panel;
-stop
+
+"Discard listing" --> if "More listings?" then
+  -->[yes] "Look up commute time"
+else
+  -->[no] "Check results count"
+endif
+
+"Score and keep listing" --> if "More listings?" then
+  -->[yes] "Look up commute time"
+else
+  -->[no] "Check results count"
+endif
+
+"Check results count" --> if "No results kept?" then
+  -->[yes] "Show empty-state message"
+  --> (*)
+else
+  -->[no] "Rank by sort mode"
+  --> "Trim to result limit"
+  --> "Display results"
+  --> (*)
+endif
 @enduml
