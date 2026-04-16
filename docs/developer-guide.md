@@ -56,14 +56,14 @@ Run the local quality gate (Checkstyle + SpotBugs + tests):
 ./gradlew clean check
 ```
 
-Regenerate UML diagrams after editing `docs/design/diagrams/*.puml`:
+Regenerate UML diagrams after editing `docs/assets/images/*.puml`:
 
 - Linux / macOS: `bash scripts/render-diagrams.sh`
 - Windows: `scripts\render-diagrams.bat`
 
 ## 3. Architecture
 
-![Architecture — Component Overview](design/diagrams/architecture-component.svg)
+![Architecture — Component Overview](assets/images/architecture-component.svg)
 
 The app is a 4-layer JavaFX application. User input flows down the layers through interfaces only:
 
@@ -108,7 +108,7 @@ Issue #46 — low coupling is a first-class design goal. This section documents 
 
 ## 5. Class Diagram
 
-![Class Diagram — System Overview](design/diagrams/class-diagram.svg)
+![Class Diagram — System Overview](assets/images/class-diagram.svg)
 
 Highlights:
 
@@ -128,11 +128,11 @@ Highlights:
 
 Activity view:
 
-![Generate Shortlist — Activity](design/diagrams/activity-generate-shortlist.svg)
+![Generate Shortlist — Activity](assets/images/activity-generate-shortlist.svg)
 
 Sequence view:
 
-![Generate Shortlist — Sequence](design/diagrams/sequence-generate-shortlist.svg)
+![Generate Shortlist — Sequence](assets/images/sequence-generate-shortlist.svg)
 
 Implementation hotspots:
 
@@ -143,7 +143,7 @@ Implementation hotspots:
 
 ### Feature — Commute Breakdown
 
-![Commute Breakdown — Sequence](design/diagrams/sequence-commute-breakdown.svg)
+![Commute Breakdown — Sequence](assets/images/sequence-commute-breakdown.svg)
 
 Implementation hotspots:
 

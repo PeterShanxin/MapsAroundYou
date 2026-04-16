@@ -2,24 +2,10 @@
 !include _style.iuml
 title Activity — Generate Shortlist
 
-|User|
 start
-:Click Search;
-|GUI|
-:Build SearchRequest;
-|Application|
-:GuiSearchService.search();
-|Logic|
-:SearchLogic.updatePreferences();
-:SearchLogic.generateShortlist();
-|Storage|
-:Load listings dataset;
-note right
-  Cross-dataset validation runs once at
-  startup inside ApplicationFactory, not
-  per request.
-end note
-|Service|
+:User clicks Search;
+:GuiSearchService.search()\n[updatePreferences + generateShortlist];
+:ListingRepository.findAll();
 :ListingFilter.filterByRent();
 :ListingFilter.filterByAircon();
 if (Listings remaining?) then [no]
@@ -27,10 +13,8 @@ if (Listings remaining?) then [no]
   stop
 else [yes]
 endif
-|Logic|
 repeat
-|Service|
-  :CommuteEstimator.estimate() via TravelTimeRepository;
+  :CommuteEstimator.estimate()\nvia TravelTimeRepository;
   if (totalMinutes > maxCommuteMinutes?) then [yes]
     :Discard listing;
   else [no]
@@ -53,20 +37,16 @@ repeat
       endif
     endif
   endif
-|Logic|
-repeat while (More listings?) is [yes]
-->  [no];
+repeat while (more listings?) is [yes]
+-> [no];
 if (Results empty?) then [yes]
   note right: throws NoResultsException
   stop
 else [no]
 endif
-|Service|
-:ListingRanker.computeScore() for each kept listing;
+:ListingRanker.computeScore() per kept listing;
 :ListingRanker.rank(sortMode);
-|Logic|
 :Truncate to resultLimit;
-|GUI|
 :Render ranked results panel;
 stop
 @enduml

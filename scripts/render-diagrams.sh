@@ -20,18 +20,18 @@ if [ ! -f "$PLANTUML_JAR_PATH" ]; then
     fi
 fi
 
-mkdir -p docs/design/diagrams
+mkdir -p docs/assets/images
 
-puml_files=(docs/design/diagrams/*.puml)
+puml_files=(docs/assets/images/*.puml)
 if [ ! -e "${puml_files[0]}" ]; then
-    echo "Info: no .puml files found in docs/design/diagrams; nothing to render."
+    echo "Info: no .puml files found in docs/assets/images; nothing to render."
     exit 0
 fi
 
-java -jar "$PLANTUML_JAR_PATH" -tsvg -o . docs/design/diagrams/*.puml
+java -jar "$PLANTUML_JAR_PATH" -tsvg -o . docs/assets/images/*.puml
 
 echo "Produced SVG files:"
-svg_files=(docs/design/diagrams/*.svg)
+svg_files=(docs/assets/images/*.svg)
 for svg_file in "${svg_files[@]}"; do
     if [ -e "$svg_file" ]; then
         echo "$svg_file"
