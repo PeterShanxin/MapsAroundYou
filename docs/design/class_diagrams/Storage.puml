@@ -23,7 +23,7 @@ interface UserPrefsRepository {
 
 interface OriginNodeRepository {
     + findAll() : List<OriginNode>
-    + Optional<OriginNode> findById(originNodeId : String)
+    + findById(originNodeId : String) : Optional<OriginNode>
 }
 
 interface TravelTimeRepository {

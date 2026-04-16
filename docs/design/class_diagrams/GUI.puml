@@ -1,6 +1,6 @@
 @startuml GUI
 hide empty members
-
+skinparam linetype ortho
 
 class Launcher {
     + main(args : String[]) : void
@@ -39,27 +39,27 @@ class UserPreferences
 class Destination
 
 ' Entry and primary app class
-Launcher --> MapsAroundYouGuiApp : launches >
-MapsAroundYouGuiApp --> ApplicationFactory : creates service >
-ApplicationFactory --> DefaultGuiSearchService : wires >
+Launcher "1" --> "1" MapsAroundYouGuiApp : launches >
+MapsAroundYouGuiApp "1" --> "1" ApplicationFactory : creates service >
+ApplicationFactory "1" --> "1" DefaultGuiSearchService : wires >
 DefaultGuiSearchService ..|> GuiSearchService
 
 ' GUI ↔ app-layer interactions
-MapsAroundYouGuiApp --> GuiSearchService : uses >
-MapsAroundYouGuiApp --> SearchRequest : builds >
-MapsAroundYouGuiApp --> SearchResponse : consumes >
-MapsAroundYouGuiApp --> UiSettingsStore : persists UI prefs >
-MapsAroundYouGuiApp --> GuiTaskRunner : runs background tasks >
-MapsAroundYouGuiApp --> GuiErrorTranslator : maps errors >
-MapsAroundYouGuiApp --> GuiSearchRequestParser : parses search input >
-MapsAroundYouGuiApp --> GuiTextFormatter : formats labels >
-MapsAroundYouGuiApp --> SearchRow : wraps domain results >
+MapsAroundYouGuiApp "1" --> "1" GuiSearchService : uses >
+MapsAroundYouGuiApp "1" --> "0..*" SearchRequest : builds >
+MapsAroundYouGuiApp "1" --> "0..*" SearchResponse : consumes >
+MapsAroundYouGuiApp "1" --> "1" UiSettingsStore : persists UI prefs >
+MapsAroundYouGuiApp "1" --> "1" GuiTaskRunner : runs background tasks >
+MapsAroundYouGuiApp "1" --> "1" GuiErrorTranslator : maps errors >
+MapsAroundYouGuiApp "1" --> "1" GuiSearchRequestParser : parses search input >
+MapsAroundYouGuiApp "1" --> "1" GuiTextFormatter : formats labels >
+MapsAroundYouGuiApp "1" --> "*" SearchRow : wraps domain results >
 
-GuiSearchService --> SearchRequest
-GuiSearchService --> SearchResponse
-GuiSearchService --> Destination
-GuiSearchService --> DatasetMetadata
-GuiSearchService --> ListingDetails
-GuiSearchService --> UserPreferences
+GuiSearchService "1" --> "0..*" SearchRequest
+GuiSearchService "1" --> "0..*" SearchResponse
+GuiSearchService "1" --> "*" Destination
+GuiSearchService "1" --> "1" DatasetMetadata
+GuiSearchService "1" --> "0..*" ListingDetails
+GuiSearchService "1" --> "1" UserPreferences
 
 @enduml

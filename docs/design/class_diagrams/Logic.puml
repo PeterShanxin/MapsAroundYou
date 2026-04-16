@@ -54,21 +54,21 @@ DefaultSearchLogic ..|> SearchLogic
 PersistentSearchLogic ..|> SearchLogic
 
 ' High-level collaborations
-DefaultSearchLogic --> DestinationRepository
-DefaultSearchLogic --> ListingRepository
-DefaultSearchLogic --> DatasetMetadataRepository
-DefaultSearchLogic --> ListingFilter
-DefaultSearchLogic --> CommuteEstimator
-DefaultSearchLogic --> ListingRanker
-DefaultSearchLogic --> RouteAnalyzer
+DefaultSearchLogic "1" --> "1" DestinationRepository
+DefaultSearchLogic "1" --> "1" ListingRepository
+DefaultSearchLogic "1" --> "1" DatasetMetadataRepository
+DefaultSearchLogic "1" --> "1" ListingFilter
+DefaultSearchLogic "1" --> "1" CommuteEstimator
+DefaultSearchLogic "1" --> "1" ListingRanker
+DefaultSearchLogic "1" --> "1" RouteAnalyzer
 
-SearchLogic --> Destination
-SearchLogic --> DatasetMetadata
-SearchLogic --> UserPreferences
-SearchLogic --> SearchResult
-SearchLogic --> ListingDetails
-SearchLogic --> CommuteEstimate
+SearchLogic "1" --> "*" Destination
+SearchLogic "1" --> "1" DatasetMetadata
+SearchLogic "1" --> "1" UserPreferences
+SearchLogic "1" --> "*" SearchResult
+SearchLogic "1" --> "0..*" ListingDetails
+SearchLogic "1" --> "0..*" CommuteEstimate
 
-PersistentSearchLogic --> SearchLogic : delegates >
-PersistentSearchLogic --> UserPrefsRepository : persists >
+PersistentSearchLogic "1" --> "1" SearchLogic : delegates >
+PersistentSearchLogic "1" --> "1" UserPrefsRepository : persists >
 @enduml
