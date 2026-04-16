@@ -1,4 +1,4 @@
-@startuml Storage
+@startuml class-diagram-storage
 hide empty members
 skinparam linetype ortho
 

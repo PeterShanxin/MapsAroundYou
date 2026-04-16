@@ -117,6 +117,22 @@ Highlights:
 - `PersistentSearchLogic` is stereotyped `<<decorator>>` and composes a `SearchLogic` via aggregation.
 - Multiplicities are present on every association.
 
+### 5.1 Layer Class Diagrams
+
+The diagrams below drill into individual layers.
+
+**GUI layer** — entry points, facade wiring, and helper utilities:
+
+![GUI Class Diagram](assets/images/class-diagram-gui.svg)
+
+**Logic layer** — `SearchLogic` interface, `DefaultSearchLogic` with 7 injected dependencies, and `PersistentSearchLogic` decorator:
+
+![Logic Class Diagram](assets/images/class-diagram-logic.svg)
+
+**Storage layer** — repository interfaces and their CSV/properties adapters:
+
+![Storage Class Diagram](assets/images/class-diagram-storage.svg)
+
 ## 6. Implementation
 
 ### Entry points
