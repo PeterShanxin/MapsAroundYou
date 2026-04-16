@@ -28,31 +28,31 @@
 
 Clone:
 
-```
+```bash
 git clone https://github.com/cs2103de-tp/MapsAroundYou.git && cd MapsAroundYou
 ```
 
 Build:
 
-```
+```bash
 ./gradlew build
 ```
 
 Run the JavaFX GUI:
 
-```
+```bash
 ./gradlew runGui
 ```
 
 Run tests:
 
-```
+```bash
 ./gradlew test
 ```
 
 Run the local quality gate (Checkstyle + SpotBugs + tests):
 
-```
+```bash
 ./gradlew clean check
 ```
 
@@ -80,7 +80,7 @@ Issue #46 — low coupling is a first-class design goal. This section documents 
 
 ### Dependency direction
 
-`gui → app → logic → service + storage`, all across interface boundaries. Never import `storage.*` or `service.*` from `gui.*`.
+`gui → app → logic → service + storage`. The GUI crosses into `app` through the `GuiSearchService` facade, and `logic` crosses into `storage` through repository interfaces. Service helpers (`ListingFilter`, `CommuteEstimator`, `ListingRanker`, `RouteAnalyzer`) are concrete classes today but are injected into `DefaultSearchLogic` via constructor, so a future contributor can introduce interfaces without rewiring callers. Never import `storage.*` or `service.*` from `gui.*`.
 
 ### Composition root
 
@@ -171,8 +171,9 @@ This project uses a fork-based workflow. See [docs/development/fork-workflow.md]
 4. Create a feature branch: `git checkout -b feature/<short-description>`.
 5. Make changes in small, focused commits — follow [docs/development/git-commit-conventions.md](development/git-commit-conventions.md).
 6. Push to your fork and open a PR against `cs2103de-tp/MapsAroundYou:main`.
-7. The PR Quality Gate (Checkstyle + SpotBugs + tests on Linux/macOS/Windows via Temurin 21 x64) must pass.
-8. Request at least one approving review before merging.
+7. Before pushing, run the local quality gate: `./gradlew clean check` (Checkstyle + SpotBugs + tests).
+8. On GitHub, the `PR Quality Gate` status must turn green. It aggregates `PR Quality Check` (Checkstyle + SpotBugs + tests on Ubuntu), the cross-OS `PR Build Gate` runnable-JAR builds for Linux / macOS / Windows on Temurin 21 x64, and `PR File Hygiene`.
+9. Request at least one approving review before merging.
 
 ## 9. Extension guidance
 

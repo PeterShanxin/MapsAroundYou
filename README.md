@@ -49,7 +49,7 @@ Run the local quality gate:
 
 - The project currently supports both JavaFX GUI and CLI entrypoints.
 - GUI startup is available through the `runGui` and default `run` Gradle tasks.
-- The codebase is organized into `storage`, `service`, `logic`, and `cli` layers so GUI work can plug in later.
+- The codebase is organized into `gui`, `cli`, `app`, `logic`, `service`, `storage`, and `model` layers, with `ApplicationFactory` as the sole composition root.
 - Runtime data stays local under `src/main/resources/commute_data/`.
 - Last-used search preferences are stored locally under the current user's home directory.
 - Persona preset and dark-mode settings are persisted for returning users.
