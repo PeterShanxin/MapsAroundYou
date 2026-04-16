@@ -1,0 +1,50 @@
+@startuml Storage
+hide empty members
+skinparam linetype ortho
+
+interface DestinationRepository {
+    + findAll() : List<Destination>
+    + findById(destinationId : String) : Optional<Destination>
+}
+
+interface ListingRepository {
+    + findAll() : List<RentalListing> 
+    + findById(listingId : String) : Optional<RentalListing> 
+}
+
+interface DatasetMetadataRepository {
+    + load() : DatasetMetadata
+}
+
+interface UserPrefsRepository {
+    + load() : UserPreferences
+    + save(preferences : UserPreferences) : void
+}
+
+interface OriginNodeRepository {
+    + findAll() : List<OriginNode>
+    + findById(originNodeId : String) : Optional<OriginNode>
+}
+
+interface TravelTimeRepository {
+    + findByOriginAndDestination(originNodeId : String, destinationId : String) : Optional<CommuteEstimate>
+    + findKnownOrigins() : Set<String>
+    + findKnownDestinations() : Set<String>
+    + findKnownDestinationsByOrigin() : Map<String, Set<String>>
+}
+
+class CsvDestinationRepository
+class CsvListingRepository
+class CsvOriginNodeRepository
+class CsvTravelTimeRepository
+class PropertiesDatasetMetadataRepository
+class PropertiesUserPrefsRepository
+
+CsvDestinationRepository ..|> DestinationRepository
+CsvListingRepository ..|> ListingRepository
+CsvOriginNodeRepository ..|> OriginNodeRepository
+CsvTravelTimeRepository ..|> TravelTimeRepository
+PropertiesDatasetMetadataRepository ..|> DatasetMetadataRepository
+PropertiesUserPrefsRepository ..|> UserPrefsRepository
+
+@enduml

@@ -1,0 +1,74 @@
+@startuml Logic
+hide empty members
+skinparam linetype ortho
+
+' Public logic API
+interface SearchLogic {
+    + getSupportedDestinations() : List<Destination>
+    + getDatasetMetadata() : DatasetMetadata
+    + updatePreferences(preferences : UserPreferences) : void
+    + generateShortlist() : List<SearchResult>
+    + getListingDetails(listingId : String) : ListingDetails
+    + getCommuteDetails(listingId : String) : CommuteEstimate
+    + getCurrentPreferences() : UserPreferences
+}
+
+' Main implementation
+class DefaultSearchLogic {
+    - currentPreferences : UserPreferences
+    + DefaultSearchLogic(
+        destinationRepository : DestinationRepository,
+        listingRepository : ListingRepository,
+        datasetMetadataRepository : DatasetMetadataRepository,
+        listingFilter : ListingFilter,
+        commuteEstimator : CommuteEstimator,
+        listingRanker : ListingRanker,
+        routeAnalyzer : RouteAnalyzer
+      )
+}
+
+' Decorator adding persistence
+class PersistentSearchLogic {
+    - delegate : SearchLogic
+    - userPrefsRepository : UserPrefsRepository
+    + PersistentSearchLogic(delegate : SearchLogic, userPrefsRepository : UserPrefsRepository)
+}
+
+class Destination
+class DatasetMetadata
+class UserPreferences
+class SearchResult
+class ListingDetails
+class CommuteEstimate
+interface DestinationRepository  
+interface ListingRepository  
+interface DatasetMetadataRepository  
+class ListingFilter  
+class CommuteEstimator  
+class ListingRanker  
+class RouteAnalyzer  
+interface UserPrefsRepository  
+
+' Implementation relationships
+DefaultSearchLogic ..|> SearchLogic
+PersistentSearchLogic ..|> SearchLogic
+
+' High-level collaborations
+DefaultSearchLogic "1" --> "1" DestinationRepository
+DefaultSearchLogic "1" --> "1" ListingRepository
+DefaultSearchLogic "1" --> "1" DatasetMetadataRepository
+DefaultSearchLogic "1" --> "1" ListingFilter
+DefaultSearchLogic "1" --> "1" CommuteEstimator
+DefaultSearchLogic "1" --> "1" ListingRanker
+DefaultSearchLogic "1" --> "1" RouteAnalyzer
+
+SearchLogic "1" --> "*" Destination
+SearchLogic "1" --> "1" DatasetMetadata
+SearchLogic "1" --> "1" UserPreferences
+SearchLogic "1" --> "*" SearchResult
+SearchLogic "1" --> "0..*" ListingDetails
+SearchLogic "1" --> "0..*" CommuteEstimate
+
+PersistentSearchLogic "1" --> "1" SearchLogic : delegates >
+PersistentSearchLogic "1" --> "1" UserPrefsRepository : persists >
+@enduml
