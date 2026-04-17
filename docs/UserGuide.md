@@ -46,13 +46,13 @@ Clone or download the repository, then open a terminal in the repository root.
 **Windows (PowerShell):**
 
 ```powershell
-.\gradlew runGui
+.\gradlew run
 ```
 
 **macOS/Linux (bash/zsh):**
 
 ```bash
-./gradlew runGui
+./gradlew run
 ```
 
 ### 4) Run the CLI
@@ -60,13 +60,13 @@ Clone or download the repository, then open a terminal in the repository root.
 **Windows (PowerShell):**
 
 ```powershell
-.\gradlew run
+.\gradlew runCli
 ```
 
 **macOS/Linux:**
 
 ```bash
-./gradlew run
+./gradlew runCli
 ```
 
 ### 5) First launch: what you should see
@@ -90,7 +90,7 @@ Clone or download the repository, then open a terminal in the repository root.
   3. Click **Search**.
   4. Click a row to see details.
 - **CLI**:
-  1. Run `.\gradlew run`.
+  1. Run `.\gradlew runCli`.
   2. Enter a destination id such as `D01` when prompted.
   3. Press **Enter** to accept defaults in brackets for the other prompts.
   4. Type `exit` at the destination prompt to quit.
@@ -206,8 +206,8 @@ MapsAroundYou’s CLI supports **three** entry flows:
 
 #### Interactive mode (default)
 
-- **Windows**: `.\gradlew run`
-- **macOS/Linux**: `./gradlew run`
+- **Windows**: `.\gradlew runCli`
+- **macOS/Linux**: `./gradlew runCli`
 
 Interactive mode prints:
 
@@ -248,10 +248,14 @@ Run one search and print results, then exit.
 
 All of these print usage text:
 
-- `.\gradlew run --args="--help"`
-- `.\gradlew run --args="-h"`
-- `.\gradlew run --args="help"`
-- `.\gradlew run --args="search --help"`
+- **Windows:** `.\gradlew runCli -PcliArgs="--help"`
+- **macOS/Linux:** `./gradlew runCli -PcliArgs="--help"`
+- **Windows:** `.\gradlew runCli -PcliArgs="-h"`
+- **macOS/Linux:** `./gradlew runCli -PcliArgs="-h"`
+- **Windows:** `.\gradlew runCli -PcliArgs="help"`
+- **macOS/Linux:** `./gradlew runCli -PcliArgs="help"`
+- **Windows:** `.\gradlew runCli -PcliArgs="search --help"`
+- **macOS/Linux:** `./gradlew runCli -PcliArgs="search --help"`
 
 ## Features
 
@@ -288,7 +292,7 @@ Runs an offline search using your selected destination and filters, then shows r
 1. Start the GUI:
 
    ```powershell
-   .\gradlew runGui
+   .\gradlew run
    ```
 
 2. In the left panel:
@@ -390,7 +394,7 @@ Interactive mode prompts you for search preferences and allows repeated searches
 1. Start the CLI:
 
    ```powershell
-   .\gradlew run
+   .\gradlew runCli
    ```
 
 2. Follow prompts for:
@@ -437,7 +441,13 @@ Runs a single search using a structured command.
 **Windows (PowerShell):**
 
 ```powershell
-.\gradlew run --args="search --destination D01 --max-rent 2200 --max-commute 45 --max-transfers 1 --max-walk 10 --result-limit 5 --sort balanced --require-aircon --exclude-walk-dominant"
+.\gradlew runCli -PcliArgs="search --destination D01 --max-rent 2200 --max-commute 45 --max-transfers 1 --max-walk 10 --result-limit 5 --sort balanced --require-aircon --exclude-walk-dominant"
+```
+
+**macOS/Linux (bash/zsh):**
+
+```bash
+./gradlew runCli -PcliArgs='search --destination D01 --max-rent 2200 --max-commute 45 --max-transfers 1 --max-walk 10 --result-limit 5 --sort balanced --require-aircon --exclude-walk-dominant'
 ```
 
 **Supported flags**
@@ -463,7 +473,7 @@ Runs a single search using a structured command.
 - Fast commute, limit results, no aircon requirement:
 
 ```powershell
-.\gradlew run --args="search --destination D05 --max-rent 1800 --max-commute 35 --result-limit 10 --sort commute"
+.\gradlew runCli -PcliArgs="search --destination D05 --max-rent 1800 --max-commute 35 --result-limit 10 --sort commute"
 ```
 
 ---
@@ -475,13 +485,13 @@ Prints usage and examples.
 **How to use**
 
 ```powershell
-.\gradlew run --args="--help"
+.\gradlew runCli -PcliArgs="--help"
 ```
 
 or
 
 ```powershell
-.\gradlew run --args="help"
+.\gradlew runCli -PcliArgs="help"
 ```
 
 ## End-to-end usage scenario
@@ -495,7 +505,7 @@ This walkthrough is written for a first-time user who wants to quickly narrow do
 1. Launch the GUI:
 
    ```powershell
-   .\gradlew runGui
+   .\gradlew run
    ```
 
    **Expected behavior**: A window titled **“MapsAroundYou”** opens, with a left-side filter panel, a results table (initially empty), and a **Selected Listing** details panel.
@@ -551,7 +561,7 @@ This walkthrough is written for a first-time user who wants to quickly narrow do
 1. Launch interactive CLI:
 
    ```powershell
-   .\gradlew run
+   .\gradlew runCli
    ```
 
 2. Pick a destination ID from the printed “Supported destinations” list, then enter your constraints:
@@ -612,7 +622,7 @@ This section translates common symptoms into plain-language causes and next step
 - **Problem:** CLI says `Error: Unknown command: ...` or `Error: Unknown flag: ...`.
   - **Likely cause:** A typo, unsupported command, or using a flag that doesn’t exist.
   - **What to do:** Run help and copy an example:
-    - `.\gradlew run --args="--help"`
+    - `.\gradlew runCli -PcliArgs="--help"`
     - Then use `search ...` with the documented flags only.
 
 - **Problem:** CLI says `Error: Missing value for flag: --max-rent` (or similar).
@@ -685,7 +695,7 @@ Try:
 
 ### The GUI won’t start
 
-First confirm Java 21+ and then try `.\gradlew runGui`. If you are on Windows ARM64, see [Known Issues](#known-issues).
+First confirm Java 21+ and then try `.\gradlew run`. If you are on Windows ARM64, see [Known Issues](#known-issues).
 
 ## FAQ
 
@@ -761,7 +771,7 @@ GUI settings are stored using Java’s `Preferences` (OS-managed storage). On Wi
 
 | Action | Where | Result |
 |---|---|---|
-| Start GUI | `.\gradlew runGui` | Opens the MapsAroundYou desktop app |
+| Start GUI | `.\gradlew run` | Opens the MapsAroundYou desktop app |
 | Run search | Choose destination → fill filters → **Search** | Populates results table and status message |
 | View details | Click a result row | Details panel updates |
 | Change persona preset | **Settings** → Persona preset | Updates default values |
@@ -771,7 +781,7 @@ GUI settings are stored using Java’s `Preferences` (OS-managed storage). On Wi
 
 | Action | Command | Example |
 |---|---|---|
-| Start interactive CLI | `.\gradlew run` | `.\gradlew run` |
-| Show help | `.\gradlew run --args="--help"` | `.\gradlew run --args="help"` |
-| Run a one-off search | `.\gradlew run --args="search ..."` | `.\gradlew run --args="search --destination D01 --max-rent 2200 --max-commute 45 --sort balanced"` |
+| Start interactive CLI | `.\gradlew runCli` | `.\gradlew runCli` |
+| Show help | `.\gradlew runCli -PcliArgs="--help"` | `.\gradlew runCli -PcliArgs="help"` |
+| Run a one-off search | `.\gradlew runCli -PcliArgs="search ..."` | `.\gradlew runCli -PcliArgs="search --destination D01 --max-rent 2200 --max-commute 45 --sort balanced"` |
 
