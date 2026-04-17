@@ -7,6 +7,8 @@ plugins {
     id 'org.openjfx.javafxplugin' version '0.1.0'
 }
 
+import org.apache.tools.ant.types.Commandline
+
 group = 'mapsaroundyou'
 version = '0.4'
 
@@ -53,6 +55,20 @@ tasks.register('runGui', JavaExec) {
         '--module-path', configurations.runtimeClasspath.asPath,
         '--add-modules', 'javafx.controls'
     ]
+}
+
+tasks.register('runCli', JavaExec) {
+    group = 'application'
+    description = 'Run the CLI application.'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'mapsaroundyou.cli.MapsAroundYouApp'
+    standardInput = System.in
+
+    // `--args` is only supported for Gradle's built-in `run` task. For `runCli`,
+    // pass args via: -PcliArgs="search --destination D01 ..."
+    if (project.hasProperty('cliArgs')) {
+        args Commandline.translateCommandline(project.property('cliArgs').toString())
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {
