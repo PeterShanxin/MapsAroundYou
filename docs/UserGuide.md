@@ -118,7 +118,9 @@ Goal: get the **lowest rent** you can accept **without accidentally choosing an 
    - **GUI**: set **Max rent (SGD)**.
    - **CLI**: set `Max rent (SGD)` or `--max-rent`.
 4. Reduce “nice-to-have” filters temporarily (optional, but often helpful for first searches).
-   - If you don’t want transfers to be a deciding factor yet, set **Max transfers** high (so you’re not filtering by interchange count).
+   - If you don’t want transfers to be a deciding factor yet:
+     - **GUI**: leave **Max transfers** blank to mean **No limit**.
+     - **CLI**: set **Max transfers** high (so you’re not filtering by interchange count).
    - Consider leaving **Require aircon** unchecked on your first pass unless it’s a must-have.
    - Consider leaving **No walk-dominant routes** off initially if you’re unsure what it excludes.
 5. Sort for rent so the cheapest acceptable options surface first.
@@ -262,6 +264,7 @@ All of these print usage text:
 - **Required vs optional**:
   - Destination must be selected before searching.
   - Other fields are validated; invalid input shows an error in the status bar.
+  - In the GUI, leaving **Max transfers** blank means **No limit** rather than an error.
 - **Where results appear**:
   - Results show in a table with columns **Listing**, **Rent (SGD)**, **Commute**, **Walk**, **Transfers**, and **A/C**.
   - When you click a row, the **Selected Listing** panel shows the full details including **Match**.
@@ -327,7 +330,9 @@ Runs an offline search using your selected destination and filters, then shows r
 
 **Tips / warnings**
 
-- **Max transfers**: set a high value if you don’t want to filter by interchange count (the CLI help explicitly suggests this).
+- **Max transfers**:
+  - **GUI**: leave the field blank for **No limit**.
+  - **CLI**: set a high value if you don’t want to filter by interchange count (the CLI help explicitly suggests this).
 - **No walk-dominant routes**: filters out results where **walking makes up most of the commute** (specifically, walking is **60% or more** of the total commute time). Enable this if you want routes that are primarily public transport rather than long walks.
 
 ---
@@ -595,8 +600,8 @@ Top matches:
 This section translates common symptoms into plain-language causes and next steps. (If you see a specific `Error:` line in the CLI, you can still use it to match the relevant case below.)
 
 - **Problem:** Search does not run after clicking **Search** (GUI).
-  - **Likely cause:** A required field is missing or invalid (for example, destination not selected, a blank numeric field, or a non-integer like `45.5`).
-  - **What to do:** Pick a destination and ensure numeric fields contain **whole numbers**. Common messages include “Please choose a destination.”, “\<Field\> is required.”, and “\<Field\> must be a valid integer.”
+  - **Likely cause:** A required field is missing or invalid (for example, destination not selected, a blank required numeric field such as **Max rent**, or a non-integer like `45.5`).
+  - **What to do:** Pick a destination and ensure numeric fields contain **whole numbers**. In the GUI, **Max transfers** is the exception: leaving it blank means **No limit**. Common messages include “Please choose a destination.”, “\<Field\> is required.”, and “\<Field\> must be a valid integer.”
 
 - **Problem:** GUI status says “Max commute must be at least 1.” (or similar “must be at least …”).
   - **Likely cause:** You entered a value below the minimum allowed.
@@ -747,7 +752,7 @@ GUI settings are stored using Java’s `Preferences` (OS-managed storage). On Wi
 - **Match**: A fit indicator for your current search limits. Higher match generally means the listing is more comfortably under your max rent and max commute, but you should still check the actual numbers (rent, commute, walk, transfers).
 - **Walk-dominant**: A commute where walking makes up most of the total travel time. If you enable “No walk-dominant routes” / `--exclude-walk-dominant`, the app filters these out.
 - **Result limit**: The maximum number of listings shown/printed for a search run.
-- **Max transfers**: The maximum number of transfers allowed in the commute. Increase this if you don’t want to filter by interchange count.
+- **Max transfers**: The maximum number of transfers allowed in the commute. In the GUI, leaving the field blank means **No limit**. In the CLI, use a high value or keep the default if you do not want to filter by interchange count.
 - **Max walking time**: The maximum walking minutes allowed within the commute. Increase this if you’re okay with longer walks to unlock more results.
 - **Sort mode**: How results are ordered:
   - `rent`: lower rent first
