@@ -6,6 +6,9 @@ MapsAroundYou is an **offline smart rental search** app that helps you shortlist
 
 This document is the **canonical end-user User Guide** for MapsAroundYou. It focuses on how to run and use the app (GUI + CLI), not on developer internals or data generation.
 
+> [!TIP]
+> Watch the demo before your first run: [MapsAroundYou Demo Video](https://youtu.be/_u43spy3ggE)
+
 ## Table of Contents
 
 - [Quick Start](#quick-start)
