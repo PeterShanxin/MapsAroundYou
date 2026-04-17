@@ -248,10 +248,14 @@ Run one search and print results, then exit.
 
 All of these print usage text:
 
-- `.\gradlew runCli -PcliArgs="--help"`
-- `.\gradlew runCli -PcliArgs="-h"`
-- `.\gradlew runCli -PcliArgs="help"`
-- `.\gradlew runCli -PcliArgs="search --help"`
+- **Windows:** `.\gradlew runCli -PcliArgs="--help"`
+- **macOS/Linux:** `./gradlew runCli -PcliArgs="--help"`
+- **Windows:** `.\gradlew runCli -PcliArgs="-h"`
+- **macOS/Linux:** `./gradlew runCli -PcliArgs="-h"`
+- **Windows:** `.\gradlew runCli -PcliArgs="help"`
+- **macOS/Linux:** `./gradlew runCli -PcliArgs="help"`
+- **Windows:** `.\gradlew runCli -PcliArgs="search --help"`
+- **macOS/Linux:** `./gradlew runCli -PcliArgs="search --help"`
 
 ## Features
 
@@ -438,6 +442,12 @@ Runs a single search using a structured command.
 
 ```powershell
 .\gradlew runCli -PcliArgs="search --destination D01 --max-rent 2200 --max-commute 45 --max-transfers 1 --max-walk 10 --result-limit 5 --sort balanced --require-aircon --exclude-walk-dominant"
+```
+
+**macOS/Linux (bash/zsh):**
+
+```bash
+./gradlew runCli -PcliArgs='search --destination D01 --max-rent 2200 --max-commute 45 --max-transfers 1 --max-walk 10 --result-limit 5 --sort balanced --require-aircon --exclude-walk-dominant'
 ```
 
 **Supported flags**
