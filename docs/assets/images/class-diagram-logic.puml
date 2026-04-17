@@ -1,4 +1,4 @@
-@startuml Logic
+@startuml class-diagram-logic
 hide empty members
 skinparam linetype ortho
 

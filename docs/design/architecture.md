@@ -10,49 +10,24 @@
 
 ## Component View
 
-![Architecture Diagram](../assets/images/architecture-diagram.png)
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                         UI (GUI)                                │
-│  • Destination selection (supported destination picker)         │
-│  • Filter inputs (max rent, max commute, max transfers,        │
-│    max walk, aircon, result limit, sort, walk-dominant toggle) │
-│  • Results list/table (rent, commute, walk, transfers, aircon) │
-│  • Settings + details panel/dialog with split commute breakdown│
-└────────────────────────────┬────────────────────────────────────┘
-                             │ User actions → Logic calls
-                             │ Rendered SearchResultViewModel[]
-                             ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                          Logic                                  │
-│  • Validate inputs                                              │
-│  • Execute search pipeline (load → filter → estimate → rank)    │
-│  • Provide view models for UI                                   │
-│  • Centralize error handling                                    │
-└──────┬──────────────────┬──────────────────┬────────────────────┘
-       │                  │                  │
-       ▼                  ▼                  ▼
-┌──────────────┐  ┌──────────────┐  ┌──────────────────┐
-│   Services   │  │    Model     │  │     Storage      │
-│              │  │              │  │                  │
-│ CommuteEst.  │  │ Listing      │  │ DestinationRepo  │
-│ ListingFilter│  │ Destination  │  │ TravelTimeRepo   │
-│ ListingRanker│  │ Preferences  │  │ ListingRepo      │
-│ RouteAnalyzer│  │ Results      │  │ UserPrefsRepo    │
-└──────────────┘  └──────────────┘  └──────────────────┘
-```
+![Architecture — Component Overview](../assets/images/architecture-component.svg)
+
+*Figure: Layer and dependency overview. See the Developer Guide's "Architecture & Coupling" section for the full narrative.*
 
 ---
 
 ## Components
 
-### UI (GUI)
+### UI (GUI / CLI)
 
-- Collects inputs from user
-- Displays ranked results
-- Restores last-used preferences on startup
-- Displays listing details + split commute breakdown (total, transit, walk, transfers, fare)
-- Persists persona preset and dark-mode settings
+- **GUI**: Collects inputs, displays ranked results, restores last-used preferences on startup, and renders listing details plus the split commute breakdown (total, transit, walk, transfers, fare). Persists persona preset and dark-mode settings.
+- **CLI**: Same search capability through `mapsaroundyou.cli.MapsAroundYouApp` for headless use.
+- GUI talks only to `app.GuiSearchService`; CLI talks to `logic.SearchLogic` — neither depends on `storage.*` or `service.*` directly.
+
+### Application (`mapsaroundyou.app`)
+
+- **`ApplicationFactory`** is the sole composition root: the only place concrete repositories and services are instantiated. Exposes `createGuiSearchService()` and `createSearchLogic()`, both returning interface types.
+- **`GuiSearchService`** is the narrow GUI-facing facade (search + metadata + preferences). Isolates JavaFX from `SearchLogic` and downstream layers.
 
 ### Logic
 
@@ -83,10 +58,11 @@
 
 ## Data Flow
 
-1. **User input** → UI captures destination, rent, commute, transfer cap, walking cap, aircon, result count, sort mode, and walk-dominant toggle
-2. **Logic** loads data from Storage, invokes Services via pipeline
-3. **ListingFilter** → **CommuteEstimator** → **RouteAnalyzer** → **ListingRanker** → ranked results
-4. **UI** renders `SearchResultViewModel[]`
+1. **User input** → GUI captures destination, rent, commute, transfer cap, walking cap, aircon, result count, sort mode, and walk-dominant toggle (CLI collects the same via command-line flags)
+2. **Application layer** → GUI goes through `GuiSearchService`; CLI calls `SearchLogic` directly. Both paths are wired by `ApplicationFactory`
+3. **Logic** loads data from Storage, invokes Services via pipeline
+4. **ListingFilter** → **CommuteEstimator** → **RouteAnalyzer** → **ListingRanker** → ranked results
+5. **UI** renders `SearchRow` items built from `SearchResponse.results()` (`SearchResult`)
 
 ---
 

@@ -46,7 +46,7 @@ Since we use local data, our app will be accurate only up to the last dataset up
 | **Model** | Entities (Listing, Destination, Preferences, Results) |
 | **Storage** | Loads local datasets (destinations/travel-times/listings) and persists last-used preferences for improved UX |
 
-**Dependency direction (summary):** `mapsaroundyou.gui` → `mapsaroundyou.app` (facades) → `mapsaroundyou.logic` → `mapsaroundyou.service` + `mapsaroundyou.storage` abstractions. The CLI entry point uses `ApplicationFactory.createSearchLogic()` and depends on `mapsaroundyou.logic` with the same composed stack. Concrete CSV/properties adapters in `mapsaroundyou.storage` are instantiated only from `ApplicationFactory`.
+**Dependency direction (summary):** `mapsaroundyou.gui` → `mapsaroundyou.app` (facades) → `mapsaroundyou.logic` → `mapsaroundyou.service` + `mapsaroundyou.storage`. Storage is reached through repository interfaces; service helpers (`CommuteEstimator`, `ListingFilter`, `ListingRanker`, `RouteAnalyzer`) are concrete but injected into `DefaultSearchLogic` via constructor, keeping the wiring open to future interface extraction. The CLI entry point uses `ApplicationFactory.createSearchLogic()` and depends on `mapsaroundyou.logic` with the same composed stack. Concrete CSV/properties adapters in `mapsaroundyou.storage` are instantiated only from `ApplicationFactory`.
 
 See [Architecture Overview](./architecture.md) for details.
 
@@ -145,14 +145,14 @@ Immutable-ish entities; lightweight DTOs between layers.
 ### Workflow A — Set Primary Destination
 
 1. User selects a supported destination and other search preferences in the GUI or CLI.
-2. UI or CLI calls `Logic.updatePreferences(preferences)`.
+2. GUI calls `GuiSearchService.search(request)` (which delegates to `SearchLogic.updatePreferences`); CLI calls `SearchLogic.updatePreferences(preferences)` directly after `ApplicationFactory.createSearchLogic()`.
 3. Logic stores the complete `UserPreferences`.
-4. Storage persists preferences after a successful search.
+4. Storage persists preferences after a successful search (via the `PersistentSearchLogic` decorator).
 
 ### Workflow B — Generate Shortlist
 
 1. User sets destination, maxRent, maxCommuteMinutes, maxTransfers, maxWalkMinutes, requireAircon, resultLimit, sortMode, and optional walk-dominant rejection, then clicks Search.
-2. UI calls `Logic.generateShortlist()`.
+2. GUI calls `GuiSearchService.search(request)` which invokes `SearchLogic.generateShortlist()` (CLI calls `SearchLogic.generateShortlist()` directly).
 3. Logic loads listings (Storage).
 4. ListingFilter applies rent plus aircon filters.
 5. For each remaining listing: `CommuteEstimator.estimate(listing.originNodeId, destinationId, 'PUBLIC_TRANSPORT')` — discard if `totalMinutes > maxCommuteMinutes`.
@@ -163,54 +163,20 @@ Immutable-ish entities; lightweight DTOs between layers.
 10. Logic truncates the ranked results to `resultLimit`.
 11. UI displays ranked results.
 
-```mermaid
-flowchart TD
-    A([User sets filters & clicks Search]) --> B[UI calls Logic.generateShortlist]
-    B --> C[Storage: load listings dataset]
-    C --> D{Schema valid?}
-    D -- No --> E[/DataLoadException → UI error message/]
-    D -- Yes --> F[ListingFilter.filterByRent]
-    F --> G[ListingFilter.filterByAircon]
-    G --> H{Any listings remaining?}
-    H -- None --> I[/NoResultsException → UI empty-state message/]
-    H -- Yes --> J[For each listing: CommuteEstimator.estimate via travel-time lookup]
-    J --> K{totalMinutes > maxCommuteMinutes?}
-    K -- Yes --> L[Discard listing]
-    K -- No --> M{transfers > maxTransfers?}
-    M -- Yes --> L
-    M -- No --> N{walkMinutes > maxWalkMinutes?}
-    N -- Yes --> L
-    N -- No --> O[RouteAnalyzer.isWalkDominant]
-    O --> P{walkMinutes / totalMinutes >= threshold?}
-    P -- Yes --> L
-    P -- No --> Q[Keep listing]
-    L --> R{More listings?}
-    Q --> R
-    R -- Yes --> J
-    R -- No --> S{Results non-empty?}
-    S -- None --> I
-    S -- Yes --> T[ListingRanker: apply selected sort mode]
-    T --> U[Return SearchResultViewModel list]
-    U --> V([UI renders ranked results panel])
-```
+![Generate Shortlist — Activity](../assets/images/activity-generate-shortlist.svg)
+
+*Figure: Generate Shortlist activity diagram.*
 
 ### Workflow C — Commute Breakdown
 
 1. User opens listing details (click result).
-2. Logic returns CommuteEstimate plus route summary.
+2. GUI calls `GuiSearchService.getListingDetails(listingId)`, which delegates to `SearchLogic.getListingDetails(listingId)`; the response carries the listing plus an `Optional<CommuteEstimate>`.
 3. `RouteAnalyzer.summarize()` formats the transit, walking, transfer, and total-time breakdown.
-4. UI displays breakdown: total time, transit, walking, transfers, and fare.
+4. GUI displays breakdown: total time, transit, walking, transfers, and fare.
 
-```mermaid
-flowchart TD
-    A([User clicks a listing result]) --> B[UI calls Logic.getCommuteDetails listingId]
-    B --> C[Storage: retrieve listing + CommuteEstimate]
-    C --> D{listingId valid?}
-    D -- No --> E[/ListingNotFoundException → UI error message/]
-    D -- Yes --> F[RouteAnalyzer.summarize commuteEstimate]
-    F --> G[Return CommuteSummary: transitMinutes, walkMinutes, transfers, total]
-    G --> H([UI renders commute breakdown panel])
-```
+![Commute Breakdown — Sequence](../assets/images/sequence-commute-breakdown.svg)
+
+*Figure: Commute Breakdown sequence diagram covering listing-absent and destination-unset branches.*
 
 ---
 

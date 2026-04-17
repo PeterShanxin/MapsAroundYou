@@ -1,0 +1,47 @@
+@startuml
+!include _style.iuml
+title Activity — Generate Shortlist
+
+(*) --> "Click Search"
+--> "Load listings"
+--> "Filter by rent and aircon"
+
+if "Any listings remain?" then
+  -->[no] "Show empty-state message"
+  --> (*)
+else
+  -->[yes] "Look up commute time"
+endif
+
+"Look up commute time" --> if "Commute, transfer\nor walk limit exceeded?" then
+  -->[yes] "Discard listing"
+else
+  -->[no] if "Walk-dominant\nroute excluded?" then
+    -->[no] "Score and keep listing"
+  else
+    -->[yes] "Discard listing"
+  endif
+endif
+
+"Discard listing" --> if "More listings?" then
+  -->[yes] "Look up commute time"
+else
+  -->[no] "Check results count"
+endif
+
+"Score and keep listing" --> if "More listings?" then
+  -->[yes] "Look up commute time"
+else
+  -->[no] "Check results count"
+endif
+
+"Check results count" --> if "No results kept?" then
+  -->[yes] "Show empty-state message"
+  --> (*)
+else
+  -->[no] "Rank by sort mode"
+  --> "Trim to result limit"
+  --> "Display results"
+  --> (*)
+endif
+@enduml

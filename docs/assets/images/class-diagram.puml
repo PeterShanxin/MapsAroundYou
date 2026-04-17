@@ -1,0 +1,239 @@
+@startuml
+!include _style.iuml
+title Class Diagram — System Overview
+left to right direction
+hide empty members
+
+package "logic" #FDFDFD {
+  interface SearchLogic {
+    +getSupportedDestinations(): List<Destination>
+    +getDatasetMetadata(): DatasetMetadata
+    +updatePreferences(preferences: UserPreferences): void
+    +generateShortlist(): List<SearchResult>
+    +getListingDetails(listingId: String): ListingDetails
+    +getCommuteDetails(listingId: String): CommuteEstimate
+    +getCurrentPreferences(): UserPreferences
+  }
+
+  class DefaultSearchLogic {
+    +getSupportedDestinations(): List<Destination>
+    +getDatasetMetadata(): DatasetMetadata
+    +updatePreferences(preferences: UserPreferences): void
+    +generateShortlist(): List<SearchResult>
+    +getListingDetails(listingId: String): ListingDetails
+    +getCommuteDetails(listingId: String): CommuteEstimate
+    +getCurrentPreferences(): UserPreferences
+  }
+
+  class PersistentSearchLogic {
+    +PersistentSearchLogic(delegate: SearchLogic, userPrefsRepository: UserPrefsRepository)
+    +getSupportedDestinations(): List<Destination>
+    +getDatasetMetadata(): DatasetMetadata
+    +updatePreferences(preferences: UserPreferences): void
+    +generateShortlist(): List<SearchResult>
+    +getListingDetails(listingId: String): ListingDetails
+    +getCommuteDetails(listingId: String): CommuteEstimate
+    +getCurrentPreferences(): UserPreferences
+  }
+}
+
+package "app" #FDFDFD {
+  interface GuiSearchService {
+    +getSupportedDestinations(): List<Destination>
+    +getDatasetMetadata(): DatasetMetadata
+    +search(request: SearchRequest): SearchResponse
+    +getListingDetails(listingId: String): ListingDetails
+    +getCurrentPreferences(): UserPreferences
+  }
+
+  class DefaultGuiSearchService {
+    +DefaultGuiSearchService(searchLogic: SearchLogic)
+    +search(request: SearchRequest): SearchResponse
+    +getListingDetails(listingId: String): ListingDetails
+    +getCurrentPreferences(): UserPreferences
+  }
+
+  class ApplicationFactory <<composition root>> {
+    +{static} createGuiSearchService(): GuiSearchService
+    +{static} createSearchLogic(): SearchLogic
+  }
+
+  class SearchRequest <<record>> {
+    +destinationId: String
+    +maxRent, maxCommuteMinutes: int
+    +maxTransfers, maxWalkMinutes: int
+    +requireAircon, excludeWalkDominantRoutes: boolean
+    +sortMode: SortMode
+    +transportMode: TransportMode
+    +resultLimit: int
+    +toUserPreferences(): UserPreferences
+  }
+
+  class SearchResponse <<record>> {
+    +datasetMetadata: DatasetMetadata
+    +results: List<SearchResult>
+  }
+}
+
+package "service" #FDFDFD {
+  class CommuteEstimator {
+    +CommuteEstimator(travelTimeRepository: TravelTimeRepository)
+    +estimate(originNodeId: String, destinationId: String, transportMode: TransportMode): CommuteEstimate
+  }
+
+  class ListingFilter {
+    +filterByRent(listings: List<RentalListing>, maxRent: int): List<RentalListing>
+    +filterByAircon(listings: List<RentalListing>, requireAircon: boolean): List<RentalListing>
+  }
+
+  class ListingRanker {
+    +rank(results: List<SearchResult>, sortMode: SortMode): List<SearchResult>
+    +computeScore(result: SearchResult, maxRent: int, maxCommuteMinutes: int): double
+  }
+
+  class RouteAnalyzer {
+    +RouteAnalyzer(walkDominantThreshold: double)
+    +isWalkDominant(commuteEstimate: CommuteEstimate): boolean
+    +summarize(commuteEstimate: CommuteEstimate): String
+  }
+}
+
+package "storage" #FDFDFD {
+  interface ListingRepository {
+    +findAll(): List<RentalListing>
+    +findById(listingId: String): Optional<RentalListing>
+  }
+
+  interface DestinationRepository {
+    +findAll(): List<Destination>
+    +findById(destinationId: String): Optional<Destination>
+  }
+
+  interface TravelTimeRepository {
+    +findByOriginAndDestination(originNodeId: String, destinationId: String): Optional<CommuteEstimate>
+    +findKnownOrigins(): Set<String>
+    +findKnownDestinations(): Set<String>
+    +findKnownDestinationsByOrigin(): Map<String, Set<String>>
+  }
+
+  interface UserPrefsRepository {
+    +load(): UserPreferences
+    +save(preferences: UserPreferences): void
+  }
+
+  interface DatasetMetadataRepository {
+    +load(): DatasetMetadata
+  }
+
+  interface OriginNodeRepository {
+    +findAll(): List<OriginNode>
+    +findById(originNodeId: String): Optional<OriginNode>
+  }
+}
+
+package "model" #FDFDFD {
+  class RentalListing <<record>> {
+    +listingId: String
+    +title: String
+    +monthlyRent: int
+    +hasAircon: boolean
+    +originNodeId: String
+    +address, roomType: String
+    +sourcePlatform, notes: String
+  }
+
+  class Destination <<record>> {
+    +destinationId: String
+    +name: String
+    +category: String
+    +area: String
+    +postalCode: String
+  }
+
+  class UserPreferences <<record>> {
+    +destinationId: String
+    +maxRent, maxCommuteMinutes: int
+    +maxTransfers, maxWalkMinutes: int
+    +requireAircon, excludeWalkDominantRoutes: boolean
+    +sortMode: SortMode
+    +transportMode: TransportMode
+    +resultLimit: int
+    +{static} defaults(): UserPreferences
+    +withDestination(updatedDestinationId: String): UserPreferences
+  }
+
+  class CommuteEstimate <<record>> {
+    +originNodeId: String
+    +destinationId: String
+    +totalMinutes, transitMinutes: int
+    +walkMinutes, transfers: int
+    +fare: double
+  }
+
+  class SearchResult <<record>> {
+    +score: double
+  }
+
+  class ListingDetails <<record>> {
+  }
+
+  enum SortMode {
+    COMMUTE
+    RENT
+    BALANCED
+    +cliValue(): String
+    +{static} fromCliValue(rawValue: String): SortMode
+    +toString(): String
+  }
+
+  enum TransportMode {
+    PUBLIC_TRANSPORT
+  }
+
+  note "Additional records omitted for clarity:\nDatasetMetadata, OriginNode,\nPersonaPreset, PersonaPresetAppliedValues." as ModelOmissionNote
+}
+
+DefaultSearchLogic ..|> SearchLogic
+PersistentSearchLogic ..|> SearchLogic
+DefaultGuiSearchService ..|> GuiSearchService
+
+PersistentSearchLogic "1" o-- "1" SearchLogic : wraps
+PersistentSearchLogic "1" --> "1" UserPrefsRepository
+note right of PersistentSearchLogic
+  decorator
+end note
+
+DefaultSearchLogic "1" --> "1" DestinationRepository
+DefaultSearchLogic "1" --> "1" ListingRepository
+DefaultSearchLogic "1" --> "1" DatasetMetadataRepository
+DefaultSearchLogic "1" --> "1" ListingFilter
+DefaultSearchLogic "1" --> "1" CommuteEstimator
+DefaultSearchLogic "1" --> "1" ListingRanker
+DefaultSearchLogic "1" --> "1" RouteAnalyzer
+DefaultGuiSearchService "1" --> "1" SearchLogic
+CommuteEstimator "1" --> "1" TravelTimeRepository
+
+ApplicationFactory ..> DefaultGuiSearchService : creates
+ApplicationFactory ..> PersistentSearchLogic : creates
+ApplicationFactory ..> DefaultSearchLogic : creates
+ApplicationFactory ..> ListingFilter : creates
+ApplicationFactory ..> CommuteEstimator : creates
+ApplicationFactory ..> ListingRanker : creates
+ApplicationFactory ..> RouteAnalyzer : creates
+ApplicationFactory ..> DestinationRepository : creates CsvDestinationRepository
+ApplicationFactory ..> OriginNodeRepository : creates CsvOriginNodeRepository
+ApplicationFactory ..> ListingRepository : creates CsvListingRepository
+ApplicationFactory ..> TravelTimeRepository : creates CsvTravelTimeRepository
+ApplicationFactory ..> DatasetMetadataRepository : creates PropertiesDatasetMetadataRepository
+ApplicationFactory ..> UserPrefsRepository : creates PropertiesUserPrefsRepository
+note right of ApplicationFactory
+  Sole place concretes are instantiated.
+  Inject interfaces everywhere else.
+  CSV/properties adapters are omitted as boxes.
+end note
+
+SearchResult "1" o-- "1" RentalListing : listing
+SearchResult "1" o-- "1" CommuteEstimate : commute
+ListingDetails "1" o-- "1" RentalListing : listing
+ListingDetails "1" o-- "0..1" CommuteEstimate : commuteEstimate
+@enduml
