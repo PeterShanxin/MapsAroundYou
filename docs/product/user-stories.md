@@ -5,7 +5,7 @@
 **Goal:** Commuting mainly between home and a specific destination (campus/office/place) while minimizing daily travel rather than securing a specific postal code.
 
 ## Legend
-- **Current shipped release:** `v0.4`
+- **Current shipped release:** `v0.5`
 - Each story includes **Acceptance Criteria (AC)** written to be testable.
 
 ---
@@ -58,9 +58,9 @@
 
 ---
 
-## Polish And Hardening In v0.4
+## Cross-Platform Onboarding And Design Docs In v0.5
 
-- [x] Domain-specific error handling is surfaced more consistently across the CLI and GUI boundaries.
-- [x] Public APIs are documented and enforced through Javadoc-oriented Checkstyle rules.
-- [x] The GUI now depends on an application-layer search facade instead of directly on `SearchLogic`.
-- [x] The results table and listing details present walking time, transfers, and split commute facts more clearly.
+- [x] The app now exposes clearer cross-platform GUI and CLI startup flows, including a documented `runCli` task for local onboarding.
+- [x] The User Guide now covers common task flows, troubleshooting, glossary terms, and the max-transfers no-limit behavior more explicitly.
+- [x] The Developer Guide and UML diagrams are now part of the shipped documentation set for contributors.
+- [x] Minor GUI polish improves dark-theme prompt readability, wide-window layout centering, and max-transfers wording.

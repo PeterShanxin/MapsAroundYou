@@ -59,8 +59,9 @@ International students and new working professionals arriving in Singapore face 
 |---------|-----------|--------|
 | **v0.1** | Project setup, CI baseline, and initial runnable artifacts | Week 8 |
 | **v0.2** | First increment — destination + rent filter with GUI baseline | Week 9 |
-| **v0.3** | Previous release — richer filters, route breakdown, settings, and persistence | Week 10 |
-| **v0.4** | Current release — professor-feedback hardening, GUI application boundary cleanup, and clearer results UX | Week 11 |
+| **v0.3** | Earlier release — richer filters, route breakdown, settings, and persistence | Week 10 |
+| **v0.4** | Previous release — professor-feedback hardening, GUI application boundary cleanup, and clearer results UX | Week 11 |
+| **v0.5** | Current release — cross-platform run flows, stronger onboarding docs, architecture diagrams, and targeted GUI polish | Week 12 |
 
 ---
 
@@ -133,12 +134,12 @@ As a renter, I want to select a preset (Student vs. Worker) so that default time
 - After that, users can change the persona preset via the `Settings` window, and the updated defaults remain editable.
 - The `Settings` window also includes a `Dark mode` toggle.
 
-### Polish And Hardening In v0.4
+### Cross-Platform Onboarding And Design Docs In v0.5
 
-- Strengthened domain-specific error handling so CLI and GUI surfaces can distinguish load, validation, and lookup failures more clearly.
-- Enforced Javadoc coverage for public APIs to keep the codebase reviewable as the architecture matures.
-- Preserved the intended dependency direction by routing JavaFX through an application-layer `GuiSearchService` facade instead of exposing `SearchLogic` directly.
-- Made the results UX easier to scan by surfacing walking time and transfer counts in the results table and splitting commute facts more clearly in the selected-listing details area.
+- Added and documented cross-platform `runCli` entrypoints so GUI and CLI startup flows are clearer for Windows, macOS, and Linux users.
+- Expanded the User Guide with first-time task flows, troubleshooting, glossary coverage, and clearer explanations of no-limit transfer behavior.
+- Added a full Developer Guide plus refreshed UML diagrams so contributors can navigate the shipped architecture more confidently.
+- Applied targeted GUI polish such as better dark-theme prompt contrast, centered wide-window layout behavior, and clearer "No limit" wording for max transfers.
 
 ---
 

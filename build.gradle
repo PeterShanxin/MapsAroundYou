@@ -10,7 +10,7 @@ plugins {
 import org.apache.tools.ant.types.Commandline
 
 group = 'mapsaroundyou'
-version = '0.4'
+version = '0.5'
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21
