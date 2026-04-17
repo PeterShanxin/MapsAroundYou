@@ -1,6 +1,7 @@
 package mapsaroundyou.gui;
 
 import mapsaroundyou.app.SearchRequest;
+import mapsaroundyou.common.AppConfig;
 import mapsaroundyou.common.InvalidInputException;
 import mapsaroundyou.model.Destination;
 import mapsaroundyou.model.SortMode;
@@ -100,5 +101,22 @@ class GuiSearchRequestParserTest {
         );
 
         assertEquals("Max transfers must be at least 0.", exception.getMessage());
+    }
+
+    @Test
+    void parse_blankTransfers_usesUnlimitedDefault() {
+        SearchRequest request = GuiSearchRequestParser.parse(
+                DESTINATION,
+                "2200",
+                "45",
+                "",
+                "10",
+                false,
+                "5",
+                SortMode.BALANCED,
+                false
+        );
+
+        assertEquals(AppConfig.DEFAULT_MAX_TRANSFERS, request.maxTransfers());
     }
 }

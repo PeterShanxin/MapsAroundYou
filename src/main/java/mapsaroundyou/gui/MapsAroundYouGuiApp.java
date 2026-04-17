@@ -1,6 +1,7 @@
 package mapsaroundyou.gui;
 
 import javafx.application.Application;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
@@ -30,6 +31,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Modality;
@@ -62,6 +64,7 @@ import java.util.function.Function;
 public final class MapsAroundYouGuiApp extends Application {
     private static final int MIN_WIDTH = 1000;
     private static final int MIN_HEIGHT = 600;
+    private static final int MAX_CONTENT_WIDTH = 1300;
     private static final int CONTROLS_PANEL_WIDTH = 340;
     private static final int RESULTS_TABLE_MIN_WIDTH = 500;
     private static final int LISTING_COLUMN_MIN_WIDTH = 180;
@@ -80,6 +83,7 @@ public final class MapsAroundYouGuiApp extends Application {
     private static final int DETAILS_LABEL_WIDTH = 92;
     private static final String ICON_RESOURCE = "/mapsaroundyou/gui/MapsAroundYou_Logo.png";
     private static final String DARK_THEME_CSS_RESOURCE = "/mapsaroundyou/gui/dark-theme.css";
+    private static final String UNLIMITED_PROMPT_TEXT = "No limit";
 
     private GuiSearchService searchService;
     private final UiSettingsStore uiSettingsStore = new UiSettingsStore();
@@ -136,11 +140,16 @@ public final class MapsAroundYouGuiApp extends Application {
             return;
         }
 
-        BorderPane root = new BorderPane();
-        root.setPadding(new Insets(12));
-        root.setTop(buildHeader());
-        root.setLeft(buildControls());
-        root.setCenter(buildContentArea());
+        BorderPane contentRoot = new BorderPane();
+        contentRoot.setPadding(new Insets(12));
+        contentRoot.setTop(buildHeader());
+        contentRoot.setLeft(buildControls());
+        contentRoot.setCenter(buildContentArea());
+
+        StackPane root = new StackPane(contentRoot);
+        StackPane.setAlignment(contentRoot, Pos.TOP_CENTER);
+        contentRoot.prefWidthProperty().bind(Bindings.min(root.widthProperty(), MAX_CONTENT_WIDTH));
+        contentRoot.maxWidthProperty().bind(contentRoot.prefWidthProperty());
 
         Scene scene = new Scene(root, MIN_WIDTH, MIN_HEIGHT);
         this.mainScene = scene;
@@ -190,7 +199,7 @@ public final class MapsAroundYouGuiApp extends Application {
         maxRentField.setMaxWidth(Double.MAX_VALUE);
         maxCommuteField.setPromptText("e.g. 45");
         maxCommuteField.setMaxWidth(Double.MAX_VALUE);
-        maxTransfersField.setPromptText("e.g. 1");
+        maxTransfersField.setPromptText("e.g. 1 (" + UNLIMITED_PROMPT_TEXT + ": leave blank)");
         maxTransfersField.setMaxWidth(Double.MAX_VALUE);
         maxWalkField.setPromptText("e.g. 10");
         maxWalkField.setMaxWidth(Double.MAX_VALUE);
@@ -808,7 +817,12 @@ public final class MapsAroundYouGuiApp extends Application {
      */
     private void applyLoadedPreferencesExceptPersonaTouchingFields(UserPreferences preferences) {
         UserPreferences resolvedPreferences = preferences == null ? UserPreferences.defaults() : preferences;
-        maxTransfersField.setText(Integer.toString(Math.max(0, resolvedPreferences.maxTransfers())));
+        int transfers = Math.max(0, resolvedPreferences.maxTransfers());
+        if (transfers >= Integer.MAX_VALUE) {
+            maxTransfersField.setText("");
+        } else {
+            maxTransfersField.setText(Integer.toString(transfers));
+        }
         maxWalkField.setText(Integer.toString(resolvedPreferences.maxWalkMinutes()));
         resultLimitField.setText(Integer.toString(resolvedPreferences.resultLimit()));
         excludeWalkDominantRoutesCheckBox.setSelected(resolvedPreferences.excludeWalkDominantRoutes());

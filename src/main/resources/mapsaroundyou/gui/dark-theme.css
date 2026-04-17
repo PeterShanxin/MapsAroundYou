@@ -22,6 +22,16 @@
     -fx-text-fill: #e6e6e6;
 }
 
+/* Keep placeholder/prompt text readable on dark backgrounds. */
+.text-input,
+.text-input:focused,
+.text-field,
+.text-field:focused,
+.text-field:empty,
+.text-field:empty:focused {
+    -fx-prompt-text-fill: #cfcfcf;
+}
+
 .combo-box-base,
 .combo-box-popup .list-view,
 .combo-box .list-cell {

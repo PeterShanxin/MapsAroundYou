@@ -44,7 +44,7 @@ public final class GuiSearchRequestParser {
                 destination,
                 maxRentRaw,
                 maxCommuteRaw,
-                String.valueOf(AppConfig.DEFAULT_MAX_TRANSFERS),
+                null,
                 maxWalkRaw,
                 requireAircon,
                 resultLimitRaw,
@@ -85,12 +85,13 @@ public final class GuiSearchRequestParser {
 
         int maxCommuteMinutes = parseInt(maxCommuteRaw, "Max commute", 1);
         int maxWalkMinutes = parseInt(maxWalkRaw, "Max walk", 0);
+        int maxTransfers = parseTransfers(maxTransfersRaw);
 
         return new SearchRequest(
                 destination.destinationId(),
                 parseInt(maxRentRaw, "Max rent", 0),
                 maxCommuteMinutes,
-                parseInt(maxTransfersRaw, "Max transfers", 0),
+                maxTransfers,
                 maxWalkMinutes,
                 requireAircon,
                 TransportMode.PUBLIC_TRANSPORT,
@@ -146,5 +147,12 @@ public final class GuiSearchRequestParser {
             throw new InvalidInputException(label + " must be at least " + minimumValue + ".");
         }
         return value;
+    }
+
+    private static int parseTransfers(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return AppConfig.DEFAULT_MAX_TRANSFERS;
+        }
+        return parseInt(raw, "Max transfers", 0);
     }
 }
