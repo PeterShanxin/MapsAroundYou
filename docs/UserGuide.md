@@ -79,7 +79,7 @@ Clone or download the repository, then open a terminal in the repository root.
   - a details panel for the selected listing,
   - a dataset label such as “Data accurate as of …”.
 
-![gui-first-launch](assets/guide_images/GUI-first-launch.png)
+   ![gui-first-launch](assets/guide_images/GUI-first-launch.png)
 - **CLI**: A banner “MapsAroundYou CLI” plus dataset provenance, then either:
   - **interactive prompts**, or
   - structured command handling if you pass arguments.
@@ -92,7 +92,7 @@ Clone or download the repository, then open a terminal in the repository root.
   3. Click **Search**.
   4. Click a row to see details.
 
-![gui-quick-action](assets/guide_images/GUI-quick-action.png)
+   ![gui-quick-action](assets/guide_images/GUI-quick-action.png)
 - **CLI**:
   1. Run `.\gradlew runCli`.
   2. Enter a destination id such as `D01` when prompted.
