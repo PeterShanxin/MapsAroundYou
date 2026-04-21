@@ -5,7 +5,7 @@ set "REPO_ROOT=%~dp0.."
 set "PLANTUML_VERSION=1.2025.2"
 set "PLANTUML_JAR_URL=https://github.com/plantuml/plantuml/releases/download/v1.2025.2/plantuml-1.2025.2.jar"
 set "PLANTUML_JAR_PATH=%REPO_ROOT%\tools\plantuml.jar"
-set "DIAGRAM_DIR=%REPO_ROOT%\docs\assets\diagram_images"
+set "DIAGRAM_DIR=%REPO_ROOT%\docs\assets\images"
 
 if not exist "%PLANTUML_JAR_PATH%" (
     curl --version >nul 2>&1

@@ -8,7 +8,7 @@
 
 A desktop GUI application that helps newcomers to Singapore find rental listings based on a primary destination (e.g., campus, office, hospital, or landmark) and commute constraints, delivered as a runnable JAR.
 
-### In-scope for the current `v0.4` release
+### In-scope for the current `v0.5` release
 
 - Primary destination selection plus monthly rent filtering
 - Commute, transfer, and walking caps with ranked shortlist output
@@ -18,6 +18,8 @@ A desktop GUI application that helps newcomers to Singapore find rental listings
 - Public API documentation enforced through Javadoc-oriented quality checks
 - JavaFX access routed through the application-layer `GuiSearchService` facade
 - Results and details surfaces tuned to show walking time, transfers, and split commute facts more clearly
+- Cross-platform Gradle entrypoints for both GUI and CLI onboarding
+- Developer-facing design diagrams and guide content aligned with the shipped architecture
 
 ### Out-of-scope (SDD-level assumptions)
 
@@ -163,7 +165,7 @@ Immutable-ish entities; lightweight DTOs between layers.
 10. Logic truncates the ranked results to `resultLimit`.
 11. UI displays ranked results.
 
-![Generate Shortlist — Activity](../assets/diagram_images/activity-generate-shortlist.svg)
+![Generate Shortlist — Activity](../assets/images/activity-generate-shortlist.svg)
 
 *Figure: Generate Shortlist activity diagram.*
 
@@ -174,7 +176,7 @@ Immutable-ish entities; lightweight DTOs between layers.
 3. `RouteAnalyzer.summarize()` formats the transit, walking, transfer, and total-time breakdown.
 4. GUI displays breakdown: total time, transit, walking, transfers, and fare.
 
-![Commute Breakdown — Sequence](../assets/diagram_images/sequence-commute-breakdown.svg)
+![Commute Breakdown — Sequence](../assets/images/sequence-commute-breakdown.svg)
 
 *Figure: Commute Breakdown sequence diagram covering listing-absent and destination-unset branches.*
 
