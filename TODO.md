@@ -20,13 +20,20 @@
 - [x] Write and run test cases
 - [x] Tag and release `v0.3` artifacts
 
-## Week 11 — v0.4 (Current Release Scope)
+## Week 11 — v0.4 (Released)
 - [x] Fold professor-feedback hardening into the shipped app surface
 - [x] Enforce Javadoc coverage for public APIs
 - [x] Keep the GUI behind the application-layer search facade
 - [x] Surface walk and transfer constraint values more clearly in results
 - [x] Tag and release `v0.4` artifacts
 
-## Post-v0.4 Follow-ups
+## Week 12 — v0.5 (Current Release Scope)
+- [x] Add and document cross-platform GUI and CLI startup flows
+- [x] Expand end-user onboarding with richer task flows and troubleshooting guidance
+- [x] Publish the Developer Guide and refreshed architecture diagrams
+- [x] Apply targeted GUI polish for prompt contrast, wide-window centering, and max-transfers wording
+- [x] Tag and release `v0.5` artifacts
+
+## Post-v0.5 Follow-ups
 - [ ] Review new UX issues as flagged on GitHub
 - [ ] Expand tests alongside future feature work
