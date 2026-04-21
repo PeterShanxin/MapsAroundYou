@@ -81,6 +81,8 @@ Clone or download the repository, then open a terminal in the repository root.
   - a results table (initially empty),
   - a details panel for the selected listing,
   - a dataset label such as “Data accurate as of …”.
+
+   ![gui-first-launch](assets/guide_images/GUI-first-launch.png)
 - **CLI**: A banner “MapsAroundYou CLI” plus dataset provenance, then either:
   - **interactive prompts**, or
   - structured command handling if you pass arguments.
@@ -92,6 +94,8 @@ Clone or download the repository, then open a terminal in the repository root.
   2. Enter `max rent` and `max commute`.
   3. Click **Search**.
   4. Click a row to see details.
+
+   ![gui-quick-action](assets/guide_images/GUI-quick-action.png)
 - **CLI**:
   1. Run `.\gradlew runCli`.
   2. Enter a destination id such as `D01` when prompted.
@@ -324,7 +328,12 @@ Runs an offline search using your selected destination and filters, then shows r
   - the results table is populated,
   - the status shows **“Found N result(s).”**,
   - the dataset label reflects the dataset provenance/last updated date.
+
+![gui-results-found](assets/guide_images/GUI-results-found.png)
+
 - If a field is invalid (e.g., not a number), the status shows a user-facing error message and the search does not run.
+
+![gui-results-not-found](assets/guide_images/GUI-results-not-found.png)
 
 **Examples**
 
@@ -386,6 +395,8 @@ The GUI includes lightweight settings for onboarding and appearance.
   - **Worker**: max rent `2000`, max commute `65`, require aircon `off`
 - **Dark mode** applies a dark theme stylesheet to the UI.
 - These settings are saved best-effort using Java’s `Preferences` store (OS-specific).
+
+![gui-results-dark](assets/guide_images/GUI-dark.png)
 
 **Examples**
 
