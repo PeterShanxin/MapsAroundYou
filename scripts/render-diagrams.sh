@@ -20,11 +20,11 @@ if [ ! -f "$PLANTUML_JAR_PATH" ]; then
     fi
 fi
 
-mkdir -p docs/assets/images
+mkdir -p docs/assets/diagram_images
 
-puml_files=(docs/assets/images/*.puml)
+puml_files=(docs/assets/diagram_images/*.puml)
 if [ ! -e "${puml_files[0]}" ]; then
-    echo "Info: no .puml files found in docs/assets/images; nothing to render."
+    echo "Info: no .puml files found in docs/assets/diagram_images; nothing to render."
     exit 0
 fi
 
